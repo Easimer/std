@@ -1,0 +1,64 @@
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<!-- Slice<T> -->
+	<Type Name="Slice&lt;*&gt;">
+		<DisplayString>{{ length={length} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="Slice&lt;char const&gt;" Priority="High">
+		<DisplayString>{data,[length]s8}</DisplayString>
+		<StringView>data,[length]s8</StringView>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- Vector<T> -->
+	<Type Name="Vector&lt;*&gt;">
+		<DisplayString>{{ len={length}, cap={capacity} }}</DisplayString>
+		<Expand>
+			<Item Name="[size]" ExcludeView="simple">length</Item>
+			<Item Name="[capacity]" ExcludeView="simple">capacity</Item>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- Arena -->
+	<Type Name="Arena">
+		<Intrinsic Name="capacity" Expression="(size_t)(end - beg)" />
+		<DisplayString Condition="capacity() &gt; 1048576">
+			{{ {capacity() / 1024 / 1024,d} MiB left
+			}}
+		</DisplayString>
+		<DisplayString Condition="capacity() &gt; 4096">{{ {capacity() / 1024,d} KiB left }}</DisplayString>
+		<DisplayString>{{ {capacity(),d} bytes left }}</DisplayString>
+		<Expand>
+			<Item Name="[capacity]">capacity(),d</Item>
+			<Item Name="beg">beg</Item>
+			<Item Name="end">end</Item>
+		</Expand>
+	</Type>
+
+	<!-- Pool<T> -->
+	<Type Name="Pool&lt;*&gt;">
+		<DisplayString Condition="head == nullptr">(empty)</DisplayString>
+		<Expand>
+			<LinkedListItems Condition="head != nullptr">
+				<HeadPointer>head</HeadPointer>
+				<NextPointer>next</NextPointer>
+				<ValueNode>value</ValueNode>
+			</LinkedListItems>
+			<Item Name="arena">arena</Item>
+		</Expand>
+	</Type>
+</AutoVisualizer>
