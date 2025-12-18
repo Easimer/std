@@ -1,0 +1,22 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "ci-test-linux",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "SN_STD_BUILD_TESTS": "ON"
+            },
+            "binaryDir": "${sourceDir}/out"
+        },
+        {
+            "name": "ci-test-windows",
+            "cacheVariables": {
+                "SN_STD_BUILD_TESTS": "ON"
+            },
+            "binaryDir": "${sourceDir}/out"
+        }
+    ]
+}

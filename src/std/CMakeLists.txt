@@ -70,4 +70,8 @@ if(SN_STD_BUILD_TESTS)
   target_link_libraries(std-tests PRIVATE std::std)
   set_property(TARGET std-tests PROPERTY FOLDER "easimer/std")
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT std-tests)
+  add_test(
+    NAME std-tests
+    COMMAND $<TARGET_FILE:std-tests>
+  )
 endif()

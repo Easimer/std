@@ -519,7 +519,7 @@ inline b32 empty(Slice<T> s) {
  */
 template <typename D, typename S>
 Slice<D> cast(Slice<S> in) {
-  return in.cast<D>();
+  return in.template cast<D>();
 }
 
 template <typename T>
@@ -527,8 +527,8 @@ inline void copyElementsInto(Slice<T> s,
                              const T *src,
                              u32 numElements,
                              u32 offset = 0) {
-  Slice<const T> src = {src, numElements};
-  s.subarray(offset).copy(src);
+  Slice<const T> srcs = {src, numElements};
+  s.subarray(offset).copy(srcs);
 }
 
 /**

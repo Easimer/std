@@ -1,0 +1,30 @@
+name: Test
+run-name: build
+on: [push]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:trixie-20250520
+    steps:
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y clang cmake git nodejs ninja-build pkg-config
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Configure
+        run: |
+          cmake -S . -B out -GNinja --preset ci-test-linux
+      - name: Build
+        run: |
+          cmake --build out
+      - name: Test
+        run: |
+          cd out
+          ctest -V -C Debug
