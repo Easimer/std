@@ -1,5 +1,5 @@
 name: Test
-run-name: build
+run-name: test
 on: [push]
 
 jobs:
@@ -24,21 +24,6 @@ jobs:
       - name: Build
         run: |
           cmake --build out
-      - name: Test
-        run: |
-          cd out
-          ctest -V -C Debug
-  test-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Configure
-        run: |
-          cmake -S . -B out --preset ci-test-windows -G "Visual Studio 17 2022" -A x64
-      - name: Build
-        run: |
-          cmake --build out --config Debug
       - name: Test
         run: |
           cd out

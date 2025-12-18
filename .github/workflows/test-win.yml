@@ -1,0 +1,21 @@
+name: Test (Windows)
+run-name: test-windows
+on:
+  workflow_dispatch:
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          cmake -S . -B out --preset ci-test-windows -G "Visual Studio 17 2022" -A x64
+      - name: Build
+        run: |
+          cmake --build out --config Debug
+      - name: Test
+        run: |
+          cd out
+          ctest -V -C Debug
