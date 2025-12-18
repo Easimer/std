@@ -12,8 +12,16 @@
 
 #include <vector>
 
+/** @file SliceStlString.hpp */
+
 /**
- * @deprecated Prefer sliceFromStd instead
+ * \addtogroup Slice Slice
+ * @{
+ */
+
+/**
+ * \deprecated Prefer sliceFromStd instead
+ * \internal
  */
 template <typename T>
 Slice<T> sliceFrom(const std::vector<T> &in) {
@@ -30,3 +38,5 @@ std::vector<T> stdVectorFrom(Slice<T> in) {
 
   return {in.data, in.data + in.length};
 }
+
+/**@}*/

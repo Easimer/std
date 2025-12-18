@@ -16,17 +16,21 @@
 /** @file SliceUtils.hpp */
 
 /**
- * \defgroup SliceCreation Slice creation
+ * \addtogroup Slice Slice
  * @{
  */
 
 #define sliceFromConstChar(s) {(s), sizeof((s)) - 1}
 #define sliceFromConstCharWithZero(s) {(s), sizeof((s))}
-/** @deprecated Prefer \ref sliceFrom from Slice.hpp */
+/**
+ * \deprecated Prefer \ref sliceFrom from Slice.hpp
+ * \private
+ */
 #define sliceFromArray(arr) {(arr), sizeof((arr)) / sizeof((arr)[0])}
 
 /**
  * \deprecated Prefer \ref "duplicate" instead
+ * \private
  */
 template <typename T>
 Slice<T> makeSlice(Arena *arena, const T *src, u32 len) {
@@ -54,12 +58,14 @@ Slice<const char> fromCStr(const char *s);
 
 
 /**
- * @deprecated Prefer `operator==`
+ * \deprecated Prefer `operator==`
+ * \private
  */
 b32 compareAsString(Slice<const char> left, Slice<const char> right);
 
 /**
- * @deprecated Prefer Slice<T>::startsWith
+ * \deprecated Prefer Slice<T>::startsWith
+ * \private
  */
 template <typename T>
 bool startsWith(Slice<const T> left, Slice<const T> prefix) {
@@ -188,6 +194,9 @@ Slice<T> concatZeroTerminate(Arena *arena,
   return ret;
 }
 
+/**
+ * \private
+ */
 template <typename T>
 bool endsWith(Slice<const T> self, Slice<const T> suffix) {
   return self.endsWith(suffix);
@@ -217,11 +226,17 @@ Slice<T> append(Slice<T> dst, const T &elem) {
   return dst;
 }
 
+/**
+ * \private
+ */
 template <typename T>
 void fill(Slice<T> dst, const T &value) {
   dst.fill(value);
 }
 
+/**
+ * \private
+ */
 template <typename D, typename S>
 void convert(Slice<D> dst, Slice<const S> src) {
   dst.copyWithConversionTo(dst);
@@ -237,3 +252,5 @@ T *findFirst(Slice<T> self, F &&filter) {
 
   return nullptr;
 }
+
+/**@}*/

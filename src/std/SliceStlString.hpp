@@ -12,6 +12,13 @@
 
 #include <string>
 
+/** @file SliceStlString.hpp */
+
+/**
+ * \addtogroup Slice Slice
+ * @{
+ */
+
 inline Slice<const char> sliceFromStdStr(const std::string &s) {
   return {s.data(), u32(s.size())};
 }
@@ -19,3 +26,5 @@ inline Slice<const char> sliceFromStdStr(const std::string &s) {
 inline std::string stdStrFrom(Slice<const u8> s) {
   return {(const char *)s.data, (const char *)s.data + s.length};
 }
+
+/**@}*/

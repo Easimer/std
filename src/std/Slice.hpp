@@ -11,6 +11,13 @@
 #include "std/Check.h"
 #include "std/Types.h"
 
+/** @file Slice.hpp */
+
+/**
+ * \defgroup Slice Slice
+ * @{
+ */
+
 /**
  * \brief A span with a start index and the number of elements.
  */
@@ -99,16 +106,16 @@ struct Slice {
     return data[i];
   }
 
-  SliceLegacyIterator<T> begin() { return {data, 0}; }
-  SliceLegacyIterator<T> end() { return {data, length}; }
+  SliceLegacyIterator<T> begin() const { return {data, 0}; }
+  SliceLegacyIterator<T> end() const { return {data, length}; }
 
-  SliceLegacyIterator<const T> begin() const { return {data, 0}; }
-  SliceLegacyIterator<const T> end() const { return {data, length}; }
-
+  /**
+   * \brief Returns a constant view on the same elements as this slice.
+   */
   Slice<const T> asConst() const { return {data, length}; }
 
   /**
-   * \brief Checks equality with an other slice.
+   * \brief Tests equality with an other slice.
    *
    * Elements are compared with the equality operator.
    */
@@ -126,7 +133,33 @@ struct Slice {
     return true;
   }
 
+  /**
+   * \brief Tests inequality with an other slice.
+   *
+   * Elements are compared with the inequality operator.
+   */
+  bool operator!=(Slice<T> other) const {
+    if (length != other.length) {
+      return true;
+    }
+
+    for (u32 i = 0; i < length; i++) {
+      if (data[i] != other[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * \brief Tests whether this slice is empty.
+   */
   bool empty() const { return length == 0; }
+
+  /**
+   * \brief Returns the size of this slice in **bytes**.
+   */
   u64 byteLength() const { return length * u64(sizeof(T)); }
 
   /**
@@ -142,6 +175,10 @@ struct Slice {
     return ret;
   }
 
+  /**
+   * \brief Tries to find the first element that is equal to `needle` and writes
+   * its index to `out`.
+   */
   bool indexOf(const T &needle, u32 *out) const {
     if (empty()) {
       return false;
@@ -157,6 +194,10 @@ struct Slice {
     return false;
   }
 
+  /**
+   * \brief Tries to find the last element that is equal to `needle` and writes
+   * its index to `out`.
+   */
   bool lastIndexOf(const T &needle, u32 *out) const {
     if (empty()) {
       return false;
@@ -173,11 +214,28 @@ struct Slice {
     return false;
   }
 
+  /**
+   * \brief Tests whether the slice contains an element that is equal to
+   * `needle`.
+   */
   bool contains(const T &needle) const {
     u32 discard;
     return indexOf(needle, &discard);
   }
 
+  /**
+   * \brief Returns a new slice on the same data. The starting index is
+   * inclusive and the end index is exclusive.
+   *
+   * The specified range is clamped:
+   * - `idxEnd` **can** be less than `idxStart`, in which case an empty slice is
+   * returned.
+   * - The specified range can be partially or completely out of range and this
+   * function will never return a slice that is outside of the bounds of `this`.
+   *
+   * \param idxStart Element to begin at; inclusive.
+   * \param idxEnd Element to end at; exclusive.
+   */
   Slice<T> subarray(u32 idxStart, u32 idxEnd) const {
     if (idxEnd <= idxStart || length <= idxStart) {
       return {nullptr, 0};
@@ -201,6 +259,15 @@ struct Slice {
     return subarray(rangeFrom(span));
   }
 
+  /**
+   * \brief Returns a new slice that's looking at the same data, starting at
+   * `idxStart` up until the end of `this`.
+   *
+   * The specified range is clamped:
+   * - `idxStart` can be out of range, in which case an empty slice is returned.
+   *
+   * \param idxStart Element to begin at; inclusive.
+   */
   Slice<T> subarray(u32 idxStart) const { return subarray(idxStart, length); }
 
   /**
@@ -295,6 +362,9 @@ struct Slice {
     }
   }
 
+  /**
+   * \brief Tests that this slice starts with the specified prefix.
+   */
   bool startsWith(Slice<const T> prefix) const {
     if (prefix.empty()) {
       return true;
@@ -307,6 +377,9 @@ struct Slice {
     return subarray(0, prefix.length).asConst() == prefix;
   }
 
+  /**
+   * \brief Tests that this slice ends with the specified suffix.
+   */
   bool endsWith(Slice<const T> suffix) const {
     if (suffix.empty()) {
       return true;
@@ -319,12 +392,19 @@ struct Slice {
     return subarray(length - suffix.length).asConst() == suffix;
   }
 
+  /**
+   * \brief Fills the slice with the specified value.
+   */
   void fill(const T &value) {
     for (u32 i = 0; i < length; i++) {
       (*this)[i] = value;
     }
   }
 
+  /**
+   * \brief Copies the contents of this slice to the destination. Each element
+   * of type `S` will be converted to type `D`.
+   */
   template <typename D>
   Slice<D> copyWithConversionTo(Slice<D> dst) const {
     DCHECK(dst.length == length);
@@ -340,6 +420,7 @@ struct Slice {
 
 /**
  * \deprecated Prefer Slice<T>::shrinkFromLeftByCount
+ * \private
  */
 template <typename T>
 inline void shrinkFromLeftByCount(Slice<T> *target, u32 numElements) {
@@ -348,6 +429,7 @@ inline void shrinkFromLeftByCount(Slice<T> *target, u32 numElements) {
 
 /**
  * \deprecated Prefer Slice<T>::indexOf
+ * \private
  */
 template <typename T>
 inline b32 indexOf(Slice<const T> s, const T &needle, u32 *out) {
@@ -356,6 +438,7 @@ inline b32 indexOf(Slice<const T> s, const T &needle, u32 *out) {
 
 /**
  * \deprecated Prefer Slice<T>::indexOf
+ * \private
  */
 template <typename T>
 inline b32 indexOf(Slice<T> s, const T &needle, u32 *out) {
@@ -364,6 +447,7 @@ inline b32 indexOf(Slice<T> s, const T &needle, u32 *out) {
 
 /**
  * \deprecated Prefer Slice<T>::lastIndexOf
+ * \private
  */
 template <typename T>
 inline b32 lastIndexOf(Slice<T> s, const T &needle, u32 *out) {
@@ -372,6 +456,7 @@ inline b32 lastIndexOf(Slice<T> s, const T &needle, u32 *out) {
 
 /**
  * \deprecated Prefer Slice<T>::subarray
+ * \private
  */
 template <typename T>
 inline Slice<T> subarray(Slice<T> s, u32 idxStart, u32 idxEnd) {
@@ -380,6 +465,7 @@ inline Slice<T> subarray(Slice<T> s, u32 idxStart, u32 idxEnd) {
 
 /**
  * \deprecated Prefer Slice<T>::subarray
+ * \private
  */
 template <typename T>
 inline Slice<T> subarray(Slice<T> s, Range<u32> range) {
@@ -388,6 +474,7 @@ inline Slice<T> subarray(Slice<T> s, Range<u32> range) {
 
 /**
  * \deprecated Prefer Slice<T>::subarray
+ * \private
  */
 template <typename T>
 inline Slice<T> subarray(Slice<T> s, Span<u32> span) {
@@ -396,6 +483,7 @@ inline Slice<T> subarray(Slice<T> s, Span<u32> span) {
 
 /**
  * \deprecated Prefer Slice<T>::subarray
+ * \private
  */
 template <typename T>
 inline Slice<T> subarray(Slice<T> s, u32 idxStart) {
@@ -404,6 +492,7 @@ inline Slice<T> subarray(Slice<T> s, u32 idxStart) {
 
 /**
  * \deprecated Prefer Slice<T>::shrinkFromLeft
+ * \private
  */
 template <typename T>
 inline void shrinkFromLeft(Slice<T> *target) {
@@ -412,6 +501,7 @@ inline void shrinkFromLeft(Slice<T> *target) {
 
 /**
  * \deprecated Prefer Slice<T>::empty
+ * \private
  */
 template <typename T>
 inline b32 empty(Slice<T> s) {
@@ -443,6 +533,7 @@ inline void copyElementsInto(Slice<T> s,
 
 /**
  * \deprecated Prefer Slice<T>::byteLength
+ * \private
  */
 template <typename T>
 inline u64 byteLength(Slice<T> s) {
@@ -467,6 +558,7 @@ constexpr Slice<const T> sliceFrom(const T (&p)[N]) {
 
 /**
  * \deprecated Prefer Slice<T>::contains
+ * \private
  */
 template <typename T>
 bool contains(Slice<T> s, const T &needle) {
@@ -483,6 +575,7 @@ bool contains(Slice<const T> s, const T &needle) {
 
 /**
  * \deprecated Prefer Slice<T>::all
+ * \private
  */
 template <typename T, typename F>
 bool all(Slice<T> list, F &&condition) {
@@ -491,6 +584,7 @@ bool all(Slice<T> list, F &&condition) {
 
 /**
  * \deprecated Prefer Slice<T>::any
+ * \private
  */
 template <typename T, typename F>
 bool any(Slice<T> list, F &&condition, u32 &index) {
@@ -499,6 +593,7 @@ bool any(Slice<T> list, F &&condition, u32 &index) {
 
 /**
  * \deprecated Prefer Slice<T>::any
+ * \private
  */
 template <typename T, typename F>
 bool any(Slice<T> list, F &&condition) {
@@ -507,6 +602,7 @@ bool any(Slice<T> list, F &&condition) {
 
 /**
  * \deprecated Prefer Slice<T>::reverse
+ * \private
  */
 template <typename T>
 void reverse(Slice<T> s) {
@@ -528,3 +624,5 @@ template <typename C>
 Slice<const typename C::value_type> sliceFromStd(const C &container) {
   return {container.data(), (u32)container.size()};
 }
+
+/**@}*/

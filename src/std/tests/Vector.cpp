@@ -156,3 +156,24 @@ SN_TEST(Vector, sliceFrom) {
   CHECK(s.data == v.data);
   CHECK(s.length == v.length);
 }
+
+SN_TEST(Vector, appendWithCount) {
+  u8 stk[2] = {0};
+  Vector<u8> v = {stk, 0, 2};
+
+  u8* p = append(nullptr, &v, 2);
+  CHECK(p == v.data);
+  CHECK(v.length == 2);
+  CHECK(v.capacity == 2);
+}
+
+SN_TEST(Vector, appendWithCountGrow) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 8);
+
+  CHECK(v.capacity >= 8);
+
+  append(temp, &v, 32);
+  CHECK(v.capacity >= 32 + 8);
+}

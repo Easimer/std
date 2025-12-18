@@ -13,6 +13,13 @@
 #include <assert.h>
 #include <string.h>
 
+/** @file Vector.hpp */
+
+/**
+ * \addtogroup Vector Vector
+ * @{
+ */
+
 /**
  * A growable array.
  */
@@ -29,9 +36,9 @@ struct Vector {
 };
 
 /**
- * Allocates spaces for `count` items in the vector and return the base address
- * to the caller. When the vector is full, a new backing array is allocated into
- * the provided arena and old elements are copied into it.
+ * \brief Allocates spaces for `count` items in the vector and return the base
+ * address to the caller. When the vector is full, a new backing array is
+ * allocated into the provided arena and old elements are copied into it.
  */
 template <typename T>
 T *append(Arena *arena, Vector<T> *dst, u32 count) {
@@ -61,9 +68,9 @@ T *append(Arena *arena, Vector<T> *dst, u32 count) {
 }
 
 /**
- * Allocates a new slot in the vector and returns it to the caller. When the
- * vector is full, a new backing array is allocated into the provided arena and
- * old elements are copied into it.
+ * \brief Allocates a new slot in the vector and returns it to the caller. When
+ * the vector is full, a new backing array is allocated into the provided arena
+ * and old elements are copied into it.
  */
 template <typename T>
 T *append(Arena *arena, Vector<T> *dst) {
@@ -88,6 +95,10 @@ T *append(Arena *arena, Vector<T> *dst) {
   return ret;
 }
 
+/**
+ * \brief Appends the specified value to the vector, growing its capacity if
+ * needed.
+ */
 template <typename T>
 T *appendVal(Arena *arena, Vector<T> *dst, const T &value) {
   T *p = append(arena, dst);
@@ -96,7 +107,7 @@ T *appendVal(Arena *arena, Vector<T> *dst, const T &value) {
 }
 
 /**
- * Creates a vector with a predefined initial capacity.
+ * \brief Creates a vector with a predefined initial capacity.
  */
 template <typename T>
 Vector<T> vectorWithInitialCapacity(Arena *arena, u32 capacity) {
@@ -106,3 +117,5 @@ Vector<T> vectorWithInitialCapacity(Arena *arena, u32 capacity) {
   ret.capacity = capacity;
   return ret;
 }
+
+/**@}*/

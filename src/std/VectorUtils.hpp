@@ -12,6 +12,13 @@
 #include "std/SliceUtils.hpp"
 #include "std/Vector.hpp"
 
+/** @file VectorUtils.hpp */
+
+/**
+ * \addtogroup Vector Vector
+ * @{
+ */
+
 template <typename T>
 Vector<T> makeVectorFrom(Arena *arena, Slice<T> s) {
   Vector<T> ret = vectorWithInitialCapacity<T>(arena, s.length);
@@ -38,3 +45,5 @@ template <typename T>
 Slice<T> sliceFrom(Vector<T> src) {
   return {src.data, src.length};
 }
+
+/**@}*/
