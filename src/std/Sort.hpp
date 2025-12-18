@@ -55,6 +55,10 @@ void mergeSort_impl(Slice<T> dst, Slice<T> s) {
 
 template <typename T>
 void mergeSort(Slice<T> dst, Slice<T> s) {
+  DCHECK(dst.length == s.length);
+  if (s.empty()) {
+    return;
+  }
   copy(dst, s);
   mergeSort_impl(dst, s);
 }

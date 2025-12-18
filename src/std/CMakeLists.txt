@@ -57,3 +57,17 @@ set_property(TARGET std PROPERTY FOLDER "easimer/std")
 
 add_library(std::std ALIAS std)
 
+if(SN_STD_BUILD_TESTS)
+  add_executable(std-tests
+    tests/entry.cpp
+    tests/Arena.cpp
+    tests/FixedRingBuffer.cpp
+    tests/Optional.cpp
+    tests/Slice.cpp
+    tests/Sort.cpp
+    tests/Vector.cpp
+  )
+  target_link_libraries(std-tests PRIVATE std::std)
+  set_property(TARGET std-tests PROPERTY FOLDER "easimer/std")
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT std-tests)
+endif()

@@ -18,6 +18,13 @@ inline void countingSort(u32 N,
                          const u32 *indices,
                          u32 *indicesOut,
                          const K *keys) {
+  DCHECK(N == 0 ||
+         (indices != nullptr && indicesOut != nullptr && keys != nullptr));
+  if (N == 0 || indices == nullptr || indicesOut == nullptr ||
+      keys == nullptr) {
+    return;
+  }
+
   u32 counts[256] = {};
 
   for (u32 i = 0; i < N; i++) {

@@ -36,17 +36,47 @@ struct FixedRingBuffer {
   }
 
   T pop() {
-    CHECK(write > read);
+    CHECK(read != write);
     return elems[(read++) % Size];
   }
 
-  T &peek(u32 idxElem = 0) {
-    CHECK(write > read + idxElem);
+  T &peek(u32 offElem = 0) {
+    u32 idxElem = read + offElem;
+    CHECK(isValidPhyIndex(idxElem));
 
-    return elems[(read + idxElem) % Size];
+    return elems[idxElem % Size];
+  }
+
+  bool isValidPhyIndex(u32 idxElem) {
+    if (empty()) {
+      return false;
+    }
+
+    if (read < write) {
+      // If `read` is before `write`, then idxElem must be before the `write`:
+      // |      R    E     W    |
+      return idxElem < write;
+    } else {
+      // If `write` is before `read`, then idxElem must either
+      // be before or on the last possible index:
+      // |   W          R     E |
+      //
+      // or it must be before the write index:
+      // | E W          R       |
+      return (idxElem <= 0xFFFFFFFF || idxElem < write);
+    }
   }
 
   b32 empty() const { return write == read; }
   b32 full() const { return write == read + Size; }
-  u32 size() const { return write - read; }
+  u32 size() const {
+    if (read <= write) {
+      return write - read;
+    } else {
+      DCHECK(read != 0);  // not possible; this branch runs when `write < read`
+                          // and there is no `write` value that would satisfy
+                          // the inequality when `read` is 0
+      return (0xFFFFFFFF - read + 1) + write;
+    }
+  }
 };

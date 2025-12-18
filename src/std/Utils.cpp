@@ -24,3 +24,8 @@ Slice<const char> fromCStr(const char *s) {
   size_t len = strlen(s);
   return {s, u32(len)};
 }
+
+Slice<const char> fromCStrWithZero(const char* s) {
+  size_t len = strlen(s);
+  return {s, u32(len) + 1};
+}
