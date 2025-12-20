@@ -22,3 +22,24 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 typedef uint32_t b32;
+
+#if __cplusplus
+extern "C" {
+#endif
+
+/**
+ * \brief Count leading zeros.
+ * \returns The number of leading zeros. When x is zero, the result is 32,
+ * similarly to Rust's `u32::leading_zeros`.
+ */
+i32 countLeadingZeros(u32 x);
+/**
+ * \brief Count leading zeros.
+ * \returns The number of leading zeros. When x is zero, the result is 64,
+ * similarly to Rust's `u64::leading_zeros`.
+ */
+i32 countLeadingZeros64(u64 x);
+
+#if __cplusplus
+}
+#endif
