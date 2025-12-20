@@ -48,8 +48,12 @@ target_compile_definitions(std-context
   PRIVATE SN_STD_BUILDING=1
   INTERFACE SN_STD_BUILDING=0
 )
-target_link_libraries(std-context PRIVATE std-static)
 set_property(TARGET std-context PROPERTY FOLDER "easimer/std")
+
+if(MSVC)
+  target_compile_options(std-context PRIVATE /W3 /WX /GS-)
+  target_link_options(std-context PRIVATE /incremental:no /opt:icf /opt:ref)
+endif()
 
 add_library(std INTERFACE)
 target_link_libraries(std INTERFACE std-context std-static)
@@ -66,6 +70,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Slice.cpp
     tests/Sort.cpp
     tests/Vector.cpp
+    tests/Utils.cpp
   )
   target_link_libraries(std-tests PRIVATE std::std)
   set_property(TARGET std-tests PROPERTY FOLDER "easimer/std")

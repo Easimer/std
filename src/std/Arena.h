@@ -8,10 +8,10 @@
 
 #pragma once
 
+#include "./CompilerInfo.h"
 #include "./Modules.h"
-#include "std/CompilerInfo.h"
-#include "std/Sanitizer.h"
-#include "std/Types.h"
+#include "./Sanitizer.h"
+#include "./Types.h"
 
 #if SN_STD_BUILDING
 #define SN_STD_API SN_DLLEXPORT

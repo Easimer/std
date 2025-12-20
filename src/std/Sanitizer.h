@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "std/CompilerInfo.h"
+#include "./CompilerInfo.h"
 
 #if defined(SN_ASAN_ACTIVE) && SN_MSVC
 #define SN_MSVC_ASAN
