@@ -28,3 +28,19 @@ jobs:
         run: |
           cd out
           ctest -V -C Debug
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          cmake -S . -B out --preset ci-test-windows
+      - name: Build
+        run: |
+          cmake --build out --config Debug
+      - name: Test
+        run: |
+          cd out
+          ctest -V -C Debug
