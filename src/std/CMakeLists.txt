@@ -5,6 +5,8 @@ target_sources(std-static
     Array.hpp
     Check.cpp Check.h
     Chronometry.c Chronometry.h
+    CommandDecoder.hpp
+    CommandEncoder.hpp
     CompilerInfo.h
     Defer.hpp
     FixedRingBuffer.hpp
@@ -19,6 +21,7 @@ target_sources(std-static
     RadixSort.hpp
     Ranges.hpp
     Sanitizer.h
+    SegmentArray.hpp
     Slice.hpp
     SliceStlString.hpp
     SliceStlVector.hpp
@@ -65,8 +68,10 @@ if(SN_STD_BUILD_TESTS)
   add_executable(std-tests
     tests/entry.cpp
     tests/Arena.cpp
+    tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
     tests/Optional.cpp
+    tests/SegmentArray.cpp
     tests/Slice.cpp
     tests/Sort.cpp
     tests/Vector.cpp

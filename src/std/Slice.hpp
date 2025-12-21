@@ -102,7 +102,7 @@ struct Slice {
   T &operator[](i32 i) const {
     DCHECK(data != nullptr);
     DCHECK(0 <= i);
-    DCHECK(i < length);
+    DCHECK((u32)i < length);
     return data[i];
   }
 
