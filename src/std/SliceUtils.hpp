@@ -141,14 +141,7 @@ void zeroMemory(Slice<T> s) {
  */
 template <typename T>
 void copy(Slice<T> dst, Slice<const T> src) {
-  if (empty(src)) {
-    return;
-  }
-
-  CHECK(src.length <= dst.length);
-  for (u32 i = 0; i < src.length; i++) {
-    dst[i] = src[i];
-  }
+  dst.copy(src);
 }
 
 /**
