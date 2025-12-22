@@ -403,3 +403,15 @@ SN_TEST(Slice, shrinkFromLeftByCount3) {
   s.shrinkFromLeftByCount(3);
   CHECK(s.empty());
 }
+
+SN_TEST(Slice, copyU32) {
+  const u32 src[3] = {5, 11, 3};
+  u32 dst[3];
+  memset(dst, 0, sizeof(dst));
+
+  sliceFrom(dst).copy(sliceFrom(src));
+
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(src[i] == dst[i]);
+  }
+}

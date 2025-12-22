@@ -11,6 +11,8 @@
 #include "std/Check.h"
 #include "std/Types.h"
 
+#include <string.h>
+
 /** @file Slice.hpp */
 
 /**
@@ -416,7 +418,45 @@ struct Slice {
 
     return dst;
   }
+
+  /**
+   * \brief Copies all elements from `source` into the beginning of this slice
+   * using memcpy.
+   */
+  void memcopy(Slice<const T> source) const {
+    if (source.empty()) {
+      return;
+    }
+
+    CHECK(source.length <= length);
+    ::memcpy(data, source.data, source.length * sizeof(T));
+  }
 };
+
+#define SLICE_DEFINE_COPY_SPECIALIZATION(T)                 \
+  template <>                                               \
+  inline void Slice<T>::copy(Slice<const T> source) const { \
+    memcopy(source);                                        \
+  }
+
+SLICE_DEFINE_COPY_SPECIALIZATION(u8);
+SLICE_DEFINE_COPY_SPECIALIZATION(u16);
+SLICE_DEFINE_COPY_SPECIALIZATION(u32);
+SLICE_DEFINE_COPY_SPECIALIZATION(u64);
+
+SLICE_DEFINE_COPY_SPECIALIZATION(i8);
+SLICE_DEFINE_COPY_SPECIALIZATION(i16);
+SLICE_DEFINE_COPY_SPECIALIZATION(i32);
+SLICE_DEFINE_COPY_SPECIALIZATION(i64);
+
+SLICE_DEFINE_COPY_SPECIALIZATION(f32);
+SLICE_DEFINE_COPY_SPECIALIZATION(f64);
+
+template <>
+void Slice<char>::copy(Slice<const char> source) const;
+
+template <>
+void Slice<u8>::copy(Slice<const u8> source) const;
 
 /**
  * \deprecated Prefer Slice<T>::shrinkFromLeftByCount
