@@ -293,7 +293,7 @@ struct Slice {
    * \brief Copies all elements from `source` into the beginning of this slice.
    */
   void copy(Slice<const T> source) const {
-    if (empty(source)) {
+    if (source.empty()) {
       return;
     }
 
@@ -451,12 +451,6 @@ SLICE_DEFINE_COPY_SPECIALIZATION(i64);
 
 SLICE_DEFINE_COPY_SPECIALIZATION(f32);
 SLICE_DEFINE_COPY_SPECIALIZATION(f64);
-
-template <>
-void Slice<char>::copy(Slice<const char> source) const;
-
-template <>
-void Slice<u8>::copy(Slice<const u8> source) const;
 
 /**
  * \deprecated Prefer Slice<T>::shrinkFromLeftByCount
