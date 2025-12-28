@@ -72,6 +72,15 @@ SN_TEST(MergeSort_u32, sortSucceeds) {
   }
 }
 
+SN_TEST(MergeSort_u32, inplaceSortSucceeds) {
+  u32 keys[4] = {3102860508, 1749442322, 813570146, 3726812458};
+  mergeSort(sliceFrom(keys));
+
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(keys[i] < keys[i + 1]);
+  }
+}
+
 SN_TEST(MergeSort_i32, sortSucceeds) {
   i32 keys[4] = {1327110793, 1899266835, 702222870, 830235625};
   i32 out[4];
@@ -79,6 +88,28 @@ SN_TEST(MergeSort_i32, sortSucceeds) {
 
   for (u32 i = 0; i < 3; i++) {
     CHECK(out[i] < out[i + 1]);
+  }
+}
+
+SN_TEST(MergeSort_i32, sortWithCmpSucceeds) {
+  i32 keys[4] = {1327110793, 1899266835, 702222870, 830235625};
+  i32 out[4];
+  mergeSort(sliceFrom(out), sliceFrom(keys),
+            [](i32 l, i32 r) { return l < r; });
+
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(out[i] < out[i + 1]);
+  }
+}
+
+SN_TEST(MergeSort_i32, sortWithCmpDescendingSucceeds) {
+  i32 keys[4] = {1327110793, 1899266835, 702222870, 830235625};
+  i32 out[4];
+  mergeSort(sliceFrom(out), sliceFrom(keys),
+            [](i32 l, i32 r) { return l > r; });
+
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(out[i] > out[i + 1]);
   }
 }
 
@@ -111,4 +142,76 @@ SN_TEST(MergeSort_u32, sortOne) {
   mergeSort(sliceFrom(out), sliceFrom(keys));
 
   CHECK(out[0] == 1);
+}
+
+auto abs = [](i32 x) { return x > 0 ? x : -x; };
+struct Comparable {
+  i32 x, y;
+
+  i32 length() const { return abs(x) + abs(y); }
+
+  bool operator<(const Comparable &other) const {
+    return length() < other.length();
+  }
+};
+
+SN_TEST(MergeSort_ComparableStruct, sortSucceeds) {
+  Comparable elems[4] = {
+      {7, 3},
+      {9, 10},
+      {1, -1},
+      {4, 5},
+  };
+  mergeSort(sliceFrom(elems));
+
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(elems[i] < elems[i + 1]);
+  }
+}
+
+SN_TEST(MergeSort_ComparableStruct, customCmpSortSucceeds) {
+  Comparable elems[4] = {
+      {7, 3},
+      {9, 10},
+      {1, -1},
+      {4, 5},
+  };
+  mergeSort(sliceFrom(elems),
+            [](const Comparable &l, const Comparable &r) { return r < l; });
+
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(elems[i + 1] < elems[i]);
+  }
+}
+
+SN_TEST(MergeSort_ComparableStruct, customCmpByConstRefSucceeds) {
+  Comparable elems[4] = {
+      {7, 3},
+      {9, 10},
+      {1, -1},
+      {4, 5},
+  };
+
+  struct CustomCmp {
+    bool isDescending = false;
+    bool operator()(const Comparable &l, const Comparable &r) const noexcept {
+      if (isDescending) {
+        return r < l;
+      } else {
+        return l < r;
+      }
+    }
+  };
+
+  CustomCmp cmp;
+  mergeSort(sliceFrom(elems), cmp);
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(elems[i] < elems[i + 1]);
+  }
+
+  cmp.isDescending = true;
+  mergeSort(sliceFrom(elems), cmp);
+  for (u32 i = 0; i < 3; i++) {
+    CHECK(elems[i + 1] < elems[i]);
+  }
 }

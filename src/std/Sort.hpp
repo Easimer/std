@@ -11,14 +11,23 @@
 #include "std/Slice.hpp"
 #include "std/SliceUtils.hpp"
 
+namespace impl {
+
 template <typename T>
-void merge(Slice<T> dst, Slice<T> left, Slice<T> right) {
+struct Less {
+  constexpr bool operator()(const T &lhs, const T &rhs) const {
+    return lhs < rhs;
+  }
+};
+
+template <typename T, typename Cmp>
+void merge(Slice<T> dst, Slice<T> left, Slice<T> right, Cmp &&cmp) {
   u32 idxLeft = 0;
   u32 idxRight = 0;
 
   for (u32 idxDst = 0; idxDst < dst.length; idxDst++) {
     if (idxLeft < left.length &&
-        (idxRight == right.length || left[idxLeft] < right[idxRight])) {
+        (idxRight == right.length || cmp(left[idxLeft], right[idxRight]))) {
       dst[idxDst] = left[idxLeft++];
     } else {
       dst[idxDst] = right[idxRight++];
@@ -26,8 +35,8 @@ void merge(Slice<T> dst, Slice<T> left, Slice<T> right) {
   }
 }
 
-template <typename T>
-void mergeSort_impl(Slice<T> dst, Slice<T> s) {
+template <typename T, typename Cmp>
+void mergeSort(Slice<T> dst, Slice<T> s, Cmp &&cmp) {
   if (s.length == 1) {
     return;
   }
@@ -47,10 +56,34 @@ void mergeSort_impl(Slice<T> dst, Slice<T> s) {
   dstRight.data = dst.data + left.length;
   dstRight.length = right.length;
 
-  mergeSort_impl(left, dstLeft);
-  mergeSort_impl(right, dstRight);
+  ::impl::mergeSort(left, dstLeft, cmp);
+  ::impl::mergeSort(right, dstRight, cmp);
 
-  merge(dst, left, right);
+  merge(dst, left, right, cmp);
+}
+
+}  // namespace impl
+
+template <typename T, typename Cmp = impl::Less<T>>
+void mergeSort(Slice<T> dst, Slice<T> s, const Cmp &cmp) {
+  DCHECK(dst.length == s.length);
+  if (s.empty()) {
+    return;
+  }
+  copy(dst, s);
+  impl::mergeSort(dst, s, cmp);
+}
+
+template <typename T, typename Cmp = impl::Less<T>>
+void mergeSort(Slice<T> s, const Cmp &cmp) {
+  if (s.empty()) {
+    return;
+  }
+
+  Arena::Scope temp = getScratch(nullptr, 0);
+  Slice<T> copy = duplicate(temp, s);
+
+  mergeSort(s, copy, cmp);
 }
 
 template <typename T>
@@ -60,5 +93,15 @@ void mergeSort(Slice<T> dst, Slice<T> s) {
     return;
   }
   copy(dst, s);
-  mergeSort_impl(dst, s);
+  mergeSort(dst, s, impl::Less<T>{});
+}
+
+template <typename T>
+void mergeSort(Slice<T> s) {
+  if (s.empty()) {
+    return;
+  }
+  Arena::Scope temp = getScratch(nullptr, 0);
+  Slice<T> copy = duplicate(temp, s);
+  mergeSort(s, copy);
 }
