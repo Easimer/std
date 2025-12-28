@@ -6,6 +6,10 @@
 
 #include <csetjmp>
 
+#ifndef SN_TEST_EXECUTABLE
+#define SN_TEST_EXECUTABLE 0
+#endif
+
 struct SnTest;
 using SnTestFunc = void (*)(void);
 extern SnTest *gSnTestFirst;
@@ -49,11 +53,15 @@ struct SnTestStats {
 #define SN_TEST_DECL_FUNC(SuiteName, TestName) \
   static void test_func_##SuiteName##_##TestName(void)
 
+#if SN_TEST_EXECUTABLE
 /** \brief Creates a test definition */
 #define SN_TEST_DEFINE_DESC(SuiteName, TestName, ShouldPass)            \
   static SnTest test_##SuiteName##_##TestName =                         \
       SnTest(SN_TEST_STRINGIFY(SuiteName), SN_TEST_STRINGIFY(TestName), \
              test_func_##SuiteName##_##TestName, ShouldPass)
+#else
+#define SN_TEST_DEFINE_DESC(SuiteName, TestName, ShouldPass)
+#endif
 
 /** \brief Defines a test that must pass. */
 #define SN_TEST(SuiteName, TestName)              \

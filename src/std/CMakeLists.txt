@@ -78,6 +78,10 @@ if(SN_STD_BUILD_TESTS)
     tests/Utils.cpp
   )
   target_link_libraries(std-tests PRIVATE std::std)
+  target_compile_definitions(std-tests
+    PRIVATE
+      SN_TEST_EXECUTABLE=1
+  )
   set_property(TARGET std-tests PROPERTY FOLDER "easimer/std")
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT std-tests)
   add_test(
