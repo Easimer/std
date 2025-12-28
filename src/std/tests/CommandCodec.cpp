@@ -25,16 +25,16 @@ struct Struct {
 };
 
 struct TestState {
-  u32 uintValue;
-  f32 floatValue;
-  Struct strct;
-  Array<Struct, 2> strctArray;
+  u32 uintValue = 0;
+  f32 floatValue = 0.0f;
+  Struct strct = {};
+  Array<Struct, 2> strctArray = {};
 };
 
 struct TestEncoder : CommandEncoder<TestFields> {
   TestState state;
 
-  TestEncoder(Arena *arena) : CommandEncoder(arena) {}
+  TestEncoder(Arena *arena) : CommandEncoder(arena), state({}) {}
 
   void end() noexcept {
     pushDirtyMask();
