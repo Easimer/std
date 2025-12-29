@@ -15,8 +15,8 @@ endif()
 if(MSVC)
   # NOTE: MSVC defines __SANTIZE_ADDRESS__ since 16.9 if /fsanitize=address is
   # passed
-  set(SN_SANITIZER_CFLAGS "/fsanitize=address /D_DISABLE_VECTOR_ANNOTATION=1 /D_DISABLE_STRING_ANNOTATION=1 /D__SANITIZE_ADDRESS__=1")
-  set(SN_SANITIZER_LDFLAGS "")
+  set(SN_SANITIZER_CFLAGS "/MTd /Od /Zi /RTC1 /fsanitize=address /D_DISABLE_VECTOR_ANNOTATION=1 /D_DISABLE_STRING_ANNOTATION=1 /D__SANITIZE_ADDRESS__=1")
+  set(SN_SANITIZER_LDFLAGS "/incremental:no")
 else()
   set(SN_SANITIZER_CFLAGS "-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined")
   set(SN_SANITIZER_LDFLAGS "-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined")

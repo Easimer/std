@@ -8,9 +8,19 @@
 
 #pragma once
 
-#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-
+#if _MSC_VER
+// On MSVC, check only __SANITIZE_ADDRESS__ because __has_feature() triggers a
+// warning
+#if defined(__SANITIZE_ADDRESS__)
 #define SN_ASAN_ACTIVE
+#endif
+#else
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+#define SN_ASAN_ACTIVE
+#endif
+#endif
+
+#if defined(SN_ASAN_ACTIVE)
 
 #include <stddef.h>
 
@@ -44,4 +54,4 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size);
 #else
 #define SN_ASAN_POISON(addr, size) ((void)(addr), (void)(size))
 #define SN_ASAN_UNPOISON(addr, size) ((void)(addr), (void)(size))
-#endif
+#endif /* defined(SN_ASAN_ACTIVE) */
