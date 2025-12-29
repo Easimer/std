@@ -25,7 +25,7 @@ static u8 *allocImpl(Arena *a,
 #endif
 
   u32 pad = (u64)a->end & (sizAlign - 1);
-  while (!(numObjects < (a->end - a->beg - pad) / sizObj)) {
+  while (!(numObjects <= (a->end - a->beg - pad) / sizObj)) {
     handleOOM(a);
   }
 
@@ -33,6 +33,7 @@ static u8 *allocImpl(Arena *a,
 
   u8 *allocEnd = a->end;
   a->end -= sizAlloc + pad;
+  DCHECK(a->beg <= a->end);
   u8 *allocStart = a->end;
 
   // Unpoison the allocated range if running an ASAN build

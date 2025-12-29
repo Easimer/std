@@ -49,3 +49,14 @@ SN_TEST_MUST_FAIL(Arena, callsHandleOomWhenOutOfSpace) {
 
   alloc<u8>(temp, 0xFFFFFFFF);
 }
+
+SN_TEST(Arena, exactSizeAllocSucceeds) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  ptrdiff_t size = (temp.arena->end - temp.arena->beg);
+  CHECK(size <= 0xFFFFFFFF);
+
+  u8 *bytes = alloc<u8>(temp, size);
+  CHECK(bytes != nullptr);
+}
+
