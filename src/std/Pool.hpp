@@ -10,9 +10,11 @@
 
 #include "std/Arena.h"
 #include "std/Check.h"
+#include "std/Sanitizer.h"
 #include "std/Types.h"
 
 #include <string.h>
+#include <new>
 
 #ifndef NDEBUG
 static constexpr u32 POOL_NODE_SENTINEL = 0xBEEFB00F;
@@ -27,7 +29,7 @@ struct Pool {
     Node *next;
     Node *prev;
 
-    T value;
+    SN_ASAN_POISANABLE_ALIGNAS T value;
   };
 
   struct Iterator {
@@ -87,8 +89,10 @@ T *alloc(Pool<T> *pool) {
     node->prev = nullptr;
   } else {
     node = alloc<typename Pool<T>::Node>(pool->arena);
+    SN_ASAN_POISON(&node->value, sizeof(node->value));
   }
 
+  SN_ASAN_UNPOISON(&node->value, sizeof(node->value));
   new (&node->value) T();
 
 #ifndef NDEBUG
@@ -116,6 +120,7 @@ void dealloc(Pool<T> *pool, typename Pool<T>::Node *node) {
   typename Pool<T>::Node *next = node->next;
 
   node->value.~T();
+  SN_ASAN_POISON(&node->value, sizeof(node->value));
 
   if (next) {
     next->prev = prev;

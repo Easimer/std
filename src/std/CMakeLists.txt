@@ -71,6 +71,7 @@ if(SN_STD_BUILD_TESTS)
     tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
     tests/Optional.cpp
+    tests/Pool.cpp
     tests/SegmentArray.cpp
     tests/Slice.cpp
     tests/Sort.cpp

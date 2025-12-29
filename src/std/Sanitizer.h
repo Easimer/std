@@ -51,7 +51,9 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size);
 #define SN_ASAN_POISON(addr, size) __asan_poison_memory_region((addr), (size))
 #define SN_ASAN_UNPOISON(addr, size) \
   __asan_unpoison_memory_region((addr), (size))
+#define SN_ASAN_POISANABLE_ALIGNAS alignas(8)
 #else
 #define SN_ASAN_POISON(addr, size) ((void)(addr), (void)(size))
 #define SN_ASAN_UNPOISON(addr, size) ((void)(addr), (void)(size))
+#define SN_ASAN_POISANABLE_ALIGNAS
 #endif /* defined(SN_ASAN_ACTIVE) */
