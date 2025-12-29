@@ -2,11 +2,21 @@
     "version": 6,
     "configurePresets": [
         {
-            "name": "ci-test-linux",
+            "name": "ci-test-clang",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "DebugSan",
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
+                "SN_STD_BUILD_TESTS": "ON"
+            },
+            "binaryDir": "${sourceDir}/out"
+        },
+        {
+            "name": "ci-test-gcc",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "DebugSan",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
                 "SN_STD_BUILD_TESTS": "ON"
             },
             "binaryDir": "${sourceDir}/out"
