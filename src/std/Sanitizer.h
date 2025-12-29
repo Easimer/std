@@ -8,17 +8,31 @@
 
 #pragma once
 
-#include "./CompilerInfo.h"
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
 
-#if defined(SN_ASAN_ACTIVE) && SN_MSVC
-#define SN_MSVC_ASAN
-#endif
+#define SN_ASAN_ACTIVE
 
-#if defined(SN_MSVC_ASAN)
+#include <stddef.h>
+
 #if __cplusplus
 extern "C" {
 #endif
+// Marks memory region [addr, addr+size) as unaddressable.
+// This memory must be previously allocated by the user program. Accessing
+// addresses in this region from instrumented code is forbidden until
+// this region is unpoisoned. This function is not guaranteed to poison
+// the whole region - it may poison only subregion of [addr, addr+size) due
+// to ASan alignment restrictions.
+// Method is NOT thread-safe in the sense that no two threads can
+// (un)poison memory in the same memory region simultaneously.
 void __asan_poison_memory_region(void const volatile *addr, size_t size);
+// Marks memory region [addr, addr+size) as addressable.
+// This memory must be previously allocated by the user program. Accessing
+// addresses in this region is allowed until this region is poisoned again.
+// This function may unpoison a superregion of [addr, addr+size) due to
+// ASan alignment restrictions.
+// Method is NOT thread-safe in the sense that no two threads can
+// (un)poison memory in the same memory region simultaneously.
 void __asan_unpoison_memory_region(void const volatile *addr, size_t size);
 #if __cplusplus
 }
@@ -28,6 +42,6 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size);
 #define SN_ASAN_UNPOISON(addr, size) \
   __asan_unpoison_memory_region((addr), (size))
 #else
-#define SN_ASAN_POISON(addr, size)
-#define SN_ASAN_UNPOISON(addr, size)
+#define SN_ASAN_POISON(addr, size) ((void)(addr), (void)(size))
+#define SN_ASAN_UNPOISON(addr, size) ((void)(addr), (void)(size))
 #endif

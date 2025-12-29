@@ -36,11 +36,7 @@ static u8 *allocImpl(Arena *a,
   u8 *allocStart = a->end;
 
   // Unpoison the allocated range if running an ASAN build
-#ifdef SN_ASAN_ACTIVE
   SN_ASAN_UNPOISON(allocStart, sizAlloc);
-#else
-  (void)allocEnd;
-#endif
 
   *sizAllocOut = sizAlloc;
   return allocStart;
