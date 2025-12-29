@@ -23,11 +23,11 @@ jobs:
           cmake -S . -B out -GNinja --preset ci-test-linux
       - name: Build
         run: |
-          cmake --build out
+          cmake --build out --config DebugSan
       - name: Test
         run: |
           cd out
-          ctest -V -C Debug
+          ctest -V -C DebugSan
 
   test-windows:
     runs-on: windows-latest
@@ -39,8 +39,8 @@ jobs:
           cmake -S . -B out --preset ci-test-windows
       - name: Build
         run: |
-          cmake --build out --config Debug
+          cmake --build out --config DebugSan
       - name: Test
         run: |
           cd out
-          ctest -V -C Debug
+          ctest -V -C DebugSan

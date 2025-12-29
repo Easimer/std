@@ -4,7 +4,7 @@
         {
             "name": "ci-test-linux",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "DebugSan",
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
                 "SN_STD_BUILD_TESTS": "ON"
