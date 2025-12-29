@@ -40,5 +40,8 @@ int main(int numArgs, char **arrArgs) {
   printf("Failed tests: %u/%u (%.2f%%)\n", numFail, stats.numTotal,
          percentFail);
 
+  free(arena1.beg);
+  free(arena0.beg);
+
   return 0;
 }
