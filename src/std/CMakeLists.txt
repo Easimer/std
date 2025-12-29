@@ -40,6 +40,7 @@ target_include_directories(std-static
   PUBLIC
     ..
 )
+target_wall_werror_SN(std-static)
 set_property(TARGET std-static PROPERTY FOLDER "easimer/std")
 
 add_library(std-context SHARED)
@@ -51,10 +52,11 @@ target_compile_definitions(std-context
   PRIVATE SN_STD_BUILDING=1
   INTERFACE SN_STD_BUILDING=0
 )
+target_wall_werror_SN(std-context)
 set_property(TARGET std-context PROPERTY FOLDER "easimer/std")
 
 if(MSVC)
-  target_compile_options(std-context PRIVATE /W3 /WX /GS-)
+  target_compile_options(std-context PRIVATE /GS-)
   target_link_options(std-context PRIVATE /incremental:no /opt:icf /opt:ref)
 endif()
 
@@ -79,6 +81,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Utils.cpp
   )
   target_link_libraries(std-tests PRIVATE std::test_exe)
+  target_wall_werror_SN(std-tests)
   set_property(TARGET std-tests PROPERTY FOLDER "easimer/std")
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT std-tests)
   add_test(

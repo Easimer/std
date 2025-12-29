@@ -30,8 +30,8 @@ struct SnTest {
       : next(nullptr),
         suiteName(suiteName),
         name(name),
-        pfnTest(pfnTest),
-        shouldPass(shouldPass) {
+        shouldPass(shouldPass),
+        pfnTest(pfnTest) {
     if (gSnTestFirst != nullptr) {
       gSnTestPrev->next = this;
       gSnTestPrev = this;

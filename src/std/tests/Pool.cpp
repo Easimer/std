@@ -108,8 +108,8 @@ SN_TEST(Pool, clearSucceeds) {
 
   Pool<Vec2> pool(temp);
 
-  Vec2 *e0 = pool.alloc();
-  Vec2 *e1 = pool.alloc();
+  pool.alloc();
+  pool.alloc();
 
   clear(&pool);
   CHECK(pool.head == nullptr);
@@ -161,4 +161,6 @@ SN_TEST(Pool, handsBackFreedElement) {
 
   // e3 has the same pointer as one of the dealloc'd elements
   CHECK(e3 == e0 || e3 == e2);
+
+  (void)e1;
 }

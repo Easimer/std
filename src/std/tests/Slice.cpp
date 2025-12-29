@@ -40,7 +40,7 @@ SN_TEST(Slice, sliceFromArrayWorks) {
 SN_TEST_MUST_FAIL(Slice, indexingOperatorAssertsWhenOob) {
   Slice<const u32> s = sliceFrom(fiveValues);
 
-  u32 x = s[666];
+  s[666];
 }
 
 SN_TEST(Slice, indexOfSucceeds) {

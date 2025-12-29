@@ -20,6 +20,7 @@ SN_TEST(ArenaScope, cleansUp) {
     Arena::Scope temp = arena;
 
     u8 *bytes = alloc<u8>(temp, 128);
+    (void)bytes;
   };
   ArenaSaved s = getScratch(nullptr, 0);
   inner(s.arena);

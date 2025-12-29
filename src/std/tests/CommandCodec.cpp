@@ -292,8 +292,6 @@ SN_TEST(CommandCodec, decode_multiple_commands_array) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
   Arena::Scope arena1 = getScratch(&arena0.arena, 0);
 
-  const u32 NUM_COMMANDS = 16;
-
   Slice<const u8> encoded;
   {
     TestEncoder enc(arena0);
@@ -347,8 +345,6 @@ SN_TEST(CommandCodec, decode_multiple_commands_array) {
 SN_TEST(CommandCodec, decode_multiple_commands_same) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
   Arena::Scope arena1 = getScratch(&arena0.arena, 0);
-
-  const u32 NUM_COMMANDS = 16;
 
   Slice<const u8> encoded;
   {

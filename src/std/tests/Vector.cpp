@@ -102,7 +102,6 @@ SN_TEST(Vector, elemsCopiedOnGrow) {
   }
 
   appendVal<u8>(temp, &v, 0xFF);
-  u8 *buf1 = v.data;
 
   // Assert that growth has happened
   CHECK(v.capacity != cap0);

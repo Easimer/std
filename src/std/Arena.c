@@ -31,7 +31,6 @@ static u8 *allocImpl(Arena *a,
 
   size_t sizAlloc = (size_t)sizObj * numObjects;
 
-  u8 *allocEnd = a->end;
   a->end -= sizAlloc + pad;
   DCHECK(a->beg <= a->end);
   u8 *allocStart = a->end;

@@ -7,8 +7,8 @@ SN_TEST(countLeadingZeros, zero) {
 }
 
 SN_TEST(countLeadingZeros, testAll) {
-  for (u32 i = 0; i < 32; i++) {
-    u32 x = 1 << i;
+  for (i32 i = 0; i < 32; i++) {
+    i32 x = 1 << i;
     i32 numLeadingZeros = countLeadingZeros(x);
     CHECK(numLeadingZeros == 32 - i - 1);
   }
@@ -19,8 +19,8 @@ SN_TEST(countLeadingZeros64, zero) {
 }
 
 SN_TEST(countLeadingZeros64, testAll) {
-  for (u32 i = 0; i < 64; i++) {
-    u64 x = u64(1) << i;
+  for (i32 i = 0; i < 64; i++) {
+    i64 x = i64(1) << i;
     i32 numLeadingZeros = countLeadingZeros64(x);
     CHECK(numLeadingZeros == 64 - i - 1);
   }

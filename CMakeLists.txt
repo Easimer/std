@@ -27,4 +27,18 @@ set(CMAKE_CXX_FLAGS_DEBUGSAN "${CMAKE_CXX_FLAGS_DEBUG} ${SN_SANITIZER_CFLAGS}")
 set(CMAKE_SHARED_LINKER_FLAGS_DEBUGSAN "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${SN_SANITIZER_LDFLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUGSAN "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${SN_SANITIZER_LDFLAGS}")
 
+function(target_wall_werror_SN TGT)
+  if(MSVC)
+    target_compile_options(${TGT}
+      PRIVATE
+        /W3 /WX
+    )
+  else()
+    target_compile_options(${TGT}
+      PRIVATE
+        -Wall -Werror
+    )
+  endif()
+endfunction()
+
 add_subdirectory(src)

@@ -144,11 +144,11 @@ SN_TEST(MergeSort_u32, sortOne) {
   CHECK(out[0] == 1);
 }
 
-auto abs = [](i32 x) { return x > 0 ? x : -x; };
+auto t_abs = [](i32 x) { return x > 0 ? x : -x; };
 struct Comparable {
   i32 x, y;
 
-  i32 length() const { return abs(x) + abs(y); }
+  i32 length() const { return t_abs(x) + t_abs(y); }
 
   bool operator<(const Comparable &other) const {
     return length() < other.length();
