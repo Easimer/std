@@ -22,7 +22,7 @@ SN_TEST(Pool, allocSucceeds) {
 
   Pool<Vec2> pool(temp);
 
-  Vec2 *elem = alloc(&pool);
+  Vec2 *elem = pool.alloc();
   CHECK(elem != nullptr);
   CHECK(pool.head != nullptr);
 }
@@ -32,12 +32,12 @@ SN_TEST(Pool, deallocSucceeds) {
 
   Pool<Vec2> pool(temp);
 
-  Vec2 *elem = alloc(&pool);
+  Vec2 *elem = pool.alloc();
   CHECK(elem != nullptr);
   CHECK(pool.head != nullptr);
   CHECK(pool.freeListHead == nullptr);
 
-  dealloc(&pool, elem);
+  pool.dealloc(elem);
   CHECK(pool.head == nullptr);
   CHECK(pool.freeListHead != nullptr);
 }
@@ -47,11 +47,11 @@ SN_TEST(Pool, allocDeallocOutOfOrder) {
 
   Pool<Vec2> pool(temp);
 
-  Vec2 *e0 = alloc(&pool);
-  Vec2 *e1 = alloc(&pool);
+  Vec2 *e0 = pool.alloc();
+  Vec2 *e1 = pool.alloc();
 
-  dealloc(&pool, e0);
-  dealloc(&pool, e1);
+  pool.dealloc(e0);
+  pool.dealloc(e1);
 
   CHECK(pool.head == nullptr);
   CHECK(pool.freeListHead != nullptr);
@@ -62,11 +62,11 @@ SN_TEST(Pool, allocatedElemsAreIterable) {
 
   Pool<Vec2> pool(temp);
 
-  Vec2 *e0 = alloc(&pool);
-  Vec2 *e1 = alloc(&pool);
-  Vec2 *e2 = alloc(&pool);
-  Vec2 *e3 = alloc(&pool);
-  Vec2 *e4 = alloc(&pool);
+  Vec2 *e0 = pool.alloc();
+  Vec2 *e1 = pool.alloc();
+  Vec2 *e2 = pool.alloc();
+  Vec2 *e3 = pool.alloc();
+  Vec2 *e4 = pool.alloc();
 
   Array<Vec2 *, 5> arrElemsNotSeen = {e2, e4, e0, e1, e3};
   Slice<Vec2 *> elemsNotSeen = arrElemsNotSeen.asSlice();
@@ -92,7 +92,7 @@ SN_TEST(Pool, preallocateSucceeds) {
 
   Pool<Vec2> pool(temp);
 
-  Pool_preallocate(&pool, 3);
+  pool.preallocate(3);
 
   // Op does not allocate
   CHECK(pool.head == nullptr);
@@ -108,8 +108,8 @@ SN_TEST(Pool, clearSucceeds) {
 
   Pool<Vec2> pool(temp);
 
-  Vec2 *e0 = alloc(&pool);
-  Vec2 *e1 = alloc(&pool);
+  Vec2 *e0 = pool.alloc();
+  Vec2 *e1 = pool.alloc();
 
   clear(&pool);
   CHECK(pool.head == nullptr);
@@ -117,4 +117,48 @@ SN_TEST(Pool, clearSucceeds) {
   CHECK(pool.freeListHead != nullptr);
   CHECK(pool.freeListHead->next != nullptr);
   CHECK(pool.freeListHead->next->next == nullptr);
+}
+
+SN_TEST(Pool, noMemoryStomp) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  Pool<Vec2> pool(temp);
+
+  Vec2 *e0 = pool.alloc();
+  Vec2 *e1 = pool.alloc();
+  Vec2 *e2 = pool.alloc();
+
+  *e0 = {0, 1};
+  *e1 = {2, 3};
+  *e2 = {4, 5};
+
+  pool.dealloc(e2);
+  pool.dealloc(e0);
+
+  CHECK(e1->x == 2);
+  CHECK(e1->y == 3);
+
+  e0 = pool.alloc();
+  *e0 = {6, 7};
+
+  CHECK(e1->x == 2);
+  CHECK(e1->y == 3);
+}
+
+SN_TEST(Pool, handsBackFreedElement) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  Pool<Vec2> pool(temp);
+
+  Vec2 *e0 = pool.alloc();
+  Vec2 *e1 = pool.alloc();
+  Vec2 *e2 = pool.alloc();
+
+  pool.dealloc(e2);
+  pool.dealloc(e0);
+
+  Vec2* e3 = pool.alloc();
+
+  // e3 has the same pointer as one of the dealloc'd elements
+  CHECK(e3 == e0 || e3 == e2);
 }
