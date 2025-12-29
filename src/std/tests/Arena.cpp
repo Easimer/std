@@ -57,7 +57,7 @@ SN_TEST(Arena, exactSizeAllocSucceeds) {
   ptrdiff_t size = (temp.arena->end - temp.arena->beg);
   CHECK(size <= 0xFFFFFFFF);
 
-  u8 *bytes = alloc<u8>(temp, size);
+  u8 *bytes = alloc<u8>(temp, (u32)size);
   CHECK(bytes != nullptr);
 }
 
