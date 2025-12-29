@@ -29,7 +29,7 @@ struct Pool {
     Node *next;
     Node *prev;
 
-    SN_ASAN_POISANABLE_ALIGNAS T value;
+    SN_ASAN_POISONABLE_ALIGNED(T) value;
   };
 
   struct Iterator {
