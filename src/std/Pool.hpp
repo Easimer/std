@@ -73,6 +73,8 @@ void Pool_preallocate(Pool<T> *self, u32 count) {
 #endif
     nodes[i].next = next;
     nodes[i].prev = nullptr;
+    SN_ASAN_POISON(&nodes[i].value, sizeof(nodes[i].value));
+    next = &nodes[i];
   }
   self->freeListHead = &nodes[count - 1];
 }

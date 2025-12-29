@@ -86,3 +86,19 @@ SN_TEST(Pool, allocatedElemsAreIterable) {
   // Assert that we've seen all allocated elements
   CHECK(elemsNotSeen.empty());
 }
+
+SN_TEST(Pool, preallocateSucceeds) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  Pool<Vec2> pool(temp);
+
+  Pool_preallocate(&pool, 3);
+
+  // Op does not allocate
+  CHECK(pool.head == nullptr);
+
+  CHECK(pool.freeListHead != nullptr);
+  CHECK(pool.freeListHead->next != nullptr);
+  CHECK(pool.freeListHead->next->next != nullptr);
+  CHECK(pool.freeListHead->next->next->next == nullptr);
+}
