@@ -102,3 +102,19 @@ SN_TEST(Pool, preallocateSucceeds) {
   CHECK(pool.freeListHead->next->next != nullptr);
   CHECK(pool.freeListHead->next->next->next == nullptr);
 }
+
+SN_TEST(Pool, clearSucceeds) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  Pool<Vec2> pool(temp);
+
+  Vec2 *e0 = alloc(&pool);
+  Vec2 *e1 = alloc(&pool);
+
+  clear(&pool);
+  CHECK(pool.head == nullptr);
+
+  CHECK(pool.freeListHead != nullptr);
+  CHECK(pool.freeListHead->next != nullptr);
+  CHECK(pool.freeListHead->next->next == nullptr);
+}
