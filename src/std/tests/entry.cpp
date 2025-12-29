@@ -6,8 +6,6 @@
 
 #include <stdlib.h>
 
-static const u32 SIZ_ARENA = 32 * 1024;
-
 SN_TEST_MUST_FAIL(Check, assertsOnFalseCondition) {
   CHECK(false);
 }
