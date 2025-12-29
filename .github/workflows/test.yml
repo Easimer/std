@@ -60,6 +60,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup env
+        shell: pwsh
+        run: |
+          # Append the location of the clang_rt.asan DLL to the PATH so that
+          # the test exe can run
+          function Find-Dirx64 {
+            try {
+              # Github runner
+              $Dirx64 = Get-ChildItem -Path 'C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/' -Recurse -Filter "Hostx64" -ErrorAction Stop
+              return $Dirx64
+            } catch {
+              # Self-hosted runner
+              $Dirx64 = Get-ChildItem -Path 'C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/' -Recurse -Filter "Hostx64"
+              return $Dirx64
+            }
+          }
+          $Dirx64 = Find-Dirx64
+          $Dll = Get-ChildItem -Path $Dirx64.FullName -Recurse -Filter "clang_rt.asan_dbg_dynamic-x86_64.dll"
+          $DllDir = $Dll.Directory
+          Write-Output $DllDir.FullName >> $env:GITHUB_PATH
+
       - name: Configure
         run: |
           cmake -S . -B out --preset ci-test-windows
