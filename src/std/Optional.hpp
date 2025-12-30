@@ -50,12 +50,14 @@ struct OptionalStorage {
       present = false;
     }
 
-    new (&value) T(other.value);
-    present = true;
+    if (other.present) {
+      new (&value) T(other.value);
+      present = true;
+    }
     return *this;
   }
 
-  constexpr OptionalStorage<T> &operator=(OptionalStorage<T> &&other) {
+  constexpr OptionalStorage<T> &operator=(OptionalStorage<T> &&other) noexcept {
     if (present) {
       value.~T();
       present = false;
@@ -98,7 +100,7 @@ struct OptionalStorage<T, enable_if_t<is_trivially_destructible_v<T>>> {
     return *this;
   }
 
-  constexpr OptionalStorage<T> &operator=(OptionalStorage<T> &&other) {
+  constexpr OptionalStorage<T> &operator=(OptionalStorage<T> &&other) noexcept {
     present = false;
 
     if (other.present) {
@@ -123,27 +125,14 @@ struct Optional {
   constexpr Optional(T &&other) : storage(std::move(other)) {}
 
   constexpr Optional<T> &operator=(const Optional<T> &other) {
-    reset();
-    if (other.hasValue()) {
-      storage = impl::OptionalStorage<T>(other.value());
-    }
+    storage = other.storage;
 
     return *this;
   }
 
-  constexpr Optional<T> &operator=(Optional<T> &&other) {
-    if (other.hasValue()) {
-      if (hasValue()) {
-        storage.value = std::move(other.value());
-        other.reset();
-      } else {
-        T value = std::move(other.value());
-        other.reset();
-        storage = impl::OptionalStorage<T>(std::move(value));
-      }
-    } else {
-      reset();
-    }
+  constexpr Optional<T> &operator=(Optional<T> &&other) noexcept {
+    storage = std::move(other.storage);
+    other.reset();
 
     return *this;
   }
