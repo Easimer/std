@@ -27,6 +27,14 @@
                 "SN_STD_BUILD_TESTS": "ON"
             },
             "binaryDir": "${sourceDir}/out"
+        },
+        {
+            "name": "ci-test-nodejs",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "DebugSan",
+                "SN_STD_BUILD_TESTS": "ON"
+            },
+            "binaryDir": "${sourceDir}/out"
         }
     ]
 }

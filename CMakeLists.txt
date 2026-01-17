@@ -41,4 +41,10 @@ function(target_wall_werror_SN TGT)
   endif()
 endfunction()
 
+option(SN_STD_EMSCRIPTEN_PTHREAD "Build with -pthread" ON)
+if(EMSCRIPTEN AND SN_STD_EMSCRIPTEN_PTHREAD)
+  add_compile_options(-pthread)
+  add_link_options(-pthread)
+endif()
+
 add_subdirectory(src)

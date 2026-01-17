@@ -91,3 +91,20 @@ jobs:
         run: |
           cd out
           ctest -V -C DebugSan
+  test-emscripten:
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:4.0.23
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Configure
+        run: |
+          emcmake cmake -S . -B out -GNinja --preset ci-test-nodejs
+      - name: Build
+        run: |
+          cmake --build out --config DebugSan
+      - name: Test
+        run: |
+          cd out
+          node src/std/std-tests.js
