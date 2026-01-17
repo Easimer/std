@@ -20,6 +20,7 @@ target_sources(std-static
     Pool.hpp
     RadixSort.hpp
     Ranges.hpp
+    Result.hpp
     Sanitizer.h
     SegmentArray.hpp
     Slice.hpp
@@ -74,6 +75,7 @@ if(SN_STD_BUILD_TESTS)
     tests/FixedRingBuffer.cpp
     tests/Optional.cpp
     tests/Pool.cpp
+    tests/Result.cpp
     tests/SegmentArray.cpp
     tests/Slice.cpp
     tests/Sort.cpp
