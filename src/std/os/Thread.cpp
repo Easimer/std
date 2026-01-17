@@ -12,6 +12,24 @@
 #include <errno.h>
 #include <pthread.h>
 
+struct WrapperInfo {
+  pthread_cond_t flag;
+  pthread_mutex_t lock;
+  
+  ThreadEntryPoint entry;
+  void *arg;
+};
+
+static void* entryPointWrapper(void *arg) {
+  auto *pInfo = reinterpret_cast<WrapperInfo *>(arg);
+  WrapperInfo info = *pInfo;
+
+  pthread_cond_signal(&pInfo->flag);
+
+  info.entry(info.arg);
+  return 0;
+}
+
 void *Thread::handle() const noexcept {
   return _handle[0];
 }
@@ -48,8 +66,28 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
     return ThreadError::ValidationFailure;
   }
 
+  WrapperInfo wrapperInfo = {.entry = info.entryPoint, .arg = info.param};
+
+  int rc;
+  
+  rc = pthread_mutex_init(&wrapperInfo.lock, nullptr);
+  DCHECK(rc == 0);
+  rc = pthread_cond_init(&wrapperInfo.flag, nullptr);
+  DCHECK(rc == 0);
+  rc = pthread_mutex_lock(&wrapperInfo.lock);
+  DCHECK(rc == 0);
+
   pthread_t handle;
-  int rc = pthread_create(&handle, nullptr, info.entryPoint, info.param);
+  rc = pthread_create(&handle, nullptr, entryPointWrapper, &wrapperInfo);
+
+  rc = pthread_cond_wait(&wrapperInfo.flag, &wrapperInfo.lock);
+  DCHECK(rc == 0);
+  rc = pthread_mutex_unlock(&wrapperInfo.lock);
+  DCHECK(rc == 0);
+  rc = pthread_cond_destroy(&wrapperInfo.flag);
+  DCHECK(rc == 0);
+  rc = pthread_mutex_destroy(&wrapperInfo.lock);
+  DCHECK(rc == 0);
 
   Thread ret;
   ret._handle[0] = (void *)handle;

@@ -26,8 +26,6 @@ SN_TEST(Thread, createJoin) {
   CHECK(!joinRes.hasValue());
 }
 
-static u32 THING = 0;
-
 SN_TEST(Thread, params) {
   auto func = [](void *arg) {
     auto *params = reinterpret_cast<TestParams *>(arg);
