@@ -32,6 +32,7 @@ target_sources(std-static
     TrieStrKey.hpp
     Types.h
     Utils.cpp
+    Uuid.hpp
     Vector.hpp
     VectorUtils.hpp
 
@@ -81,6 +82,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Sort.cpp
     tests/Vector.cpp
     tests/Utils.cpp
+    tests/Uuid.cpp
   )
   target_link_libraries(std-tests PRIVATE std::test_exe)
   target_wall_werror_SN(std-tests)

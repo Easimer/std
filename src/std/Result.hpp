@@ -34,6 +34,8 @@ struct ResultStorage {
     }
   }
 
+  ResultStorage() = delete;
+
   ResultStorage(const T &value) : value(value), isValue(true) {}
   ResultStorage(const E &error) : error(error), isValue(false) {}
 
@@ -83,35 +85,84 @@ struct ResultStorage {
 
     return *this;
   }
+
+  void operator=(const T &) = delete;
+  void operator=(T &&) = delete;
+
+  void operator=(const E &) = delete;
+  void operator=(E &&) = delete;
 };
 }  // namespace impl
 
-template<typename T, typename E>
+template <typename T, typename E>
 struct Result {
   impl::ResultStorage<T, E> storage;
 
   ~Result() = default;
 
-  constexpr Result() : storage() {}
+  Result() = delete;
   constexpr Result(const T &other) : storage(other) {}
   constexpr Result(const E &other) : storage(other) {}
   constexpr Result(const Result<T, E> &other) : storage(other.storage) {}
-  constexpr Result(T &&other) : storage(std::move(other)) {}
-  constexpr Result(E &&other) : storage(std::move(other)) {}
-  constexpr Result(Result<T, E> &&other) : storage(std::move(other.storage)) {}
+  constexpr Result(T &&other) noexcept : storage(std::move(other)) {}
+  constexpr Result(E &&other) noexcept : storage(std::move(other)) {}
+  constexpr Result(Result<T, E> &&other) noexcept
+      : storage(std::move(other.storage)) {}
 
   constexpr Result<T, E> &operator=(const Result<T, E> &other) {
     storage = other.storage;
     return *this;
   }
 
-  constexpr Result<T, E> &operator=(Result<T, E> &&other) {
+  constexpr Result<T, E> &operator=(Result<T, E> &&other) noexcept {
     storage = std::move(other.storage);
     return *this;
   }
 
-  constexpr bool hasValue() const noexcept { return storage.isValue; }
-  constexpr bool hasError() const noexcept { return !storage.isValue; }
-  constexpr explicit operator bool() const noexcept { return hasValue(); }
+  void operator=(const T &) = delete;
+  void operator=(T &&) = delete;
+
+  void operator=(const E &) = delete;
+  void operator=(E &&) = delete;
+
+  constexpr bool isOk() const noexcept { return storage.isValue; }
+  constexpr bool isErr() const noexcept { return !storage.isValue; }
+  constexpr explicit operator bool() const noexcept { return isOk(); }
+
+  T *operator->() noexcept {
+    DCHECK(isOk());
+    return &storage.value;
+  }
+
+  T &unwrap() noexcept {
+    DCHECK(isOk());
+    return storage.value;
+  }
+
+  T unwrapOrDefault() noexcept {
+    if (isOk()) {
+      return unwrap();
+    }
+
+    return T();
+  }
+
+  E &unwrapErr() noexcept {
+    DCHECK(isErr());
+    return storage.error;
+  }
 };
 
+template <typename T, typename E>
+Result<T, E> flatten(Result<Result<T, E>, E> res) {
+  if (res.isErr()) {
+    return res.unwrapErr();
+  }
+
+  Result<T, E> &inner = res.unwrap();
+  if (inner.isErr()) {
+    return inner.unwrapErr();
+  }
+
+  return inner.unwrap();
+}
