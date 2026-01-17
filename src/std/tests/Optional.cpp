@@ -1,7 +1,6 @@
 #include <std/Check.h>
 #include <std/Optional.hpp>
 #include <std/Testing.hpp>
-#include <std/log/log.h>
 
 /**
  * A non-trivial type that increments a counter at constructor and decrements
@@ -12,11 +11,9 @@ struct NonTrivDtor {
   i32 value;
 
   explicit NonTrivDtor(i32 v) : value(v) {
-    log_info("ctor %d", value);
     NonTrivDtor::counter += value;
   }
   ~NonTrivDtor() {
-    log_info("dtor %d", value);
     NonTrivDtor::counter -= value;
   }
 
