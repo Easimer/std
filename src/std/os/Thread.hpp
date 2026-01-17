@@ -8,10 +8,11 @@
 
 #pragma once
 
+#include "std/ChainedStruct.hpp"
+#include "std/Optional.hpp"
+#include "std/Result.hpp"
 #include "std/Types.h"
 #include "std/os/OsInfo.h"
-#include "std/ChainedStruct.hpp"
-#include "std/Result.hpp"
 
 enum class ThreadError {
   InsufficientResources,
@@ -20,7 +21,7 @@ enum class ThreadError {
   AlreadyJoined,
 };
 
-using ThreadEntryPoint = void *(*)(void *arg);
+using ThreadEntryPoint = void (*)(void *arg);
 
 struct ThreadCreateInfo {
   ChainedStruct *nextInChain = nullptr;
@@ -31,7 +32,7 @@ struct ThreadCreateInfo {
 
 struct Thread {
   void *handle() const noexcept;
-  Result<void *, ThreadError> join();
+  Optional<ThreadError> join();
 
   static Result<Thread, ThreadError> create(const ThreadCreateInfo &info);
 

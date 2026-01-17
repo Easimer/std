@@ -14,10 +14,7 @@ struct TestParams {
 };
 
 SN_TEST(Thread, createJoin) {
-  auto func = [](void *arg) -> void * {
-    (void)arg;
-    return nullptr;
-  };
+  auto func = [](void *arg) { (void)arg; };
 
   Result<Thread, ThreadError> res = Thread::create({
       .entryPoint = func,
@@ -25,31 +22,16 @@ SN_TEST(Thread, createJoin) {
   });
   CHECK(res.isOk());
 
-  Result<void *, ThreadError> joinRes = res->join();
-  CHECK(joinRes.isOk());
+  Optional<ThreadError> joinRes = res->join();
+  CHECK(!joinRes.hasValue());
 }
 
 static u32 THING = 0;
 
-SN_TEST(Thread, joinResult) {
-  auto func = [](void *arg) -> void * { return &THING; };
-
-  Result<Thread, ThreadError> res = Thread::create({
-      .entryPoint = func,
-      .param = nullptr,
-  });
-  CHECK(res.isOk());
-
-  Result<void *, ThreadError> joinRes = res->join();
-  CHECK(joinRes.isOk());
-  CHECK(joinRes.unwrap() == &THING);
-}
-
 SN_TEST(Thread, params) {
-  auto func = [](void *arg) -> void * {
+  auto func = [](void *arg) {
     auto *params = reinterpret_cast<TestParams *>(arg);
     params->x = 1;
-    return nullptr;
   };
 
   TestParams params = {.x = 0};
@@ -59,8 +41,8 @@ SN_TEST(Thread, params) {
   });
   CHECK(res.isOk());
 
-  Result<void *, ThreadError> joinRes = res->join();
-  CHECK(joinRes.isOk());
+  Optional<ThreadError> joinRes = res->join();
+  CHECK(!joinRes.hasValue());
 
   CHECK(params.x == 1);
 }
@@ -75,17 +57,17 @@ SN_TEST(Thread, nullFunc) {
 }
 
 SN_TEST(Thread, doubleJoin) {
-  auto func = [](void *arg) -> void * { return nullptr; };
+  auto func = [](void *arg) {};
   Result<Thread, ThreadError> res = Thread::create({
       .entryPoint = func,
       .param = nullptr,
   });
   CHECK(res.isOk());
 
-  Result<void *, ThreadError> joinRes = res->join();
-  CHECK(joinRes.isOk());
+  Optional<ThreadError> joinRes = res->join();
+  CHECK(!joinRes.hasValue());
 
-  Result<void *, ThreadError> join2Res = res->join();
-  CHECK(join2Res.isErr());
-  CHECK(join2Res.unwrapErr() == ThreadError::AlreadyJoined);
+  Optional<ThreadError> join2Res = res->join();
+  CHECK(join2Res.hasValue());
+  CHECK(join2Res.value() == ThreadError::AlreadyJoined);
 }
