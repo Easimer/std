@@ -10,6 +10,7 @@
 
 #include <type_traits>
 #include <utility>
+#include <new>
 
 #include "std/Check.h"
 #include "std/Slice.hpp"
