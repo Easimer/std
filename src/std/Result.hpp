@@ -41,9 +41,9 @@ struct ResultStorage {
 
   ResultStorage(const ResultStorage<T, E> &other) : isValue(other.isValue) {
     if (other.isValue) {
-      value = other.value;
+      new (&value) T(other.value);
     } else {
-      error = other.error;
+      new (&error) E(other.error);
     }
   }
 
