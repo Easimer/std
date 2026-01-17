@@ -415,3 +415,60 @@ SN_TEST(Slice, copyU32) {
     CHECK(src[i] == dst[i]);
   }
 }
+
+SN_TEST(Slice, equals) {
+  char bufAbcd[4] = {'A', 'B', 'C', 'D'};
+  char bufAbcde[5] = {'A', 'B', 'C', 'D', 'E'};
+  char bufDcba[4] = {'D', 'C', 'B', 'A'};
+
+  Slice<char> abcd = {bufAbcd, 4};
+  Slice<char> abcde = {bufAbcde, 5};
+  Slice<char> abcde_4 = {bufAbcde, 4};
+  Slice<char> dcba = {bufDcba, 4};
+
+  Slice<char> empty = {nullptr, 0};
+  CHECK(empty == empty);
+  CHECK(empty != abcd);
+  CHECK(abcd != empty);
+  CHECK(empty != abcde);
+  CHECK(empty != abcde_4);
+  CHECK(empty != dcba);
+
+  CHECK(abcd == abcd);
+  CHECK(abcd == abcde_4);
+  CHECK(abcde_4 == abcd);
+
+  CHECK(abcde == abcde);
+  CHECK(abcde != abcde_4);
+  CHECK(abcde_4 != abcde);
+
+  CHECK(abcd != abcde);
+  CHECK(abcd != dcba);
+
+  CHECK(empty.asConst() == empty.asConst());
+  CHECK(abcd.asConst() != empty.asConst());
+}
+
+SN_TEST(Slice, byteLength) {
+  Slice<const char> text = {"asd", 3};
+  CHECK(text.length == 3);
+  CHECK(text.byteLength() == 3);
+
+  u64 qwords[3] = {5, 6, 7};
+  Slice<u64> qw = {qwords, 3};
+  CHECK(qw.length == 3);
+  CHECK(qw.byteLength() == 3 * 8);
+}
+
+SN_TEST(Slice, cast) {
+  u64 qwords[3] = {5, 6, 7};
+  Slice<u64> qw = {qwords, 3};
+
+  Slice<u8> bytesOfQw = qw.cast<u8>();
+  CHECK(bytesOfQw.length == 3 * 8);
+
+  u8 bufBytes[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+  Slice<u8> bytes = {bufBytes, 4};
+  Slice<const u32> dwordsOfBytes = bytes.cast<const u32>();
+  CHECK(dwordsOfBytes.length == 1);
+}
