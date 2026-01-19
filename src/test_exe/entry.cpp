@@ -24,9 +24,40 @@ static Arena makeArena() {
 
 SN_TEST_MAIN;
 
+static void onTestErrorActions(const char *expr,
+                               const char *file,
+                               unsigned line) {
+  printf("::error file=%s,line=%u::%s\n", file, line, expr);
+}
+
+static void onTestBeforeActions(const char *suiteName, const char *testName) {
+  printf("::group::%s - %s\n", suiteName, testName);
+}
+
+static void onTestAfterActions(const char *suiteName,
+                               const char *testName,
+                               bool wasSuccessful) {
+  (void)suiteName;
+  (void)testName;
+  if (wasSuccessful) {
+    printf("::notice::OK!\n");
+  }
+  printf("::endgroup::\n");
+}
+
+static const SnTestEventHandlers actionsEventHandlers = {
+    .error = onTestErrorActions,
+    .beforeTest = onTestBeforeActions,
+    .afterTest = onTestAfterActions,
+};
+
 int main(int numArgs, char **arrArgs) {
   Arena arena0 = makeArena();
   Arena arena1 = makeArena();
+
+  if (getenv("GITHUB_ACTIONS")) {
+    snTestSetHandlers(&actionsEventHandlers);
+  }
 
   SnTestStats stats;
   testMain(&arena0, &arena1, &stats);

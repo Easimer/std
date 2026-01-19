@@ -75,14 +75,47 @@ struct SnTestStats {
   SN_TEST_DEFINE_DESC(SuiteName, TestName, false); \
   static void test_func_##SuiteName##_##TestName(void)
 
+using SnTestErrorHandler = void (*)(const char *expr,
+                                    const char *file,
+                                    unsigned line);
+using SnTestBeforeTestHandler = void (*)(const char *suiteName,
+                                         const char *testName);
+using SnTestAfterTestHandler = void (*)(const char *suiteName,
+                                        const char *testName,
+                                        bool wasSuccessful);
+
+struct SnTestEventHandlers {
+  /**
+   * \brief Custom test error handler. The default handler simply prints the
+   * error using log_fatal; this can be used to log errors in a special format
+   * or write them to a specific file instead.
+   */
+  SnTestErrorHandler error = nullptr;
+
+  SnTestBeforeTestHandler beforeTest = nullptr;
+  SnTestAfterTestHandler afterTest = nullptr;
+};
+
+void snTestSetHandlers(const SnTestEventHandlers *handlers);
+
 #define SN_TEST_MAIN                                                           \
   SnTest *gSnTestFirst = nullptr;                                              \
   SnTest *gSnTestPrev = nullptr;                                               \
   static std::jmp_buf gJmpBuf;                                                 \
+  static const SnTestEventHandlers *gSnTestHandlers = nullptr;                 \
   extern "C" void checkFail(const char *pExpr, const char *pFile,              \
                             unsigned line) {                                   \
-    log_fatal("\n  Assertion failed: %s\n    at %s:%u\n", pExpr, pFile, line); \
+    if (gSnTestHandlers && gSnTestHandlers->error) {                           \
+      gSnTestHandlers->error(pExpr, pFile, line);                              \
+    } else {                                                                   \
+      log_fatal("\n  Assertion failed: %s\n    at %s:%u\n", pExpr, pFile,      \
+                line);                                                         \
+    }                                                                          \
     std::longjmp(gJmpBuf, 1);                                                  \
+  }                                                                            \
+                                                                               \
+  void snTestSetHandlers(const SnTestEventHandlers *handlers) {                \
+    gSnTestHandlers = handlers;                                                \
   }                                                                            \
                                                                                \
   extern "C" void handleOOM(Arena *arena) {                                    \
@@ -99,7 +132,12 @@ struct SnTestStats {
     u32 numTotal = 0;                                                          \
                                                                                \
     while (currentTest != nullptr) {                                           \
-      printf("[%s] %s...", currentTest->suiteName, currentTest->name);         \
+      if (gSnTestHandlers && gSnTestHandlers->beforeTest) {                    \
+        gSnTestHandlers->beforeTest(currentTest->suiteName,                    \
+                                    currentTest->name);                        \
+      } else {                                                                 \
+        printf("[%s] %s...", currentTest->suiteName, currentTest->name);       \
+      }                                                                        \
       didPass = false;                                                         \
                                                                                \
       if (!setjmp(gJmpBuf)) {                                                  \
@@ -110,8 +148,18 @@ struct SnTestStats {
         didPass = true;                                                        \
       }                                                                        \
       if (currentTest->shouldPass == didPass) {                                \
-        printf("OK\n");                                                        \
+        if (gSnTestHandlers && gSnTestHandlers->beforeTest) {                  \
+          gSnTestHandlers->afterTest(currentTest->suiteName,                   \
+                                     currentTest->name, true);                 \
+        } else {                                                               \
+          printf("OK\n");                                                      \
+        }                                                                      \
         numSuccess += 1;                                                       \
+      } else {                                                                 \
+        if (gSnTestHandlers && gSnTestHandlers->afterTest) {                   \
+          gSnTestHandlers->afterTest(currentTest->suiteName,                   \
+                                     currentTest->name, false);                \
+        }                                                                      \
       }                                                                        \
       numTotal += 1;                                                           \
       currentTest = currentTest->next;                                         \
