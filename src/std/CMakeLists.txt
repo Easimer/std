@@ -161,6 +161,7 @@ if(SN_STD_BUILD_TESTS)
     tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
     tests/Optional.cpp
+    tests/Path.cpp
     tests/Pool.cpp
     tests/Result.cpp
     tests/SegmentArray.cpp
