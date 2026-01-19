@@ -27,8 +27,8 @@ Slice<const char> dirname(Slice<const char> path) {
     return DOT_STR;
   }
 
-  u32 idxFwd;
-  u32 idxBack;
+  u32 idxFwd = 0;
+  u32 idxBack = 0;
   bool hasFwd = lastIndexOf<const char>(path, '/', &idxFwd);
   bool hasBack = lastIndexOf<const char>(path, '\\', &idxBack);
 
@@ -43,8 +43,6 @@ Slice<const char> dirname(Slice<const char> path) {
     idxSlash = idxFwd;
   } else if (hasBack) {
     idxSlash = idxBack;
-  } else {
-    NOTREACHED();
   }
 
   if (idxSlash == 0) {
@@ -64,7 +62,9 @@ Slice<const char> basename(Slice<const char> path) {
   if (path.length == 0) {
     return {nullptr, 0};
   }
-  u32 idxFwd, idxBack;
+
+  u32 idxFwd = 0;
+  u32 idxBack = 0;
   bool hasFwd = lastIndexOf<const char>(path, '/', &idxFwd);
   bool hasBack = lastIndexOf<const char>(path, '\\', &idxBack);
 
@@ -79,8 +79,6 @@ Slice<const char> basename(Slice<const char> path) {
     idxSlash = idxFwd;
   } else if (hasBack) {
     idxSlash = idxBack;
-  } else {
-    NOTREACHED();
   }
 
   return subarray(path, idxSlash + 1);
