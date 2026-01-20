@@ -129,6 +129,7 @@ add_library(std-os STATIC)
 target_sources(std-os
   PRIVATE
     os/Thread.cpp os/Thread.hpp
+    os/Sync.c os/Sync.h
 )
 target_link_libraries(std-os PUBLIC std-static)
 target_wall_werror_SN(std-os)
