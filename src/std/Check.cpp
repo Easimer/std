@@ -19,8 +19,6 @@ static void checkFailDefaultImpl(const char *expr,
 
 #if SN_MSVC
 
-// If the LINK can't find checkFail, use checkFailDefault
-#pragma comment(linker, "/alternatename:checkFail=checkFailDefault")
 extern "C" void checkFailDefault(const char *expr,
                                  const char *file,
                                  unsigned line) {

@@ -121,6 +121,10 @@ target_compile_definitions(std-static
     SN_STD_SYSTEM=${SN_STD_SYSTEM}
 )
 
+if(MSVC)
+  target_link_options(std-static PUBLIC "/alternatename:checkFail=checkFailDefault")
+endif()
+
 add_library(std-os STATIC)
 target_sources(std-os
   PRIVATE
