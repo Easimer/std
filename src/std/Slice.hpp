@@ -29,6 +29,18 @@ struct Span {
   T start;
   /** \brief The number of elements */
   T count;
+
+  bool empty() const { return count == 0; }
+
+  bool contains(Span<T> inner) const {
+    if (empty() || inner.empty() || count < inner.count) {
+      return false;
+    }
+
+    Span<u32> diff = {start, count - inner.count};
+    return diff.start <= inner.start &&
+           inner.start <= (diff.start + diff.count);
+  }
 };
 
 /**

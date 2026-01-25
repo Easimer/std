@@ -472,3 +472,71 @@ SN_TEST(Slice, cast) {
   Slice<const u32> dwordsOfBytes = bytes.cast<const u32>();
   CHECK(dwordsOfBytes.length == 1);
 }
+
+SN_TEST(Span, empty) {
+  Span<u32> zero = {0, 0};
+  CHECK(zero.empty());
+
+  Span<u32> zero2 = {2, 0};
+  CHECK(zero2.empty());
+}
+
+SN_TEST(Span, containsEmptyInNonEmpty) {
+  Span<u32> outer = {0, 4}; // 0,1,2,3,
+  Span<u32> inner = {0, 0}; // ,
+  CHECK(outer.contains(inner) == false);
+}
+
+SN_TEST(Span, containsNonEmptyInEmpty) {
+  Span<u32> outer = {0, 0}; // ,
+  Span<u32> inner = {0, 4}; // 0,1,2,3,
+  CHECK(outer.contains(inner) == false);
+}
+
+SN_TEST(Span, containsLarger) {
+  Span<u32> outer = {1, 2}; // 1,2,
+  Span<u32> inner = {0, 4}; // 0,1,2,3,
+  CHECK(outer.contains(inner) == false);
+}
+
+SN_TEST(Span, containsLeft) {
+  Span<u32> outer = {2, 2};  // 2,3,
+  Span<u32> inner = {0, 1};  // 0,
+  CHECK(outer.contains(inner) == false);
+}
+
+SN_TEST(Span, containsLeftOverlap) {
+  Span<u32> outer = {2, 2};  // 2,3,
+  Span<u32> inner = {1, 2};  // 1,2,
+  CHECK(outer.contains(inner) == false);
+}
+
+SN_TEST(Span, containsLeftEdge) {
+  Span<u32> outer = {2, 2};  // 2,3,
+  Span<u32> inner = {2, 1};  // 2,
+  CHECK(outer.contains(inner) == true);
+}
+
+SN_TEST(Span, containsInside) {
+  Span<u32> outer = {2, 4};  // 2,3,4,5
+  Span<u32> inner = {3, 2};  // 3,4,
+  CHECK(outer.contains(inner) == true);
+}
+
+SN_TEST(Span, containsRightEdge) {
+  Span<u32> outer = {0, 4};  // 0,1,2,3,
+  Span<u32> inner = {3, 1};  // 3,
+  CHECK(outer.contains(inner) == true);
+}
+
+SN_TEST(Span, containsRightOverlap) {
+  Span<u32> outer = {0, 4};  // 0,1,2,3,
+  Span<u32> inner = {3, 2};  // 3,4,
+  CHECK(outer.contains(inner) == false);
+}
+
+SN_TEST(Span, containsRight) {
+  Span<u32> outer = {0, 4};  // 0,1,2,3,
+  Span<u32> inner = {4, 1};  // 4,
+  CHECK(outer.contains(inner) == false);
+}
