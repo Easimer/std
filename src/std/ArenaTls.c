@@ -123,12 +123,6 @@ SN_STD_API void setAllocatorsForThread(Arena *arena0, Arena* arena1) {
   S->arena1 = arena1;
 }
 
-#if defined(__GNUC__) || defined(__clang__)
-#define SN_STD_WEAK_SYMBOL __attribute__((weak))
-#else
-#define SN_STD_WEAK_SYMBOL
-#endif
-
 void SN_STD_WEAK_SYMBOL checkFail(const char *pExpr,
                                   const char *pFile,
                                   unsigned line) {

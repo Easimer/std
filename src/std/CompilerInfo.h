@@ -20,6 +20,7 @@
 #define SN_MSVC 0
 
 #define SN_FORCEINLINE __attribute__((always_inline)) inline
+#define SN_STD_WEAK_SYMBOL __attribute__((weak))
 
 #elif defined(__GNUC__) || defined(__GNUG__)
 #define SN_COMPILER SN_COMPILER_GCC
@@ -28,6 +29,7 @@
 #define SN_MSVC 0
 
 #define SN_FORCEINLINE __attribute__((always_inline)) inline
+#define SN_STD_WEAK_SYMBOL __attribute__((weak))
 
 #elif defined(_MSC_VER)
 #define SN_COMPILER SN_COMPILER_MSVC
@@ -36,6 +38,7 @@
 #define SN_MSVC 1
 
 #define SN_FORCEINLINE __forceinline
+#define SN_STD_WEAK_SYMBOL
 
 #else
 #define SN_COMPILER SN_COMPILER_UNKNOWN
@@ -44,4 +47,5 @@
 #define SN_MSVC 0
 
 #define SN_FORCEINLINE inline
+#define SN_STD_WEAK_SYMBOL
 #endif
