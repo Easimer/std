@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: debian:trixie-20251208
+    strategy:
+      matrix:
+        unity: ["ON", "OFF"]
     steps:
       - name: Install dependencies
         run: |
@@ -20,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Configure
         run: |
-          cmake -S . -B out -GNinja --preset ci-test-clang
+          cmake -S . -B out -GNinja --preset ci-test-clang -DCMAKE_UNITY_BUILD=${{ matrix.unity }}
       - name: Build
         run: |
           cmake --build out --config DebugSan
@@ -33,6 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: debian:trixie-20251208
+    strategy:
+      matrix:
+        unity: ["ON", "OFF"]
     steps:
       - name: Install dependencies
         run: |
@@ -46,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Configure
         run: |
-          cmake -S . -B out -GNinja --preset ci-test-gcc
+          cmake -S . -B out -GNinja --preset ci-test-gcc -DCMAKE_UNITY_BUILD=${{ matrix.unity }}
       - name: Build
         run: |
           cmake --build out --config DebugSan
@@ -57,6 +63,9 @@ jobs:
 
   test-windows:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        unity: ["ON", "OFF"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,7 +92,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -S . -B out --preset ci-test-windows
+          cmake -S . -B out --preset ci-test-windows -DCMAKE_UNITY_BUILD=${{ matrix.unity }}
       - name: Build
         run: |
           cmake --build out --config DebugSan
@@ -95,12 +104,15 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: emscripten/emsdk:4.0.23
+    strategy:
+      matrix:
+        unity: ["ON", "OFF"]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Configure
         run: |
-          emcmake cmake -S . -B out --preset ci-test-nodejs
+          emcmake cmake -S . -B out --preset ci-test-nodejs -DCMAKE_UNITY_BUILD=${{ matrix.unity }}
       - name: Build
         run: |
           cmake --build out --config DebugSan
