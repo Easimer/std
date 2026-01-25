@@ -28,9 +28,9 @@ extern "C" void checkFailDefault(const char *expr,
 }
 
 #else  /* !SN_MSVC */
-extern "C" SN_WEAK_FUNCTION void checkFail(const char *expr,
-                                           const char *file,
-                                           unsigned line) {
+extern "C" SN_STD_WEAK_SYMBOL void checkFail(const char *expr,
+                                             const char *file,
+                                             unsigned line) {
   checkFailDefaultImpl(expr, file, line);
 }
 #endif /* !SN_MSVC */
