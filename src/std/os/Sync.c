@@ -6,9 +6,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#include <std/Arena.h>
 #include <std/Check.h>
+#include <std/Types.h>
 #include <std/os/OsInfo.h>
 #include <std/os/Sync.h>
+
+#include <stddef.h>
 
 #if SN_STD_SYSTEM_HAS_PTHREADS
 #include <pthread.h>

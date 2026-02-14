@@ -8,9 +8,7 @@
 
 #pragma once
 
-#include "./CompilerInfo.h"
 #include "./Modules.h"
-#include "./Sanitizer.h"
 #include "./Types.h"
 
 #if SN_STD_BUILDING
@@ -69,8 +67,8 @@ struct Arena::Scope {
 extern "C" {
 #endif
 
-u8 *alloc(Arena *a, u32 objsize, u32 align, u32 count);
-u8 *allocNZ(Arena *a, u32 objsize, u32 align, u32 count);
+u8 *alloc(Arena *a, u32 sizObj, u32 sizAlign, u32 numObjects);
+u8 *allocNZ(Arena *a, u32 sizObj, u32 sizAlign, u32 numObjects);
 /**
  * Finds a scratch arena that doesn't conflict with the provided arenas, saves
  * its state and returns it to the caller.

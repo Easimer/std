@@ -8,9 +8,9 @@
 
 #pragma once
 
+#include <new>
 #include <type_traits>
 #include <utility>
-#include <new>
 
 #include "std/Check.h"
 #include "std/Slice.hpp"
@@ -45,7 +45,7 @@ struct OptionalStorage {
   }
   OptionalStorage(T &&other) : value(std::move(other)), present(true) {}
 
-  constexpr OptionalStorage<T> &operator=(const OptionalStorage<T> &other) {
+  constexpr OptionalStorage &operator=(const OptionalStorage<T> &other) {
     if (present) {
       value.~T();
       present = false;
@@ -58,7 +58,7 @@ struct OptionalStorage {
     return *this;
   }
 
-  constexpr OptionalStorage<T> &operator=(OptionalStorage<T> &&other) noexcept {
+  constexpr OptionalStorage &operator=(OptionalStorage<T> &&other) noexcept {
     if (present) {
       value.~T();
       present = false;
@@ -92,7 +92,7 @@ struct OptionalStorage<T, enable_if_t<is_trivially_destructible_v<T>>> {
   constexpr OptionalStorage(T &&other)
       : value(std::move(other)), present(true) {}
 
-  constexpr OptionalStorage<T> &operator=(const OptionalStorage<T> &other) {
+  constexpr OptionalStorage &operator=(const OptionalStorage<T> &other) {
     if (other.present) {
       value = other.value;
     }
@@ -101,7 +101,7 @@ struct OptionalStorage<T, enable_if_t<is_trivially_destructible_v<T>>> {
     return *this;
   }
 
-  constexpr OptionalStorage<T> &operator=(OptionalStorage<T> &&other) noexcept {
+  constexpr OptionalStorage &operator=(OptionalStorage<T> &&other) noexcept {
     present = false;
 
     if (other.present) {

@@ -8,6 +8,7 @@
 
 #include "./Arena.h"
 #include "./Check.h"
+#include "./CompilerInfo.h"
 #include "./Types.h"
 
 typedef struct {
@@ -15,7 +16,7 @@ typedef struct {
   Arena *arena1;
 } ThreadContext;
 
-static ThreadContext* getCurrentThreadContext();
+static ThreadContext *getCurrentThreadContext();
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -84,12 +85,12 @@ static void initKey() {
   CHECK(rc == 0);
 }
 
-static ThreadContext* getCurrentThreadContext() {
+static ThreadContext *getCurrentThreadContext() {
   pthread_once(&g_once, initKey);
 
-  ThreadContext* S = (ThreadContext*)pthread_getspecific(g_key);
+  ThreadContext *S = (ThreadContext *)pthread_getspecific(g_key);
   if (S == NULL) {
-    S = (ThreadContext*)malloc(sizeof(ThreadContext));
+    S = (ThreadContext *)malloc(sizeof(ThreadContext));
     CHECK(S != NULL);
     S->arena0 = S->arena1 = NULL;
     int rc = pthread_setspecific(g_key, S);
@@ -101,24 +102,24 @@ static ThreadContext* getCurrentThreadContext() {
 #endif
 
 SN_STD_API ArenaTemp getScratch(Arena **pConflicts, u32 numConflicts) {
-  ThreadContext* S = getCurrentThreadContext();
+  ThreadContext *S = getCurrentThreadContext();
 
-  if(numConflicts == 0) {
+  if (numConflicts == 0) {
     return saveArena(S->arena0);
   }
 
   DCHECK(numConflicts == 1);
 
-  Arena* conflict = pConflicts[0];
-  if(S->arena0 == conflict) {
+  Arena *conflict = pConflicts[0];
+  if (S->arena0 == conflict) {
     return saveArena(S->arena1);
-  } else {
-    return saveArena(S->arena0);
   }
+
+  return saveArena(S->arena0);
 }
 
-SN_STD_API void setAllocatorsForThread(Arena *arena0, Arena* arena1) {
-  ThreadContext* S = getCurrentThreadContext();
+SN_STD_API void setAllocatorsForThread(Arena *arena0, Arena *arena1) {
+  ThreadContext *S = getCurrentThreadContext();
   S->arena0 = arena0;
   S->arena1 = arena1;
 }

@@ -8,6 +8,7 @@
 
 #include "std/Arena.h"
 #include "std/Check.h"
+#include "std/Sanitizer.h"
 #include "std/Types.h"
 
 #include <string.h>

@@ -8,7 +8,9 @@
 
 #pragma once
 
+#include "std/Check.h"
 #include "std/Slice.hpp"
+#include "std/Types.h"
 
 #include <initializer_list>
 

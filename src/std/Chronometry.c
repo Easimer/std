@@ -7,6 +7,7 @@
  */
 
 #include "std/Chronometry.h"
+#include "std/Types.h"
 #include <stdlib.h>
 #include <string.h>
 
