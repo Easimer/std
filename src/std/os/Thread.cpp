@@ -9,18 +9,21 @@
 #include <std/os/Thread.hpp>
 
 #if SN_STD_SYSTEM_HAS_PTHREADS
+
 #include <errno.h>
 #include <pthread.h>
+#include <sched.h>
+#include <unistd.h>
 
 struct WrapperInfo {
   pthread_cond_t flag;
   pthread_mutex_t lock;
-  
+
   ThreadEntryPoint entry;
   void *arg;
 };
 
-static void* entryPointWrapper(void *arg) {
+static void *entryPointWrapper(void *arg) {
   auto *pInfo = reinterpret_cast<WrapperInfo *>(arg);
   WrapperInfo info = *pInfo;
 
@@ -69,7 +72,7 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
   WrapperInfo wrapperInfo = {.entry = info.entryPoint, .arg = info.param};
 
   int rc;
-  
+
   rc = pthread_mutex_init(&wrapperInfo.lock, nullptr);
   DCHECK(rc == 0);
   rc = pthread_cond_init(&wrapperInfo.flag, nullptr);
@@ -104,6 +107,13 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
 
   CHECK(!"Unexpected error");
   return ThreadError::ValidationFailure;
+}
+
+u32 Thread::hardwareConcurrency() {
+  cpu_set_t s;
+  int rc = sched_getaffinity(getpid(), sizeof(s), &s);
+  CHECK(rc == 0);
+  return (u32)CPU_COUNT_S(sizeof(s), &s);
 }
 
 #elif SN_STD_SYSTEM_WINDOWS
@@ -183,6 +193,10 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
   ret._handle[0] = (void *)handle;
   ret._handle[1] = nullptr;
   return ret;
+}
+
+u32 Thread::hardwareConcurrency() {
+  return (u32)GetActiveProcessorCount(ALL_PROCESSOR_GROUPS);
 }
 
 #endif

@@ -35,6 +35,7 @@ struct Thread {
   Optional<ThreadError> join();
 
   static Result<Thread, ThreadError> create(const ThreadCreateInfo &info);
+  static u32 hardwareConcurrency();
 
  private:
   void *_handle[2];
