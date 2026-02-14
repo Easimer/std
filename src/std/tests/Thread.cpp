@@ -10,6 +10,8 @@
 #include <std/Testing.hpp>
 #include <std/os/Thread.hpp>
 
+#include <thread>
+
 struct TestParams {
   u32 x;
 };
@@ -69,6 +71,12 @@ SN_TEST(Thread, doubleJoin) {
   Optional<ThreadError> join2Res = res->join();
   CHECK(join2Res.hasValue());
   CHECK(join2Res.value() == ThreadError::AlreadyJoined);
+}
+
+SN_TEST(Thread, hardwareConcurrency) {
+  u32 expected = std::thread::hardware_concurrency();
+  u32 actual = Thread::hardwareConcurrency();
+  CHECK(actual == expected);
 }
 
 SN_TEST(Barrier, createDestroy) {
