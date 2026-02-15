@@ -93,6 +93,7 @@ target_sources(std-static
     Result.hpp
     Sanitizer.h
     SegmentArray.hpp
+    SignalTree.hpp
     Slice.hpp
     SliceStlString.hpp
     SliceStlVector.hpp
@@ -105,6 +106,7 @@ target_sources(std-static
     Uuid.hpp
     Vector.hpp
     VectorUtils.hpp
+    WorkerPool.cpp WorkerPool.hpp
 
     log/log.c log/log.h
 )

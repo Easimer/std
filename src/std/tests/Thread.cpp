@@ -8,6 +8,7 @@
 
 #include <std/os/Sync.h>
 #include <std/Testing.hpp>
+#include <std/WorkerPool.hpp>
 #include <std/os/Thread.hpp>
 
 #include <thread>
@@ -123,4 +124,60 @@ SN_TEST(Barrier, simple) {
   }
 
   barrierDestroy(barrier);
+}
+
+SN_TEST(WorkerPool, one_thread) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+  WorkerPool *wp = createWorkerPool(temp, 1);
+
+  auto func = [](const Dispatch *D) {
+    u32 &buf2 = D->parametersAs<u32>();
+    u32 *buf = &buf2;
+    buf[D->threadIndex.x] = D->threadIndex.x;
+  };
+
+  WorkContract *wc = wp->createWorkContract(temp, func);
+
+  u32 buffer[32];
+  for (u32 i = 0; i < 32; i++) {
+    buffer[i] = 0xFFFFFFFF;
+  }
+
+  wp->dispatch(wc, buffer, 32);
+
+  wp->release(wc);
+
+  for (u32 i = 0; i < 32; i++) {
+    CHECK(buffer[i] == i);
+  }
+
+  wp->shutdown();
+}
+
+SN_TEST(WorkerPool, multi_thread) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+  WorkerPool *wp = createWorkerPool(temp, 8);
+
+  auto func = [](const Dispatch *D) {
+    u32 &buf2 = D->parametersAs<u32>();
+    u32 *buf = &buf2;
+    buf[D->threadIndex.x] = D->threadIndex.x;
+  };
+
+  WorkContract *wc = wp->createWorkContract(temp, func);
+
+  u32 buffer[32];
+  for (u32 i = 0; i < 32; i++) {
+    buffer[i] = 0xFFFFFFFF;
+  }
+
+  wp->dispatch(wc, buffer, 32);
+
+  wp->release(wc);
+
+  for (u32 i = 0; i < 32; i++) {
+    CHECK(buffer[i] == i);
+  }
+
+  wp->shutdown();
 }

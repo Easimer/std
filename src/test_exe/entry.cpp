@@ -14,7 +14,7 @@
 
 #include <stdlib.h>
 
-static const u32 SIZ_ARENA = 32 * 1024;
+static const u32 SIZ_ARENA = 256 * 1024;
 
 static Arena makeArena() {
   u8 *base = reinterpret_cast<u8 *>(malloc(SIZ_ARENA));
