@@ -12,7 +12,6 @@
 
 #include <errno.h>
 #include <pthread.h>
-#include <sched.h>
 #include <unistd.h>
 
 struct WrapperInfo {
@@ -110,10 +109,12 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
 }
 
 u32 Thread::hardwareConcurrency() {
-  cpu_set_t s;
-  int rc = sched_getaffinity(getpid(), sizeof(s), &s);
-  CHECK(rc == 0);
-  return (u32)CPU_COUNT_S(sizeof(s), &s);
+  long result = sysconf(_SC_NPROCESSORS_ONLN);
+  if (result <= 0) {
+    return 1;
+  }
+
+  return (u32)result;
 }
 
 #elif SN_STD_SYSTEM_WINDOWS
