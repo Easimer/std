@@ -108,6 +108,11 @@ target_sources(std-static
     VectorUtils.hpp
     WorkerPool.cpp WorkerPool.hpp
 
+    json/Value.hpp
+    json/Parser.cpp
+    json/Parser.hpp
+    json/Utils.hpp
+
     log/log.c log/log.h
 )
 target_include_directories(std-static
@@ -167,6 +172,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Arena.cpp
     tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
+    tests/Json.cpp
     tests/Optional.cpp
     tests/Path.cpp
     tests/Pool.cpp
