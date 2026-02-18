@@ -181,3 +181,29 @@ SN_TEST(WorkerPool, multi_thread) {
 
   wp->shutdown();
 }
+
+SN_TEST(WorkerPool, init) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  auto init = [](const Dispatch *D) {
+    u32 &mask = D->parametersAs<u32>();
+    mask |= u32(1) << D->idxPhysicalThread;
+  };
+
+  u32 mask = 0;
+  const u32 expected = 0xF;
+
+  WorkerPoolCreateInfo createInfo = {
+      .numThreads = 4,
+      .workerInitializer =
+          WorkerPoolWorkerInitializer{
+              .func = init,
+              .parameters = &mask,
+          },
+  };
+  WorkerPool *wp = createWorkerPool(temp, createInfo);
+
+  wp->shutdown();
+
+  CHECK(mask == expected);
+}

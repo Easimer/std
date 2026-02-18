@@ -9,6 +9,7 @@
 #pragma once
 
 #include "std/Arena.h"
+#include "std/Optional.hpp"
 #include "std/Types.h"
 
 struct WorkerPool;
@@ -59,7 +60,19 @@ struct WorkerPool {
   virtual void release(WorkContract *workContract) = 0;
 };
 
+struct WorkerPoolWorkerInitializer {
+  KernelEntryPoint func;
+  void *parameters;
+};
+
+struct WorkerPoolCreateInfo {
+  Optional<u32> numThreads;
+  Optional<WorkerPoolWorkerInitializer> workerInitializer;
+};
+
 WorkerPool *createWorkerPool(Arena *arena);
 WorkerPool *createWorkerPool(Arena *arena, u32 numThreads);
+WorkerPool *createWorkerPool(Arena *arena,
+                             const WorkerPoolCreateInfo &createInfo);
 
 

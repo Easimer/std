@@ -64,11 +64,23 @@ struct WorkerThreadProcInfo {
   SignalTreeAndJobs *stj;
   u32 idxThread;
   WorkerPool *workerPool;
+
+  Optional<WorkerPoolWorkerInitializer> init;
 };
 
 static void workerThreadProc(void *arg) {
-  auto [stj, idxThread, workerPool] =
+  auto [stj, idxThread, workerPool, init] =
       *reinterpret_cast<WorkerThreadProcInfo *>(arg);
+
+  if (init.hasValue()) {
+    Dispatch D = {
+        .parameters = init->parameters,
+        .threadIndex = {.x = idxThread, .y = 0, .z = 0},
+        .idxPhysicalThread = idxThread,
+        .workerPool = workerPool,
+    };
+    init->func(&D);
+  }
 
   while (!stj->shutdown) {
     // Try to decrement the root node. If we can do that, we'll have a guarantee
@@ -260,7 +272,11 @@ struct WorkerPoolImpl final : WorkerPool {
   }
 };
 
-WorkerPool *createWorkerPool(Arena *arena, u32 numThreads) {
+WorkerPool *createWorkerPool(Arena *arena,
+                             const WorkerPoolCreateInfo &createInfo) {
+  u32 numThreads =
+      createInfo.numThreads.valueOrElse(Thread::hardwareConcurrency);
+
   Slice<Thread> threads;
   alloc(arena, numThreads, threads);
   Slice<WorkerThreadProcInfo> threadProcInfo;
@@ -274,6 +290,7 @@ WorkerPool *createWorkerPool(Arena *arena, u32 numThreads) {
     threadProcInfo[i].stj = &wp->signalTreeAndJobs;
     threadProcInfo[i].idxThread = i;
     threadProcInfo[i].workerPool = wp;
+    threadProcInfo[i].init = createInfo.workerInitializer;
   }
 
   for (auto [_, i] : threads) {
@@ -289,6 +306,18 @@ WorkerPool *createWorkerPool(Arena *arena, u32 numThreads) {
   return wp;
 }
 
+WorkerPool *createWorkerPool(Arena *arena, u32 numThreads) {
+  WorkerPoolCreateInfo createInfo = {
+      .numThreads = numThreads,
+      .workerInitializer = {},
+  };
+  return createWorkerPool(arena, createInfo);
+}
+
 WorkerPool *createWorkerPool(Arena *arena) {
-  return createWorkerPool(arena, Thread::hardwareConcurrency());
+  WorkerPoolCreateInfo createInfo = {
+      .numThreads = {},
+      .workerInitializer = {},
+  };
+  return createWorkerPool(arena, createInfo);
 }
