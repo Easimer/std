@@ -43,3 +43,5 @@ i32 countLeadingZeros64(u64 x);
 #if __cplusplus
 }
 #endif
+
+#define ARG_UNUSED(x) (void)(x)
