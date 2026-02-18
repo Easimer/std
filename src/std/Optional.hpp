@@ -143,27 +143,27 @@ struct Optional {
 
   void reset() { storage = impl::OptionalStorage<T>(); }
 
-  constexpr T &value() & noexcept {
+  [[nodiscard]] constexpr T &value() & noexcept {
     CHECK(storage.present);
     return storage.value;
   }
 
-  constexpr T &&value() && noexcept {
+  [[nodiscard]] constexpr T &&value() && noexcept {
     CHECK(storage.present);
     return std::move(storage.value);
   }
 
-  constexpr const T &value() const & noexcept {
+  [[nodiscard]] constexpr const T &value() const & noexcept {
     CHECK(storage.present);
     return storage.value;
   }
 
-  constexpr const T &&value() const && noexcept {
+  [[nodiscard]] constexpr const T &&value() const && noexcept {
     CHECK(storage.present);
     return std::move(storage.value);
   }
 
-  constexpr T valueOr(T fallback) const noexcept {
+  [[nodiscard]] constexpr T valueOr(T fallback) const noexcept {
     if (!storage.present) {
       return fallback;
     }
@@ -172,7 +172,7 @@ struct Optional {
   }
 
   template <typename F>
-  constexpr T valueOrElse(F &&func) const {
+  [[nodiscard]] constexpr T valueOrElse(F &&func) const {
     if (!storage.present) {
       return func();
     }

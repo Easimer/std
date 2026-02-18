@@ -196,7 +196,8 @@ SN_TEST(Optional, moveAssignment_presentToPresent_nonTrivialDtor) {
 
 SN_TEST(Optional, valueOr_const) {
   const Optional<u32> empty;
-  empty.valueOr(3);
+  u32 actual = empty.valueOr(3);
+  ARG_UNUSED(actual);
 }
 
 SN_TEST(Optional, valueOr_empty) {
@@ -217,7 +218,8 @@ SN_TEST(Optional, valueOr_present) {
 
 SN_TEST(Optional, valueOrElse_const) {
   const Optional<u32> empty;
-  empty.valueOrElse([]() { return 0; });
+  u32 actual = empty.valueOrElse([]() { return 0; });
+  ARG_UNUSED(actual);
 }
 
 SN_TEST(Optional, valueOrElse_empty_result) {
@@ -235,6 +237,7 @@ SN_TEST(Optional, valueOrElse_empty_called) {
     wasCalled = true;
     return 3;
   });
+  ARG_UNUSED(actual);
 
   CHECK(wasCalled);
 }
@@ -256,6 +259,7 @@ SN_TEST(Optional, valueOrElse_present_notCalled) {
     wasCalled = true;
     return 3;
   });
+  ARG_UNUSED(actual);
 
   CHECK(!wasCalled);
 }
