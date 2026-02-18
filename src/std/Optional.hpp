@@ -163,7 +163,7 @@ struct Optional {
     return std::move(storage.value);
   }
 
-  constexpr T valueOr(T fallback) noexcept {
+  constexpr T valueOr(T fallback) const noexcept {
     if (!storage.present) {
       return fallback;
     }

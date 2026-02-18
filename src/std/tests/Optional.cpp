@@ -193,3 +193,8 @@ SN_TEST(Optional, moveAssignment_presentToPresent_nonTrivialDtor) {
   CHECK(present0.hasValue());
   CHECK(present0->value == 3);
 }
+
+SN_TEST(Optional, valueOr_const) {
+  const Optional<u32> empty;
+  empty.valueOr(3);
+}
