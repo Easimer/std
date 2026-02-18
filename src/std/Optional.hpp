@@ -171,6 +171,15 @@ struct Optional {
     return storage.value;
   }
 
+  template <typename F>
+  constexpr T valueOrElse(F &&func) const {
+    if (!storage.present) {
+      return func();
+    }
+
+    return storage.value;
+  }
+
   constexpr T *operator->() noexcept { return &value(); }
   constexpr T &operator*() & noexcept { return value(); }
   constexpr T &&operator*() && noexcept { return std::move(value()); }

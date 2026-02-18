@@ -198,3 +198,64 @@ SN_TEST(Optional, valueOr_const) {
   const Optional<u32> empty;
   empty.valueOr(3);
 }
+
+SN_TEST(Optional, valueOr_empty) {
+  const u32 expected = 3;
+  Optional<u32> empty;
+
+  u32 actual = empty.valueOr(expected);
+  CHECK(actual == expected);
+}
+
+SN_TEST(Optional, valueOr_present) {
+  const u32 expected = 5;
+  Optional<u32> present = expected;
+
+  u32 actual = present.valueOr(3);
+  CHECK(actual == expected);
+}
+
+SN_TEST(Optional, valueOrElse_const) {
+  const Optional<u32> empty;
+  empty.valueOrElse([]() { return 0; });
+}
+
+SN_TEST(Optional, valueOrElse_empty_result) {
+  Optional<u32> empty;
+
+  u32 actual = empty.valueOrElse([]() { return 3; });
+  CHECK(actual == 3);
+}
+
+SN_TEST(Optional, valueOrElse_empty_called) {
+  Optional<u32> empty;
+
+  bool wasCalled = false;
+  u32 actual = empty.valueOrElse([&wasCalled]() {
+    wasCalled = true;
+    return 3;
+  });
+
+  CHECK(wasCalled);
+}
+
+SN_TEST(Optional, valueOrElse_present_result) {
+  const u32 expected = 5;
+  Optional<u32> present = expected;
+
+  u32 actual = present.valueOrElse([]() { return 3; });
+  CHECK(actual == expected);
+}
+
+SN_TEST(Optional, valueOrElse_present_notCalled) {
+  const u32 expected = 5;
+  Optional<u32> present = expected;
+
+  bool wasCalled = false;
+  u32 actual = present.valueOrElse([&wasCalled]() {
+    wasCalled = true;
+    return 3;
+  });
+
+  CHECK(!wasCalled);
+}
