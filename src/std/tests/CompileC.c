@@ -3,6 +3,7 @@
 #include <std/Arena.h>
 #include <std/Check.h>
 #include <std/Chronometry.h>
+#include <std/Endian.h>
 #include <std/Hash.h>
 #include <std/log.h>
 #include <std/Modules.h>

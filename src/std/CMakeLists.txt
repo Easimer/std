@@ -172,6 +172,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Arena.cpp
     tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
+    tests/Endian.cpp
     tests/Json.cpp
     tests/Optional.cpp
     tests/Path.cpp
