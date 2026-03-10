@@ -184,6 +184,8 @@ if(SN_STD_BUILD_TESTS)
     tests/Vector.cpp
     tests/Utils.cpp
     tests/Uuid.cpp
+
+    tests/CompileC.c
   )
   target_link_libraries(std-tests PRIVATE std::test_exe std::os)
   target_wall_werror_SN(std-tests)
