@@ -5,6 +5,7 @@
 
 SN_TEST(Array, initializerList) {
   Array<u32, 4> arr = {1, 2, 4, 5};
+  ARG_UNUSED(arr);
 }
 
 SN_TEST(Array, indexing) {
