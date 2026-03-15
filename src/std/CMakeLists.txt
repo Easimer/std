@@ -170,6 +170,7 @@ if(SN_STD_BUILD_TESTS)
   add_executable(std-tests
     tests/entry.cpp
     tests/Arena.cpp
+    tests/Array.cpp
     tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
     tests/Endian.cpp
