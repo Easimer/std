@@ -1,6 +1,6 @@
 #include <std/Check.h>
-#include <std/Slice.hpp>
 #include <std/Array.hpp>
+#include <std/Slice.hpp>
 #include <std/Testing.hpp>
 
 SN_TEST(Array, initializerList) {
@@ -58,9 +58,44 @@ SN_TEST(Array, subarray) {
   CHECK(view.length == 3);
 }
 
+SN_TEST(Array, subarrayConst) {
+  const Array<u32, 4> arr = {1, 2, 4, 5};
+  Slice<const u32> view = arr.subarray(0, 3);
+  CHECK(view.data == arr.data);
+  CHECK(view.length == 3);
+}
+
 SN_TEST(Array, subarrayOffset) {
   Array<u32, 4> arr = {1, 2, 4, 5};
   Slice<u32> view = arr.subarray(1, 4);
   CHECK(view.data == arr.data + 1);
   CHECK(view.length == 3);
+}
+
+SN_TEST(Array, subarraySpan) {
+  Array<u32, 4> arr = {1, 2, 4, 5};
+  Slice<u32> view = arr.subarray(Span<u32>{.start = 2, .count = 2});
+  CHECK(view.data == arr.data + 2);
+  CHECK(view.length == 2);
+}
+
+SN_TEST(Array, subarraySpanConst) {
+  const Array<u32, 4> arr = {1, 2, 4, 5};
+  Slice<const u32> view = arr.subarray(Span<u32>{.start = 2, .count = 2});
+  CHECK(view.data == arr.data + 2);
+  CHECK(view.length == 2);
+}
+
+SN_TEST(Array, subarrayRange) {
+  Array<u32, 4> arr = {1, 2, 4, 5};
+  Slice<u32> view = arr.subarray(Range<u32>{.start = 2, .end = 3});
+  CHECK(view.data == arr.data + 2);
+  CHECK(view.length == 1);
+}
+
+SN_TEST(Array, subarrayRangeConst) {
+  const Array<u32, 4> arr = {1, 2, 4, 5};
+  Slice<const u32> view = arr.subarray(Range<u32>{.start = 2, .end = 3});
+  CHECK(view.data == arr.data + 2);
+  CHECK(view.length == 1);
 }

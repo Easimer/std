@@ -63,9 +63,38 @@ struct Array {
     return {data, u32(N)};
   }
 
-  Slice<T> subarray(size_t idxStart, size_t idxEnd) {
+  Slice<T> subarray(u32 idxStart) {
     Slice<T> whole = (*this);
-    return subarray(whole, idxStart, idxEnd);
+    return whole.subarray(idxStart);
+  }
+
+  Slice<T> subarray(u32 idxStart, u32 idxEnd) {
+    Slice<T> whole = (*this);
+    return whole.subarray(idxStart, idxEnd);
+  }
+
+  Slice<const T> subarray(u32 idxStart) const {
+    Slice<const T> whole = (*this);
+    return whole.subarray(idxStart);
+  }
+
+  Slice<const T> subarray(u32 idxStart, u32 idxEnd) const {
+    Slice<const T> whole = (*this);
+    return whole.subarray(idxStart, idxEnd);
+  }
+
+  Slice<T> subarray(Range<u32> range) {
+    return subarray(range.start, range.end);
+  }
+
+  Slice<T> subarray(Span<u32> span) { return subarray(rangeFrom(span)); }
+
+  Slice<const T> subarray(Range<u32> range) const {
+    return subarray(range.start, range.end);
+  }
+
+  Slice<const T> subarray(Span<u32> span) const {
+    return subarray(rangeFrom(span));
   }
 
   T *begin() { return &data[0]; }
