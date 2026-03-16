@@ -473,6 +473,44 @@ SN_TEST(Slice, cast) {
   CHECK(dwordsOfBytes.length == 1);
 }
 
+SN_TEST(Slice, replace_empty) {
+  Slice<char> empty;
+  Slice<char> res = empty.replace(',', ' ');
+  CHECK(res.empty());
+}
+
+SN_TEST(Slice, replace_normal) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  char str[] = "asd,123,wawa";
+  Slice<const char> expected = sliceFromConstChar("asd 123 wawa");
+
+  Slice<char> input = sliceFrom(str);
+  input.length -= 1;  // remove zero terminator
+
+  Slice<char> res = input.replace(',', ' ');
+  CHECK(res.data == input.data);
+  CHECK(res.length == input.length);
+
+  CHECK(res.asConst() == expected);
+}
+
+SN_TEST(Slice, replace_nothingToReplace) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  char str[] = "asd";
+  Slice<const char> expected = sliceFromConstChar("asd");
+
+  Slice<char> input = sliceFrom(str);
+  input.length -= 1;  // remove zero terminator
+
+  Slice<char> res = input.replace(',', ' ');
+  CHECK(res.data == input.data);
+  CHECK(res.length == input.length);
+
+  CHECK(res.asConst() == expected);
+}
+
 SN_TEST(Span, empty) {
   Span<u32> zero = {0, 0};
   CHECK(zero.empty());
@@ -540,3 +578,4 @@ SN_TEST(Span, containsRight) {
   Span<u32> inner = {4, 1};  // 4,
   CHECK(outer.contains(inner) == false);
 }
+

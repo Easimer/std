@@ -443,6 +443,16 @@ struct Slice {
     CHECK(source.length <= length);
     ::memcpy(data, source.data, source.length * sizeof(T));
   }
+
+  Slice<T> replace(const T &prev, const T &next) {
+    for (auto [val, _] : *this) {
+      if (val == prev) {
+        val = next;
+      }
+    }
+
+    return *this;
+  }
 };
 
 #define SLICE_DEFINE_COPY_SPECIALIZATION(T)                 \

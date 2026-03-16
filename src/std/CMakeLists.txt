@@ -99,6 +99,7 @@ target_sources(std-static
     SliceStlVector.hpp
     SliceUtils.hpp
     Sort.hpp
+    Strings.hpp
     Trie.hpp
     TrieStrKey.hpp
     Types.h
@@ -182,6 +183,7 @@ if(SN_STD_BUILD_TESTS)
     tests/SegmentArray.cpp
     tests/Slice.cpp
     tests/Sort.cpp
+    tests/Strings.cpp
     tests/Thread.cpp
     tests/Vector.cpp
     tests/Utils.cpp
