@@ -19,8 +19,11 @@ Slice<Slice<T>> split(Arena *arena, Slice<T> arr, const T &sep) {
     return {};
   }
 
+  u32 numSeparators = arr.count(sep);
+
   Arena::Scope temp = getScratch(&arena, 1);
-  Vector<Slice<T>> ret;
+  Vector<Slice<T>> ret =
+      vectorWithInitialCapacity<Slice<T>>(temp, numSeparators + 1);
 
   u32 idxPrevStart = 0;
   for (auto [elem, i] : arr) {
@@ -45,8 +48,11 @@ Slice<Slice<const T>> split(Arena *arena, Slice<const T> arr, const T &sep) {
     return {};
   }
 
+  u32 numSeparators = arr.count(sep);
+
   Arena::Scope temp = getScratch(&arena, 1);
-  Vector<Slice<const T>> ret;
+  Vector<Slice<const T>> ret =
+      vectorWithInitialCapacity<Slice<const T>>(temp, numSeparators + 1);
 
   u32 idxPrevStart = 0;
   for (auto [elem, i] : arr) {
