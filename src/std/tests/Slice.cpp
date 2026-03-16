@@ -511,6 +511,22 @@ SN_TEST(Slice, replace_nothingToReplace) {
   CHECK(res.asConst() == expected);
 }
 
+SN_TEST(Slice, count) {
+  u32 arr[] = {1, 2, 1, 2, 1};
+
+  Slice<const u32> sarr = sliceFrom(arr).asConst();
+  u32 actual = sarr.count(1);
+  CHECK(actual == 3);
+}
+
+SN_TEST(Slice, countIf) {
+  u32 arr[] = {1, 2, 3, 4, 5};
+
+  Slice<const u32> sarr = sliceFrom(arr).asConst();
+  u32 actual = sarr.countIf([](u32 v) { return (v % 2) == 0; });
+  CHECK(actual == 2);
+}
+
 SN_TEST(Span, empty) {
   Span<u32> zero = {0, 0};
   CHECK(zero.empty());

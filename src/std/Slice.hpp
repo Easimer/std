@@ -453,6 +453,27 @@ struct Slice {
 
     return *this;
   }
+
+  u32 count(const T &value) const {
+    u32 ret = 0;
+    for (auto [elem, _] : *this) {
+      if (elem == value) {
+        ret += 1;
+      }
+    }
+    return ret;
+  }
+
+  template <typename F>
+  u32 countIf(F &&condition) const {
+    u32 ret = 0;
+    for (auto [elem, _] : *this) {
+      if (condition(elem)) {
+        ret += 1;
+      }
+    }
+    return ret;
+  }
 };
 
 #define SLICE_DEFINE_COPY_SPECIALIZATION(T)                 \
