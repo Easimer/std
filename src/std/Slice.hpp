@@ -111,7 +111,13 @@ struct Slice {
   constexpr Slice() noexcept : data(nullptr), length(0) {}
   constexpr Slice(T *ptr, u32 length) noexcept : data(ptr), length(length) {}
   constexpr Slice(std::initializer_list<T> list) noexcept
-      : data(list.begin()), length((u32)list.size()) {
+      : Slice(const_cast<T *>(list.begin()), static_cast<u32>(list.size())) {
+    // NOTE(danielm): this constructor delegates to the (ptr, length)
+    // constructor to avoid a -Winit-list-lifetime warning on GCC and Clang. The
+    // usage pattern the compiler is warning about in this case is fine as long
+    // the Slice constructed using this constructor is only ever used as a
+    // temporary and neither it nor references to its contents are stored
+    // anywhere.
     DCHECK(list.size() <= 0xFFFFFFFF);
   }
 
