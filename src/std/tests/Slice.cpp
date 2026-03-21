@@ -9,6 +9,21 @@ SN_TEST(Slice, defaultConstructedIsEmpty) {
   CHECK(s.length == 0);
 }
 
+SN_TEST(Slice, initializerList) {
+  auto check = [](Slice<const f32> s) {
+    CHECK(s.length == 3);
+    CHECK(s[0] == 5.0f);
+    CHECK(s[1] == 1.0f);
+    CHECK(s[2] == -1.0f);
+  };
+  check({5.0f, 1.0f, -1.0f});
+}
+
+SN_TEST(Slice, emptyInitializerList) {
+  Slice<const f32> s = {};
+  CHECK(s.empty());
+}
+
 SN_TEST(Slice, empty) {
   Slice<u8> s = {nullptr, 0};
 

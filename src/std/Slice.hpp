@@ -12,6 +12,7 @@
 #include "std/Types.h"
 
 #include <string.h>
+#include <initializer_list>
 
 /** @file Slice.hpp */
 
@@ -106,6 +107,13 @@ struct Slice {
 
   T *data = nullptr;
   u32 length = 0;
+
+  constexpr Slice() noexcept : data(nullptr), length(0) {}
+  constexpr Slice(T *ptr, u32 length) noexcept : data(ptr), length(length) {}
+  constexpr Slice(std::initializer_list<T> list) noexcept
+      : data(list.begin()), length((u32)list.size()) {
+    DCHECK(list.size() <= 0xFFFFFFFF);
+  }
 
   T &operator[](u32 i) const {
     DCHECK(data != nullptr);
