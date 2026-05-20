@@ -81,6 +81,16 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
 
   pthread_t handle;
   rc = pthread_create(&handle, nullptr, entryPointWrapper, &wrapperInfo);
+  if (rc != 0) {
+    if (rc == EAGAIN) {
+      return ThreadError::InsufficientResources;
+    } else if (rc == EINVAL || rc == EPERM) {
+      return ThreadError::ValidationFailure;
+    }
+
+    CHECK(!"Unexpected error");
+    return ThreadError::ValidationFailure;
+  }
 
   rc = pthread_cond_wait(&wrapperInfo.flag, &wrapperInfo.lock);
   DCHECK(rc == 0);
@@ -94,18 +104,7 @@ Result<Thread, ThreadError> Thread::create(const ThreadCreateInfo &info) {
   Thread ret;
   ret._handle[0] = (void *)handle;
   ret._handle[1] = nullptr;
-  if (rc == 0) {
-    return ret;
-  }
-
-  if (rc == EAGAIN) {
-    return ThreadError::InsufficientResources;
-  } else if (rc == EINVAL || rc == EPERM) {
-    return ThreadError::ValidationFailure;
-  }
-
-  CHECK(!"Unexpected error");
-  return ThreadError::ValidationFailure;
+  return ret;
 }
 
 u32 Thread::hardwareConcurrency() {
