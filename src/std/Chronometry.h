@@ -24,6 +24,25 @@ TimePoint chrono_getCurrentTime();
  */
 f64 chrono_secondsBetween(TimePoint t0, TimePoint t1);
 
+typedef struct chrono_date {
+  // Year
+  i16 year;
+  // Month, 1..12
+  i16 month;
+  // Day, 1..31
+  i16 day;
+  // Hour, 0..23
+  i16 hour;
+  // Minute, 0..59
+  i16 minute;
+  // Second, 0..59
+  i16 second;
+  // Milliseconds, 0..999
+  i16 milliseconds;
+} chrono_date;
+
+struct chrono_date chrono_get_local_date(void);
+
 #if __cplusplus
 }
 #endif

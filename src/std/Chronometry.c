@@ -54,6 +54,24 @@ f64 chrono_secondsBetween(TimePoint t0, TimePoint t1) {
   return (f64)delta / ((f64)freq.QuadPart);
 }
 
+struct chrono_date chrono_get_local_date(void) {
+  SYSTEMTIME st;
+  memset(&st, 0, sizeof(st));
+
+  GetLocalTime(&st);
+
+  struct chrono_date ret = {
+      .year = st.wYear,
+      .month = st.wMonth,
+      .day = st.wDay,
+      .hour = st.wHour,
+      .minute = st.wMinute,
+      .second = st.wSecond,
+      .milliseconds = st.wMilliseconds,
+  };
+  return ret;
+}
+
 #else
 TimePoint chrono_getCurrentTime() {
   TimePoint ret = 0;
@@ -80,5 +98,23 @@ f64 chrono_secondsBetween(TimePoint t0, TimePoint t1) {
   i64 delta = ticks1 - ticks0;
 
   return (f64)delta / (f64)1000000000;
+}
+
+struct chrono_date chrono_get_local_date(void) {
+  time_t t = time(NULL);
+  struct tm tm;
+  memset(&tm, 0, sizeof(tm));
+  localtime_r(&t, &tm);
+
+  struct chrono_date ret = {
+      .year = 1900 + tm.tm_year,
+      .month = 1 + tm.tm_mon,
+      .day = tm.tm_mday,
+      .hour = tm.tm_hour,
+      .minute = tm.tm_min,
+      .second = tm.tm_sec,
+      .milliseconds = 0,
+  };
+  return ret;
 }
 #endif
