@@ -130,4 +130,6 @@ void SN_STD_WEAK_SYMBOL checkFail(const char *pExpr,
   (void)pExpr;
   (void)pFile;
   (void)line;
+
+  for(;;) {}
 }

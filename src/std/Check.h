@@ -40,7 +40,7 @@ extern "C" {
 #endif
 #endif
 
-void checkFail(const char *pExpr, const char *pFile, unsigned line);
+CHECK_NORETURN void checkFail(const char *pExpr, const char *pFile, unsigned line);
 
 #if __cplusplus
 }

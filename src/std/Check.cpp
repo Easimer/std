@@ -10,11 +10,12 @@
 #include "std/CompilerInfo.h"
 #include "std/log.h"
 
-static void checkFailDefaultImpl(const char *expr,
+CHECK_NORETURN static void checkFailDefaultImpl(const char *expr,
                                  const char *file,
                                  unsigned line) {
   log_fatal("\n  Assertion failed: %s\n    at %s:%u", expr, file, line);
   // TODO(danielm): print stacktrace
+  for(;;) {}
 }
 
 #if SN_MSVC
