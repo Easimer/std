@@ -8,10 +8,11 @@
 
 #include <std/Arena.h>
 #include <std/Check.h>
-#include <std/log/log.h>
+#include <std/log.h>
 #include <std/Slice.hpp>
 #include <std/Testing.hpp>
 
+#include <stdio.h>
 #include <stdlib.h>
 
 static const u32 SIZ_ARENA = 256 * 1024;

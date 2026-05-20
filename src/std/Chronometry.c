@@ -7,9 +7,9 @@
  */
 
 #include "std/Chronometry.h"
-#include "std/Types.h"
 #include <stdlib.h>
 #include <string.h>
+#include "std/Types.h"
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -18,6 +18,7 @@
 
 #if _POSIX_C_SOURCE >= 199309L
 #include <time.h>
+#include <unistd.h>
 #endif
 
 #if ANDROID
@@ -26,7 +27,15 @@
 
 #if EMSCRIPTEN
 #include <emscripten/html5.h>
+#include <unistd.h>
 #endif
+
+#define SEC_FROM_USEC(Usec) ((Usec) / 1000000)
+#define USEC_FROM_SEC(Sec) ((Sec)*1000000)
+#define USEC_FROM_NSEC(Nsec) ((Nsec) / 1000)
+
+#define SEC_FROM_NSEC(Sec) ((Sec) / 1000000000)
+#define NSEC_FROM_SEC(Sec) ((Sec)*1000000000)
 
 #if _WIN32
 TimePoint chrono_getCurrentTime() {
@@ -72,32 +81,30 @@ struct chrono_date chrono_get_local_date(void) {
   return ret;
 }
 
-#else
-TimePoint chrono_getCurrentTime() {
-  TimePoint ret = 0;
-#if EMSCRIPTEN
-  u32 ticks;
-#else
-  u64 ticks;
-#endif
+void chrono_sleep(u32 num_seconds) {
+  Sleep(num_seconds * 1000);
+}
 
+#elif EMSCRIPTEN
+TimePoint chrono_getCurrentTime() {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
-  ticks = now.tv_sec;
-  ticks *= 1000000000;
-  ticks += now.tv_nsec;
+  u32 ticks = USEC_FROM_SEC(now.tv_sec);
+  ticks += USEC_FROM_NSEC(now.tv_nsec);
 
+  TimePoint ret = 0;
   memcpy(&ret, &ticks, sizeof(ticks));
   return ret;
 }
 
 f64 chrono_secondsBetween(TimePoint t0, TimePoint t1) {
-  u64 ticks0, ticks1;
+  u64 ticks0 = 0;
+  u64 ticks1 = 0;
   memcpy(&ticks0, &t0, sizeof(t0));
   memcpy(&ticks1, &t1, sizeof(t1));
   i64 delta = ticks1 - ticks0;
 
-  return (f64)delta / (f64)1000000000;
+  return SEC_FROM_USEC((f64)delta);
 }
 
 struct chrono_date chrono_get_local_date(void) {
@@ -116,5 +123,54 @@ struct chrono_date chrono_get_local_date(void) {
       .milliseconds = 0,
   };
   return ret;
+}
+
+void chrono_sleep(u32 num_seconds) {
+  sleep(num_seconds);
+}
+
+#else
+
+TimePoint chrono_getCurrentTime() {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  u64 ticks = NSEC_FROM_SEC((u64)now.tv_sec);
+  ticks += (u64)now.tv_nsec;
+
+  TimePoint ret;
+  memcpy(&ret, &ticks, sizeof(ticks));
+  return ret;
+}
+
+f64 chrono_secondsBetween(TimePoint t0, TimePoint t1) {
+  u64 ticks0 = 0;
+  u64 ticks1 = 0;
+  memcpy(&ticks0, &t0, sizeof(t0));
+  memcpy(&ticks1, &t1, sizeof(t1));
+  i64 delta = ticks1 - ticks0;
+
+  return SEC_FROM_NSEC((f64)delta);
+}
+
+struct chrono_date chrono_get_local_date(void) {
+  time_t t = time(NULL);
+  struct tm tm;
+  memset(&tm, 0, sizeof(tm));
+  localtime_r(&t, &tm);
+
+  struct chrono_date ret = {
+      .year = 1900 + tm.tm_year,
+      .month = 1 + tm.tm_mon,
+      .day = tm.tm_mday,
+      .hour = tm.tm_hour,
+      .minute = tm.tm_min,
+      .second = tm.tm_sec,
+      .milliseconds = 0,
+  };
+  return ret;
+}
+
+void chrono_sleep(u32 num_seconds) {
+  sleep(num_seconds);
 }
 #endif

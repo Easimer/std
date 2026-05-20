@@ -1,6 +1,6 @@
 #include <std/Arena.h>
 #include <std/Check.h>
-#include <std/log/log.h>
+#include <std/log.h>
 #include <std/Slice.hpp>
 #include <std/Testing.hpp>
 

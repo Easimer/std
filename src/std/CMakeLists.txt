@@ -172,10 +172,12 @@ if(SN_STD_BUILD_TESTS)
     tests/entry.cpp
     tests/Arena.cpp
     tests/Array.cpp
+    tests/Chronometry.cpp
     tests/CommandCodec.cpp
     tests/FixedRingBuffer.cpp
     tests/Endian.cpp
     tests/Json.cpp
+    tests/Log.cpp
     tests/Optional.cpp
     tests/Path.cpp
     tests/Pool.cpp

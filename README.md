@@ -36,5 +36,3 @@ This will add `/src/` as an include directory and the headers can be included li
 
 This library is distributed under the [Mozilla Public License Version 2.0](LICENSE).
 
-This repository contains a [modified version](src/std/log) of [rxi's logger library](https://github.com/rxi/log.c), licensed under the MIT license.
-

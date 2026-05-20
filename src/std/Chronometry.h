@@ -43,6 +43,8 @@ typedef struct chrono_date {
 
 struct chrono_date chrono_get_local_date(void);
 
+void chrono_sleep(u32 num_seconds);
+
 #if __cplusplus
 }
 #endif
