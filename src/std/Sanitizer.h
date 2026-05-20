@@ -20,6 +20,17 @@
 #endif
 #endif
 
+#if __cplusplus
+#define SN_ASAN_ALIGNOF(T) alignof(T)
+#define SN_ASAN_ALIGNAS(N) alignas(N)
+#else
+#include <stdalign.h>
+#define SN_ASAN_ALIGNOF(T) _Alignof(T)
+#define SN_ASAN_ALIGNAS(N) _Alignas(N)
+#endif
+
+#define SN_ASAN_MAX(A, B) (((A) > (B)) ? (A) : (B))
+
 #if defined(SN_ASAN_ACTIVE)
 
 #include <stddef.h>
@@ -52,13 +63,22 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size);
 #define SN_ASAN_UNPOISON(addr, size) \
   __asan_unpoison_memory_region((addr), (size))
 #define SN_ASAN_POISONABLE_MIN_ALIGNMENT (8)
-#define SN_ASAN_POISONABLE_ALIGNED(T)                   \
-  alignas(alignof(T) > SN_ASAN_POISONABLE_MIN_ALIGNMENT \
-              ? alignof(T)                              \
-              : SN_ASAN_POISONABLE_MIN_ALIGNMENT) T
+
+/**
+ * \brief Alignment of a poisonable instance of type T
+ */
+#define SN_ASAN_POISONABLE_ALIGNOF(T) \
+  SN_ASAN_MAX(SN_ASAN_ALIGNOF(T), SN_ASAN_POISONABLE_MIN_ALIGNMENT)
+/**
+ * \brief Declares a variable of type T aligned such that it is poisonable.
+ */
+#define SN_ASAN_POISONABLE_ALIGNED(T) \
+  SN_ASAN_ALIGNAS(SN_ASAN_POISONABLE_ALIGNOF(T)) T
+
 #else
 #define SN_ASAN_POISON(addr, size) ((void)(addr), (void)(size))
 #define SN_ASAN_UNPOISON(addr, size) ((void)(addr), (void)(size))
 #define SN_ASAN_POISONABLE_MIN_ALIGNMENT (1)
+#define SN_ASAN_POISONABLE_ALIGNOF(T) SN_ASAN_ALIGNOF(T)
 #define SN_ASAN_POISONABLE_ALIGNED(T) T
 #endif /* defined(SN_ASAN_ACTIVE) */
