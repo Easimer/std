@@ -141,12 +141,12 @@ SN_TEST(JsonParser, StringCodepoint) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("\"\\u0391\"");
+  Slice<const char> src = sliceFromConstChar("\"\\u039B\"");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::String);
 
-  const u8 uc[2] = {0xCE, 0x91};
+  const u8 uc[2] = {0xCE, 0x9B};
   Slice<const u8> ucs = sliceFrom(uc);
   CHECK(res.string() == ucs.cast<const char>());
 }

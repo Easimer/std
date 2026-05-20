@@ -45,7 +45,7 @@ static bool isDigitExceptZero(Slice<const char> json) {
 }
 
 static bool isHex(Slice<const char> json, u8 &out) {
-  if (empty(json)) {
+  if (json.empty()) {
     return false;
   }
 
@@ -57,11 +57,13 @@ static bool isHex(Slice<const char> json, u8 &out) {
   char c = json[0];
 
   if ('a' <= c && c <= 'f') {
-    return 10 + (c - 'a');
+    out = 10 + (c - 'a');
+    return true;
   }
 
   if ('A' <= c && c <= 'F') {
-    return 10 + (c - 'A');
+    out = 10 + (c - 'A');
+    return true;
   }
 
   return false;
