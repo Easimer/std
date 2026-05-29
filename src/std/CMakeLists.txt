@@ -107,6 +107,7 @@ target_sources(std-static
     Uuid.hpp
     Vector.hpp
     VectorUtils.hpp
+    VU128.c VU128.h
     WorkerPool.cpp WorkerPool.hpp
 
     json/Value.hpp
@@ -187,9 +188,10 @@ if(SN_STD_BUILD_TESTS)
     tests/Sort.cpp
     tests/Strings.cpp
     tests/Thread.cpp
-    tests/Vector.cpp
     tests/Utils.cpp
     tests/Uuid.cpp
+    tests/Vector.cpp
+    tests/VU128.cpp
 
     tests/CompileC.c
   )

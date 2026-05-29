@@ -5,10 +5,11 @@
 #include <std/Chronometry.h>
 #include <std/Endian.h>
 #include <std/Hash.h>
-#include <std/log.h>
 #include <std/Modules.h>
 #include <std/Sanitizer.h>
 #include <std/Types.h>
+#include <std/VU128.h>
+#include <std/log.h>
 
 #include <std/os/OsInfo.h>
 #include <std/os/Sync.h>
