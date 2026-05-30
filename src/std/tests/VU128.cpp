@@ -3,11 +3,11 @@
 
 #include <string.h>
 
-static const u8 bufEncoded0[1] = {0};
-static const u8 bufEncoded126[1] = {126};
-static const u8 bufEncoded255[2] = {240, 255};
-static const u8 bufEncoded23456[3] = {241, 160, 91};
-static const u8 bufEncoded0xFFFFFF[4] = {242, 255, 255, 255};
+static const u8 bufEncoded0[5] = {0, 0, 0, 0, 0};
+static const u8 bufEncoded126[5] = {126, 0, 0, 0, 0};
+static const u8 bufEncoded255[5] = {240, 255, 0, 0, 0};
+static const u8 bufEncoded23456[5] = {241, 160, 91, 0, 0};
+static const u8 bufEncoded0xFFFFFF[5] = {242, 255, 255, 255, 0};
 static const u8 bufEncoded0xFFFFFFFF[5] = {243, 255, 255, 255, 255};
 
 SN_TEST(VU128, encode_0) {
