@@ -39,14 +39,14 @@ static void printRes(const SnTestResult *results) {
 }
 
 int main(int numArgs, char **arrArgs) {
-  TimePoint t_start = chrono_getCurrentTime();
-
   Arena arena0 = makeArena();
   Arena arena1 = makeArena();
   Arena arenaResults = makeArena();
 
   SnTestStats stats;
+  TimePoint t_start = chrono_getCurrentTime();
   SnTestResult* results = testMain(&arena0, &arena1, &arenaResults, &stats);
+  TimePoint t_end = chrono_getCurrentTime();
 
   u32 numFail = stats.numTotal - stats.numSuccess;
   f32 percentSuccess = stats.numSuccess / f32(stats.numTotal) * 100.0f;
@@ -88,10 +88,10 @@ int main(int numArgs, char **arrArgs) {
   printf("Failed tests:     %u/%u (%.2f%%)\n", numFail, stats.numTotal,
          percentFail);
 
+  free(arenaResults.beg);
   free(arena1.beg);
   free(arena0.beg);
 
-  TimePoint t_end = chrono_getCurrentTime();
   f64 elapsed = chrono_secondsBetween(t_start, t_end);
   printf("Duration:         %f milliseconds\n", elapsed * 1000.0);
 
