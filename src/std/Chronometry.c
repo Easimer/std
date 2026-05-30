@@ -37,6 +37,10 @@
 #define SEC_FROM_NSEC(Sec) ((Sec) / 1000000000)
 #define NSEC_FROM_SEC(Sec) ((Sec)*1000000000)
 
+void chrono_sleep(u32 num_seconds) {
+  chrono_msleep(num_seconds * 1000);
+}
+
 #if _WIN32
 TimePoint chrono_getCurrentTime() {
   TimePoint ret = 0;
@@ -81,8 +85,8 @@ struct chrono_date chrono_get_local_date(void) {
   return ret;
 }
 
-void chrono_sleep(u32 num_seconds) {
-  Sleep(num_seconds * 1000);
+void chrono_msleep(u32 num_milliseconds) {
+  Sleep(num_milliseconds);
 }
 
 #elif EMSCRIPTEN
@@ -125,8 +129,14 @@ struct chrono_date chrono_get_local_date(void) {
   return ret;
 }
 
-void chrono_sleep(u32 num_seconds) {
-  sleep(num_seconds);
+void chrono_msleep(u32 num_milliseconds) {
+  u32 num_seconds = num_milliseconds / 1000;
+  u32 num_nanoseconds = (num_milliseconds - num_seconds * 1000) * 1000000;
+  struct timespec dur = {
+      .tv_sec = num_seconds,
+      .tv_nsec = num_nanoseconds,
+  };
+  nanosleep(&dur, NULL);
 }
 
 #else
@@ -170,7 +180,13 @@ struct chrono_date chrono_get_local_date(void) {
   return ret;
 }
 
-void chrono_sleep(u32 num_seconds) {
-  sleep(num_seconds);
+void chrono_msleep(u32 num_milliseconds) {
+  u32 num_seconds = num_milliseconds / 1000;
+  u32 num_nanoseconds = (num_milliseconds - num_seconds * 1000) * 1000000;
+  struct timespec dur = {
+      .tv_sec = num_seconds,
+      .tv_nsec = num_nanoseconds,
+  };
+  nanosleep(&dur, NULL);
 }
 #endif

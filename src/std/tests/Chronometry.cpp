@@ -12,11 +12,10 @@ SN_TEST(Chronometry, getCurrentTimeExecutes) {
 
 SN_TEST(Chronometry, secondsBetween) {
   TimePoint t0 = chrono_getCurrentTime();
-  chrono_sleep(1);
+  chrono_msleep(100);
   TimePoint t1 = chrono_getCurrentTime();
   f64 elapsed = chrono_secondsBetween(t0, t1);
-  printf("elapsed %f\n", elapsed);
-  CHECK(0 <= elapsed && elapsed <= 2.0f);
+  CHECK(0 <= elapsed && elapsed <= 0.15f);
 }
 
 SN_TEST(Chronometry, get_local_date) {
