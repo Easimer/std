@@ -44,5 +44,6 @@ int main(int numArgs, char **arrArgs) {
   free(arena1.beg);
   free(arena0.beg);
 
-  return 0;
+  int rc = (numFail == 0) ? 0 : 1;
+  return rc;
 }
