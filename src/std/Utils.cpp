@@ -73,3 +73,35 @@ extern "C" i32 countLeadingZeros64(u64 x) {
   return (i32)__builtin_clzll(x);
 #endif
 }
+
+#ifndef MIN
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
+#endif
+
+extern "C" u8 mipmapGetLevelCount(u32 width, u32 height) {
+  if (width == 0 || height == 0) {
+    return 0;
+  }
+
+  u8 n0w = (u8)countLeadingZeros(width);
+  u8 n0h = (u8)countLeadingZeros(height);
+
+  return 32 - MIN(n0w, n0h);
+}
+
+extern "C" u8 mipmapGetLevelCount3(u32 width, u32 height, u32 depth) {
+  if (width == 0 || height == 0) {
+    return 0;
+  }
+
+  u8 n0w = (u8)countLeadingZeros(width);
+  u8 n0h = (u8)countLeadingZeros(height);
+  u8 n0d = (u8)countLeadingZeros(depth);
+
+  return 32 - MIN(MIN(n0w, n0h), n0d);
+}
+
+extern "C" u8 mipmapGetLevelDim(u32 dim0, u8 level) {
+  u32 res = dim0 >> level;
+  return res > 0 ? res : 1;
+}
