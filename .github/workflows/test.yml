@@ -29,8 +29,7 @@ jobs:
           cmake --build out --config DebugSan
       - name: Test
         run: |
-          cd out
-          ctest -V --timeout 30 -C DebugSan
+          ./out/src/std/std-tests
 
   test-linux-gcc:
     runs-on: ubuntu-latest
@@ -58,8 +57,7 @@ jobs:
           cmake --build out --config DebugSan
       - name: Test
         run: |
-          cd out
-          ctest -V --timeout 30 -C DebugSan
+          ./out/src/std/std-tests
 
   test-windows:
     runs-on: windows-latest
@@ -98,8 +96,7 @@ jobs:
           cmake --build out --config DebugSan
       - name: Test
         run: |
-          cd out
-          ctest -V --timeout 30 -C DebugSan
+          out/src/std/DebugSan/std-tests.exe
   test-emscripten-4:
     runs-on: ubuntu-latest
     container:
