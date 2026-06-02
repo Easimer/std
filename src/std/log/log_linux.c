@@ -33,9 +33,15 @@ static void log_on_event(const struct log_handler *handler,
   FILE *file = file_from_level(ev->level);
   const char *level = log_level_strings[ev->level];
 
+  const char* fmt = ev->fmt;
+  DCHECK(fmt != NULL);
+  if (fmt == NULL) {
+    return;
+  }
+
   fprintf(file, "%02d:%02d:%02d %-5s %s:%d: ", ev->time.hour, ev->time.minute,
           ev->time.second, level, ev->file, ev->line);
-  vfprintf(file, ev->fmt, ap);
+  vfprintf(file, fmt, ap);
   fprintf(file, "\n");
 }
 
