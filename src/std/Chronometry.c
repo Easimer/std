@@ -25,7 +25,7 @@
 #include <time.h>
 #endif
 
-#if EMSCRIPTEN
+#if __EMSCRIPTEN__
 #include <emscripten/html5.h>
 #include <unistd.h>
 #endif
@@ -89,7 +89,7 @@ void chrono_msleep(u32 num_milliseconds) {
   Sleep(num_milliseconds);
 }
 
-#elif EMSCRIPTEN
+#elif __EMSCRIPTEN__
 TimePoint chrono_getCurrentTime() {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);

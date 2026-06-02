@@ -12,7 +12,7 @@
 #include "./Check.h"
 #include "./Types.h"
 
-#if EMSCRIPTEN
+#if __EMSCRIPTEN__
 #include <emscripten/atomic.h>
 #include <emscripten/threading.h>
 #else
@@ -20,7 +20,7 @@
 #endif
 
 namespace impl {
-#if EMSCRIPTEN
+#if __EMSCRIPTEN__
 struct AtomicU32 {
   alignas(4) _Atomic u32 v;
 
