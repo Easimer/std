@@ -93,6 +93,7 @@ SN_TEST(Result, flattenInnerError) {
 
 SN_TEST(Result, flattenOuterError) {
   Result<Result<Value, TestError>, TestError> outer = TestError(RC);
+  CHECK(outer.isErr());
 
   Result<Value, TestError> flattened = flatten(outer);
   CHECK_HAS_ERROR(flattened, RC);
