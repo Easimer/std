@@ -375,6 +375,7 @@ static bool tryParseArray(Arena *arena,
 
   if (json[0] == ']') {
     json.shrinkFromLeft();  // eat ]
+    rollback.disarm();
     return true;
   }
 
