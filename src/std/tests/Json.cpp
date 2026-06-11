@@ -371,6 +371,15 @@ SN_TEST(JsonParser, UnescapedCtrlChars) {
   }
 }
 
+SN_TEST(JsonParser, ObjectExtraComma) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  JsonValue res;
+  Slice<const char> src = sliceFromConstChar("{\"k\":0,}");
+  bool rc = tryParseValue(temp, src, res);
+  CHECK(!rc);
+}
+
 SN_TEST(JsonUtils, GetKeyValue) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
