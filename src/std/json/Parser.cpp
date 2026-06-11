@@ -570,5 +570,13 @@ bool tryParseValue(Arena *arena,
 
 bool tryParseValue(Arena *arena, Slice<const char> &json, JsonValue &out) {
   Arena::Scope temp = getScratch(&arena, 1);
-  return tryParseValue(arena, temp, json, out);
+  bool accepted = tryParseValue(arena, temp, json, out);
+
+  eatWhitespace(json);
+  if (!json.empty()) {
+    // Reject JSON if there are unconsumed characters in the source
+    return false;
+  }
+
+  return accepted;
 }

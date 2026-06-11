@@ -240,8 +240,7 @@ SN_TEST(JsonParser, ArrayDoubleClose) {
   JsonValue res;
   Slice<const char> src = sliceFromConstChar("[\"x\"]]");
   bool rc = tryParseValue(temp, src, res);
-  CHECK(rc);
-  CHECK(src.length == 1);
+  CHECK(!rc);
 }
 
 SN_TEST(JsonParser, ArrayIncomplete) {
@@ -258,6 +257,24 @@ SN_TEST(JsonParser, NumberWithAlpha) {
 
   JsonValue res;
   Slice<const char> src = sliceFromConstChar("[1.2a-3]");
+  bool rc = tryParseValue(temp, src, res);
+  CHECK(!rc);
+}
+
+SN_TEST(JsonParser, TrailingChars) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  JsonValue res;
+  Slice<const char> src = sliceFromConstChar("[\"\"],");
+  bool rc = tryParseValue(temp, src, res);
+  CHECK(!rc);
+}
+
+SN_TEST(JsonParser, ArrayExtraComma) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  JsonValue res;
+  Slice<const char> src = sliceFromConstChar("[\"\",]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
