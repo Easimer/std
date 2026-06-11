@@ -349,7 +349,8 @@ static bool tryParseString(Arena *arena,
   Vector<char> vec;
 
   while (!json.empty() && json[0] != '"') {
-    switch (json[0]) {
+    char ch = json[0];
+    switch (ch) {
       case '\\': {
         u32 codepoint;
         if (!tryParseEscapedChar(json, codepoint)) {
@@ -359,7 +360,12 @@ static bool tryParseString(Arena *arena,
         break;
       }
       default: {
-        appendVal(temp, &vec, json[0]);
+        if (0x0000 <= ch && ch <= 0x001F) {
+          // Unescaped control characters, which according to RFC7159 are: "the
+          // control characters (U+0000 through U+001F)."
+          return false;
+        }
+        appendVal(temp, &vec, ch);
         json.shrinkFromLeft();
         break;
       }

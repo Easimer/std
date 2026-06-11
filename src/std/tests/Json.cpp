@@ -342,6 +342,35 @@ SN_TEST(JsonParser, NumberHugeNegExponent) {
   }
 }
 
+SN_TEST(JsonParser, UnescapedCtrlChars) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("\"\n\"");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(!rc);
+  }
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("\"\t\"");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(!rc);
+  }
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("\"\b\"");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(!rc);
+  }
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("\"\x7f\"");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(rc);
+  }
+}
+
 SN_TEST(JsonUtils, GetKeyValue) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
