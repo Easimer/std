@@ -138,12 +138,20 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
   if (json[0] == '.') {
     json.shrinkFromLeft();
 
+    bool seenOneDigit = false;
+
     const f64 rcp10 = 1.0 / 10.0;
     f64 rcpDivisor = rcp10;
     while (isDigit(json)) {
       fraction += (json[0] - '0') * rcpDivisor;
       json.shrinkFromLeft();
       rcpDivisor *= rcp10;
+
+      seenOneDigit = true;
+    }
+
+    if (!seenOneDigit) {
+      return false;
     }
   }
 

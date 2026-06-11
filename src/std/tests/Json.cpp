@@ -279,6 +279,15 @@ SN_TEST(JsonParser, ArrayExtraComma) {
   CHECK(!rc);
 }
 
+SN_TEST(JsonParser, NumberWithNoFractionalDigits) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  JsonValue res;
+  Slice<const char> src = sliceFromConstChar("[-2.]");
+  bool rc = tryParseValue(temp, src, res);
+  CHECK(!rc);
+}
+
 SN_TEST(JsonUtils, GetKeyValue) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
