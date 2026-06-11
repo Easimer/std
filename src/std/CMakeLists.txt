@@ -204,3 +204,10 @@ if(SN_STD_BUILD_TESTS)
     COMMAND $<TARGET_FILE:std-tests>
   )
 endif()
+
+if(SN_STD_BUILD_JSON_TEST_SUITE_RUNNER)
+  add_executable(std-json_test_suite json_test_suite/entry.cpp)
+  target_link_libraries(std-json_test_suite PRIVATE std-static std-context)
+  target_wall_werror_SN(std-json_test_suite)
+  set_property(TARGET std-json_test_suite PROPERTY FOLDER "easimer/std")
+endif()

@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(SN_STD_BUILD_TESTS "Build tests" OFF)
+option(SN_STD_BUILD_JSON_TEST_SUITE_RUNNER "Build the JSON test suite runner" OFF)
 if(SN_STD_BUILD_TESTS)
   enable_testing()
 endif()

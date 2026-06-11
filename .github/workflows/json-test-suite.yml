@@ -1,0 +1,33 @@
+name: JSON test suite
+run-name: json-test-suite
+on: [push]
+
+jobs:
+  test-linux-clang:
+    runs-on: ubuntu-latest
+    container:
+      image: silkeh/clang:19-bookworm
+    steps:
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y --no-install-recommends cmake git nodejs ninja-build pkg-config
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Check out test suite
+        run: |
+          git clone https://github.com/nst/JSONTestSuite.git
+      - name: Configure
+        run: |
+          cmake -S . -B out -GNinja --preset ci-test-clang -DSN_STD_BUILD_JSON_TEST_SUITE_RUNNER=ON
+      - name: Build
+        run: |
+          cmake --build out --config DebugSan --target std-json_test_suite
+      - name: Test
+        run: |
+          ./out/src/std/std-json_test_suite ./JSONTestSuite/ || exit 0
+
