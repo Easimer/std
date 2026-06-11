@@ -170,8 +170,8 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
       return false;
     }
 
-    i32 exponentSign = 1;
-    i32 exponent = 0;
+    i8 exponentSign = 1;
+    u32 exponent = 0;
 
     if (json[0] == '+') {
       json.shrinkFromLeft();
@@ -184,13 +184,32 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
       return false;
     }
 
+    bool isInfinite = false;
+
     while (isDigit(json)) {
+      if (exponent > 1024) {
+        isInfinite = true;
+        break;
+      }
+
       exponent *= 10;
-      exponent += (json[0] - '0');
+      exponent += u32(json[0] - '0');
       json.shrinkFromLeft();
     }
 
-    out.number = combined * pow(10, exponentSign * exponent);
+    if (isInfinite) {
+      while (isDigit(json)) {
+        json.shrinkFromLeft();
+      }
+
+      if (exponentSign == 1) {
+        out.number = sign * INFINITY;
+      } else {
+        out.number = sign * 0.0f;
+      }
+    } else {
+      out.number = combined * pow(10, exponentSign * exponent);
+    }
   }
 
   rollback.disarm();

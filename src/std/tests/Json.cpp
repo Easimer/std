@@ -4,6 +4,8 @@
 #include "std/json/Parser.hpp"
 #include "std/json/Utils.hpp"
 
+#include <math.h>
+
 #define CHECK_STR(Var, Literal) \
   CHECK((Var).asConst() == Slice<const char>(sliceFromConstChar(Literal)))
 
@@ -295,6 +297,49 @@ SN_TEST(JsonParser, StringStartEscapeUnclosed) {
   Slice<const char> src = sliceFromConstChar("[\"\\");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
+}
+
+SN_TEST(JsonParser, NumberHugePosExponent) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("1.0e9999999");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(rc);
+    CHECK(res.type == JsonType::Number);
+    CHECK(isinf(res.number));
+  }
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("-1.0e9999999");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(rc);
+    CHECK(res.type == JsonType::Number);
+    CHECK(isinf(res.number));
+  }
+}
+
+SN_TEST(JsonParser, NumberHugeNegExponent) {
+  Arena::Scope temp = getScratch(nullptr, 0);
+
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("1.0e-9999999");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(rc);
+    CHECK(res.type == JsonType::Number);
+    CHECK(res.number == 0.0f);
+  }
+
+  {
+    JsonValue res;
+    Slice<const char> src = sliceFromConstChar("-1.0e-9999999");
+    bool rc = tryParseValue(temp, src, res);
+    CHECK(rc);
+    CHECK(res.type == JsonType::Number);
+    CHECK(res.number == -0.0f);
+  }
 }
 
 SN_TEST(JsonUtils, GetKeyValue) {
