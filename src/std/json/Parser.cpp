@@ -230,6 +230,11 @@ static bool tryParseEscapedChar(Slice<const char> &json, u32 &out) {
   Slice<const char> saved = json;
   json.shrinkFromLeft();
 
+  if (json.empty()) {
+    json = saved;
+    return false;
+  }
+
   switch (json[0]) {
     case '"':
     case '\\':
