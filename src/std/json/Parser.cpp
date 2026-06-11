@@ -382,7 +382,10 @@ static bool tryParseArray(Arena *arena,
   Arena::Scope temp = tempArena;
   Vector<JsonValue> values;
 
+  bool sawComma = false;
+
   while (!json.empty() && json[0] != ']') {
+    sawComma = false;
     JsonValue *pValue = append(temp, &values);
     if (!tryParseValue(arena, tempArena, json, *pValue)) {
       return false;
@@ -403,6 +406,11 @@ static bool tryParseArray(Arena *arena,
     }
 
     json.shrinkFromLeft();  // eat comma
+    sawComma = true;
+  }
+
+  if (sawComma) {
+    return false;
   }
 
   json.shrinkFromLeft();  // eat ]
