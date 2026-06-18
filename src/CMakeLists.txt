@@ -1,2 +1,5 @@
+if(SN_STD_BUILD_TESTS)
+  add_subdirectory(embed)
+endif()
 add_subdirectory(test_exe)
 add_subdirectory(std)

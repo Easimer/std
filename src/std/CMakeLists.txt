@@ -168,6 +168,18 @@ set_property(TARGET std PROPERTY FOLDER "easimer/std")
 
 add_library(std::std ALIAS std)
 
+add_library(std-gltf STATIC)
+target_sources(std-gltf
+  PRIVATE
+    gltf/AccessorIterable.hpp
+    gltf/Descriptor.hpp
+    gltf/IntegerConversion.hpp
+    gltf/Loader.cpp gltf/Loader.hpp
+)
+target_link_libraries(std-gltf PUBLIC std::std)
+add_library(std::gltf ALIAS std-gltf)
+set_property(TARGET std-gltf PROPERTY FOLDER "easimer/std")
+
 if(SN_STD_BUILD_TESTS)
   add_executable(std-tests
     tests/entry.cpp
@@ -193,15 +205,29 @@ if(SN_STD_BUILD_TESTS)
     tests/Vector.cpp
     tests/VU128.cpp
 
+    gltf/Tests.cpp
+    Box_glb.c
+    BoxTextured_glb.c
+
     tests/CompileC.c
   )
-  target_link_libraries(std-tests PRIVATE std::test_exe std::os)
+  target_link_libraries(std-tests PRIVATE std::test_exe std::os std::gltf)
   target_wall_werror_SN(std-tests)
   set_property(TARGET std-tests PROPERTY FOLDER "easimer/std")
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT std-tests)
   add_test(
     NAME std-tests
     COMMAND $<TARGET_FILE:std-tests>
+  )
+  add_custom_command(
+    OUTPUT Box_glb.c
+    COMMAND embed Box_glb ${CMAKE_SOURCE_DIR}/assets/Box.glb
+    DEPENDS ${CMAKE_SOURCE_DIR}/assets/Box.glb
+  )
+  add_custom_command(
+    OUTPUT BoxTextured_glb.c
+    COMMAND embed BoxTextured_glb ${CMAKE_SOURCE_DIR}/assets/BoxTextured.glb
+    DEPENDS ${CMAKE_SOURCE_DIR}/assets/BoxTextured.glb
   )
 endif()
 
