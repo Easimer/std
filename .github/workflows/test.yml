@@ -75,7 +75,7 @@ jobs:
           function Find-Dirx64 {
             try {
               # Github runner
-              $Dirx64 = Get-ChildItem -Path 'C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/' -Recurse -Filter "Hostx64" -ErrorAction Stop
+              $Dirx64 = Get-ChildItem -Path 'C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/' -Recurse -Filter "Hostx64" -ErrorAction Stop
               return $Dirx64
             } catch {
               # Self-hosted runner
