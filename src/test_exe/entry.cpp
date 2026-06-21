@@ -342,6 +342,7 @@ int main(int numArgs, char **arrArgs) {
     printf("::endgroup\n");
   }
 
+  log_shutdown();
   int rc = (numFail == 0) ? 0 : 1;
   return rc;
 }

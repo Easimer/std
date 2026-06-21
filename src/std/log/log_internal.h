@@ -29,8 +29,11 @@ typedef void (*log_pfn_on_event)(const struct log_handler *handler,
                                  const struct log_event *ev,
                                  va_list ap);
 
+typedef void (*log_pfn_shutdown)(const struct log_handler *handler);
+
 struct log_handler_api {
   log_pfn_on_event on_event;
+  log_pfn_shutdown shutdown;
 };
 
 struct log_handler {

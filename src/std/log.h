@@ -85,6 +85,8 @@ void log_log(enum log_level level,
 int log_register_handler(const struct log_handler *handler);
 int log_unregister_handler(const struct log_handler *handler);
 
+void log_shutdown(void);
+
 #if __cplusplus
 }
 #endif

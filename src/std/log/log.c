@@ -85,6 +85,10 @@ int log_unregister_handler(const struct log_handler *handler) {
       continue;
     }
 
+    if (slot->handler->api->shutdown) {
+      slot->handler->api->shutdown(slot->handler);
+    }
+
     // Move contents of the last slot into the slot to be removed
     memset(slot, 0, sizeof(*slot));
     *slot = *last_slot;
@@ -96,6 +100,21 @@ int log_unregister_handler(const struct log_handler *handler) {
   }
 
   return LOG_ERR_ENOENT;
+}
+
+void log_shutdown(void) {
+  for (uint32_t i = 0; i < handler_registry_len; i++) {
+    struct log_handler_slot *slot = &handler_registry[i];
+    if (slot->handler == NULL) {
+      continue;
+    }
+
+    if (slot->handler->api->shutdown) {
+      slot->handler->api->shutdown(slot->handler);
+    }
+  }
+
+  memset(handler_registry, 0, sizeof(handler_registry));
 }
 
 #if LOG_HANDLER_WIN32_ENABLED
