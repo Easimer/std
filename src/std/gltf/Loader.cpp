@@ -681,7 +681,7 @@ Result<Node, Error> parseNode(Arena *arena,
     }
 
     ret.localPosition = translation->valueOr(Vec3(0, 0, 0));
-    ret.localOrientation = rotation->valueOr(Quat(1, 0, 0, 0));
+    ret.localOrientation = rotation->valueOr(Quat(0, 0, 0, 1));
     ret.localScale = scale->valueOr(Vec3(1, 1, 1));
   }
 

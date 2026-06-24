@@ -171,7 +171,7 @@ SN_TEST(Gltf, Box_nodes) {
 
   auto &node1 = file.nodes[1];
   CHECK_VEC_CLOSE_ENOUGH(node1.localPosition, Vec3(0, 0, 0), 0.001f);
-  CHECK_QUAT_CLOSE_ENOUGH(node1.localOrientation, Quat(1, 0, 0, 0), 0.001f);
+  CHECK_QUAT_CLOSE_ENOUGH(node1.localOrientation, Quat(0, 0, 0, 1), 0.001f);
   CHECK_VEC_CLOSE_ENOUGH(node1.localScale, Vec3(1, 1, 1), 0.001f);
   CHECK(node1.idxSelf == 1);
   CHECK(node1.mesh == &file.meshes[0]);

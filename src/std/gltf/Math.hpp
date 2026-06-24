@@ -2,6 +2,8 @@
 
 #include "std/gltf/Descriptor.hpp"
 
+#include <math.h>
+
 namespace sn::gltf {
 
 static inline Quat quatFromRotationMatrix(const f32 matrix[9]) {
