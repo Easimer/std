@@ -3,6 +3,7 @@
 #include "std/Arena.h"
 #include "std/Check.h"
 #include "std/Chronometry.h"
+#include "std/Slice.hpp"
 #include "std/Types.h"
 
 #include <csetjmp>
@@ -92,3 +93,4 @@ struct SnTestResult {
   SN_TEST_DEFINE_DESC(SuiteName, TestName, false); \
   static void test_func_##SuiteName##_##TestName(void)
 
+extern Slice<u8> snTestReadAsset(Arena *arena, Slice<const char> path);

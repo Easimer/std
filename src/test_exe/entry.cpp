@@ -10,12 +10,17 @@
 #include <std/Check.h>
 #include <std/Chronometry.h>
 #include <std/log.h>
+#include <std/Path.hpp>
 #include <std/Slice.hpp>
 #include <std/SliceUtils.hpp>
 #include <std/Testing.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#if __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 SnTest *gSnTestFirst = nullptr;
 SnTest *gSnTestPrev = nullptr;
@@ -54,6 +59,30 @@ Slice<char> getWorkingDir(Slice<char> dst, u32 &sizRequired) {
   return dst.subarray(0, len);
 }
 #endif
+
+static Slice<const char> gPathAssets;
+Slice<u8> snTestReadAsset(Arena *arena, Slice<const char> path) {
+  Arena::Scope temp = getScratch(&arena, 1);
+
+  Slice<char> p = concatZeroTerminate(
+      temp, joinSimple(temp, gPathAssets, path).asConst(), {});
+
+  FILE *f = fopen(p.data, "rb");
+  if (f == nullptr) {
+  return {};
+  }
+
+  fseek(f, 0, SEEK_END);
+  long sizFile = ftell(f);
+  fseek(f, 0, SEEK_SET);
+
+  Slice<u8> buf;
+  alloc(arena, sizFile, buf);
+  size_t sizRead = fread(buf.data, 1, sizFile, f);
+  fclose(f);
+
+  return buf.subarray(0, sizRead);
+}
 
 static const u32 SIZ_ARENA = 256 * 1024;
 
@@ -268,6 +297,13 @@ int main(int numArgs, char **arrArgs) {
     }
   };
 
+#if __EMSCRIPTEN__
+  // FIXME(danielm): hardcoded for the std repo
+  EM_ASM(FS.mkdir('/std');  FS.mount(NODEFS, {root : '..'}, '/std'););
+  char pathStd[5] = "/std";
+  cwd = {pathStd, 4};
+#endif
+
   gSnCwd = cwd;
   printf("Working directory: %.*s\n", FMT_SLICE(cwd));
 
@@ -277,6 +313,21 @@ int main(int numArgs, char **arrArgs) {
   }
 
   printf("Running in GA: %d\n", gSnRunningInGA ? 1 : 0);
+
+  // Compute path to the /assets directory
+  Slice<const char> pathAssets = cwd.asConst();
+  // FIXME(danielm): hardcoded for the std repo
+  while (
+      pathAssets != Slice<const char>(sliceFromConstChar("/")) &&
+      (basename(pathAssets) != Slice<const char>(sliceFromConstChar("std")) ||
+       basename(dirname(pathAssets)) ==
+           Slice<const char>(sliceFromConstChar("src")))) {
+    pathAssets = dirname(pathAssets);
+  }
+
+  gPathAssets =
+      joinSimple(&arenaResults, pathAssets, sliceFromConstChar("assets"))
+          .asConst();
 
   SnTestStats stats;
   TimePoint t_start = chrono_getCurrentTime();

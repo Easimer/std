@@ -206,8 +206,6 @@ if(SN_STD_BUILD_TESTS)
     tests/VU128.cpp
 
     gltf/Tests.cpp
-    Box_glb.c
-    BoxTextured_glb.c
 
     tests/CompileC.c
   )
@@ -219,16 +217,9 @@ if(SN_STD_BUILD_TESTS)
     NAME std-tests
     COMMAND $<TARGET_FILE:std-tests>
   )
-  add_custom_command(
-    OUTPUT Box_glb.c
-    COMMAND embed Box_glb ${CMAKE_SOURCE_DIR}/assets/Box.glb
-    DEPENDS ${CMAKE_SOURCE_DIR}/assets/Box.glb
-  )
-  add_custom_command(
-    OUTPUT BoxTextured_glb.c
-    COMMAND embed BoxTextured_glb ${CMAKE_SOURCE_DIR}/assets/BoxTextured.glb
-    DEPENDS ${CMAKE_SOURCE_DIR}/assets/BoxTextured.glb
-  )
+  if(EMSCRIPTEN)
+    target_link_options(std-tests PRIVATE -lnodefs.js)
+  endif()
 endif()
 
 if(SN_STD_BUILD_JSON_TEST_SUITE_RUNNER)

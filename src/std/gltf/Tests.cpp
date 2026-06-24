@@ -15,11 +15,6 @@
 
 using namespace sn::gltf;
 
-extern "C" const unsigned char Box_glb[];
-extern "C" const size_t Box_glb_len;
-extern "C" const unsigned char BoxTextured_glb[];
-extern "C" const size_t BoxTextured_glb_len;
-
 static inline bool isQuatCloseEnough(Quat actual,
                                      Quat expected,
                                      f32 epsilon) {
@@ -31,18 +26,22 @@ static inline bool isQuatCloseEnough(Quat actual,
   CHECK(isQuatCloseEnough(Actual, Expected, Epsilon) ||    \
         isQuatCloseEnough(negate(Actual), Expected, Epsilon))
 
-static sn::gltf::File parseModel(Arena *arena, const unsigned char* pBuf, size_t sizBuf) {
-  Slice<const unsigned char> src = {pBuf, (u32)sizBuf};
-  Result<sn::gltf::File, sn::gltf::Error> res =
-      sn::gltf::parseGlb(arena, src.cast<const u8>());
+static sn::gltf::File parseModel(Arena *arena, Slice<const char> path) {
+  Arena::Scope temp = getScratch(&arena, 1);
+  Slice<const u8> src = snTestReadAsset(temp, path).asConst();
+  Result<sn::gltf::File, sn::gltf::Error> res = sn::gltf::parseGlb(arena, src);
   CHECK(res.isOk());
 
   return res.unwrap();
 }
 
+static const Slice<const char> BOX_GLB = sliceFromConstChar("Box.glb");
+static const Slice<const char> BOX_TEXTURED_GLB =
+    sliceFromConstChar("BoxTextured.glb");
+
 SN_TEST(Gltf, Box_buffers) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.buffers.length == 1);
   CHECK(file.buffers[0].data.length == 648);
@@ -50,7 +49,7 @@ SN_TEST(Gltf, Box_buffers) {
 
 SN_TEST(Gltf, Box_bufferViews) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.bufferViews.length == 2);
 
@@ -71,7 +70,7 @@ SN_TEST(Gltf, Box_bufferViews) {
 
 SN_TEST(Gltf, Box_accessors) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.accessors.length == 3);
 
@@ -103,7 +102,7 @@ SN_TEST(Gltf, Box_accessors) {
 
 SN_TEST(Gltf, Box_materials) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.materials.length == 1);
 
@@ -127,7 +126,7 @@ SN_TEST(Gltf, Box_materials) {
 
 SN_TEST(Gltf, Box_meshes) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.meshes.length == 1);
   CHECK(file.materials.length == 1);
@@ -150,7 +149,7 @@ SN_TEST(Gltf, Box_meshes) {
 
 SN_TEST(Gltf, Box_nodes) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.nodes.length == 2);
   CHECK(file.meshes.length > 0);
@@ -184,7 +183,7 @@ SN_TEST(Gltf, Box_nodes) {
 
 SN_TEST(Gltf, Box_scenes) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, Box_glb, Box_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_GLB);
 
   CHECK(file.scenes.length == 1);
 
@@ -196,7 +195,7 @@ SN_TEST(Gltf, Box_scenes) {
 
 SN_TEST(Gltf, BoxTextured_texcoord) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, BoxTextured_glb, BoxTextured_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_TEXTURED_GLB);
 
   CHECK(file.meshes.length == 1);
 
@@ -212,7 +211,7 @@ SN_TEST(Gltf, BoxTextured_texcoord) {
 
 SN_TEST(Gltf, BoxTextured_textures) {
   Arena::Scope temp = getScratch(nullptr, 0);
-  sn::gltf::File file = parseModel(temp, BoxTextured_glb, BoxTextured_glb_len);
+  sn::gltf::File file = parseModel(temp, BOX_TEXTURED_GLB);
 
   CHECK(file.textures.length == 1);
   CHECK(file.samplers.length == 1);
