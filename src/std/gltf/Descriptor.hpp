@@ -123,6 +123,10 @@ struct Vec3 {
 
     f32 v[3];
   };
+
+  Vec3() : x(0), y(0), z(0) {}
+  Vec3(f32 c) : x(c), y(c), z(c) {}
+  Vec3(f32 x, f32 y, f32 z) : x(x), y(y), z(z) {}
 };
 
 struct Vec4 {
@@ -135,6 +139,10 @@ struct Vec4 {
     };
     f32 v[4];
   };
+
+  Vec4() : x(0), y(0), z(0), w(0) {}
+  Vec4(f32 c) : x(c), y(c), z(c), w(c) {}
+  Vec4(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w) {}
 };
 
 struct Quat {
@@ -147,7 +155,10 @@ struct Quat {
     };
     f32 v[4];
   };
-  };
+
+  Quat() : x(0), y(0), z(0), w(0) {}
+  Quat(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w) {}
+};
 
 struct Buffer {
   Slice<const u8> data;
@@ -268,9 +279,9 @@ struct Skin {
 };
 
 struct Node {
-  Vec3 localPosition = {0, 0, 0};
-  Quat localOrientation = Quat(1, 0, 0, 0);
-  Vec3 localScale = {1, 1, 1};
+  Vec3 localPosition = Vec3(0, 0, 0);
+  Quat localOrientation = Quat(0, 0, 0, 1);
+  Vec3 localScale = Vec3(1, 1, 1);
 
   u32 idxSelf;
   Node *parent = nullptr;
