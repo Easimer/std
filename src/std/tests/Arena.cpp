@@ -30,14 +30,14 @@ SN_TEST(ArenaScope, cleansUp) {
 }
 
 SN_TEST(Arena, succeeds) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp;
 
   u8 *bytes = alloc<u8>(temp, 128);
   CHECK(bytes != nullptr);
 }
 
 SN_TEST(Arena, memoryIsZeroInited) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp;
 
   u64 *values = alloc<u64>(temp, 8);
   for (u32 i = 0; i < 8; i++) {
@@ -46,13 +46,13 @@ SN_TEST(Arena, memoryIsZeroInited) {
 }
 
 SN_TEST_MUST_FAIL(Arena, callsHandleOomWhenOutOfSpace) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp;
 
   alloc<u8>(temp, 0xFFFFFFFF);
 }
 
 SN_TEST(Arena, exactSizeAllocSucceeds) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp;
 
   ptrdiff_t size = (temp.arena->end - temp.arena->beg);
   CHECK(size <= 0xFFFFFFFF);
@@ -61,3 +61,30 @@ SN_TEST(Arena, exactSizeAllocSucceeds) {
   CHECK(bytes != nullptr);
 }
 
+SN_TEST(ArenaScope, defaultCtor) {
+  ArenaSaved saved = getScratch(nullptr, 0);
+
+  {
+    Arena::Scope temp;
+    CHECK(temp.arena == saved.arena);
+    alloc<u8>(temp, 64);
+  }
+
+  ArenaSaved now = getScratch(nullptr, 0);
+  CHECK(now.arena->beg == saved.arena->beg);
+  CHECK(now.arena->end == saved.arena->end);
+}
+
+SN_TEST(Arena, getScratchFor) {
+  ArenaSaved a0 = getScratch(nullptr, 0);
+  ArenaSaved a1 = getScratchFor(a0.arena);
+  ArenaSaved a2 = getScratchFor(a1.arena);
+
+  CHECK(a0.arena != nullptr);
+  CHECK(a1.arena != nullptr);
+  CHECK(a2.arena != nullptr);
+
+  CHECK(a0.arena != a1.arena);
+  CHECK(a1.arena != a2.arena);
+  CHECK(a0.arena == a2.arena);
+}

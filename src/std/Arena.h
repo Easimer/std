@@ -44,26 +44,6 @@ typedef struct ArenaSaved {
 typedef ArenaSaved ArenaTemp;
 
 #if __cplusplus
-struct Arena::Scope {
-  Arena *arena;
-  Arena saved;
-
-  Scope(Arena *arena) : arena(arena) { saved = *arena; }
-  Scope(ArenaSaved temp) : arena(temp.arena), saved(temp.saved) {}
-  ~Scope() { reset(); }
-  Scope(const Scope &) = delete;
-  Scope(Scope &&) = delete;
-  void operator=(const Scope &) = delete;
-  void operator=(Scope &&) = delete;
-  operator Arena *() { return arena; }
-
-  void reset() { restoreArena(arena, saved); }
-
-  [[deprecated]] Scope *operator->() { return this; }
-};
-#endif
-
-#if __cplusplus
 extern "C" {
 #endif
 
@@ -134,6 +114,10 @@ SN_STD_API ArenaSaved getScratch(Arena **pConflicts, u32 numConflicts);
 SN_STD_API void setAllocatorsForThread(Arena *arena0, Arena *arena1);
 void handleOOM(Arena *arena);
 
+static inline ArenaSaved getScratchFor(Arena *arena) {
+  return getScratch(&arena, 1);
+}
+
 /**
  * Saves the current state of the provided arena into an ArenaSaved structure.
  * The arena can be restored later to this state by `restoreArena`.
@@ -156,6 +140,27 @@ void restoreArena(Arena *dst, Arena saved);
 
 #if __cplusplus
 }
+#endif
+
+#if __cplusplus
+struct Arena::Scope {
+  Arena *arena;
+  Arena saved;
+
+  Scope() : Scope(getScratch(nullptr, 0)) {}
+  Scope(Arena *arena) : arena(arena), saved(*arena) {}
+  Scope(ArenaSaved temp) : arena(temp.arena), saved(temp.saved) {}
+  ~Scope() { reset(); }
+  Scope(const Scope &) = delete;
+  Scope(Scope &&) = delete;
+  void operator=(const Scope &) = delete;
+  void operator=(Scope &&) = delete;
+  operator Arena *() { return arena; }
+
+  void reset() { restoreArena(arena, saved); }
+
+  [[deprecated]] Scope *operator->() { return this; }
+};
 #endif
 
 #if __cplusplus
