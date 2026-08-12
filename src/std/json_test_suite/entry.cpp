@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <csetjmp>
 
-static const Slice<const char> TEST_PARSER[] = {
+static const Slice<char> TEST_PARSER[] = {
     sliceFromConstChar("i_number_double_huge_neg_exp.json"),
     sliceFromConstChar("i_number_huge_exp.json"),
     sliceFromConstChar("i_number_neg_int_huge_exp.json"),
@@ -185,7 +185,8 @@ static const Slice<const char> TEST_PARSER[] = {
     sliceFromConstChar("n_string_unescaped_tab.json"),
     sliceFromConstChar("n_string_unicode_CapitalU.json"),
     sliceFromConstChar("n_string_with_trailing_garbage.json"),
-    // sliceFromConstChar("n_structure_100000_opening_arrays.json"), // SKIPPED: stack overflow
+    // sliceFromConstChar("n_structure_100000_opening_arrays.json"), // SKIPPED:
+    // stack overflow
     sliceFromConstChar("n_structure_angle_bracket_..json"),
     sliceFromConstChar("n_structure_angle_bracket_null.json"),
     sliceFromConstChar("n_structure_array_trailing_garbage.json"),
@@ -209,7 +210,8 @@ static const Slice<const char> TEST_PARSER[] = {
     sliceFromConstChar("n_structure_object_with_trailing_garbage.json"),
     sliceFromConstChar("n_structure_open_array_apostrophe.json"),
     sliceFromConstChar("n_structure_open_array_comma.json"),
-    // sliceFromConstChar("n_structure_open_array_object.json"), // SKIPPED: stack overflow
+    // sliceFromConstChar("n_structure_open_array_object.json"), // SKIPPED:
+    // stack overflow
     sliceFromConstChar("n_structure_open_array_open_object.json"),
     sliceFromConstChar("n_structure_open_array_open_string.json"),
     sliceFromConstChar("n_structure_open_array_string.json"),
@@ -324,8 +326,8 @@ int main(int argc, char **argv) {
   Arena arena1 = makeArena();
   setAllocatorsForThread(&arena0, &arena1);
 
-  Slice<const char> pathRepo = {argv[1], (u32)strlen(argv[1])};
-  Slice<const Slice<const char>> test_files = sliceFrom(TEST_PARSER);
+  Slice<char> pathRepo = {argv[1], (u32)strlen(argv[1])};
+  Slice<Slice<char>> test_files = sliceFrom(TEST_PARSER);
 
   Arena arena0Saved = arena0;
   Arena arena1Saved = arena1;
@@ -338,8 +340,8 @@ int main(int argc, char **argv) {
 
     Slice<char> pathTestFiles =
         joinSimple(temp, pathRepo, sliceFromConstChar("test_parsing"));
-    Slice<char> pathFile = joinSimple(temp, pathTestFiles.asConst(), filename);
-    Slice<char> z = concatZeroTerminate(temp, pathFile.asConst(), {});
+    Slice<char> pathFile = joinSimple(temp, pathTestFiles, filename);
+    Slice<char> z = concatZeroTerminate(temp, pathFile, {});
 
     FILE *f = fopen(z.data, "rb");
     if (!f) {
@@ -349,13 +351,13 @@ int main(int argc, char **argv) {
     fseek(f, 0, SEEK_END);
     long sizFile = ftell(f);
     fseek(f, 0, SEEK_SET);
-    Slice<char> bytes;
+    MutSlice<char> bytes;
     alloc(temp, sizFile, bytes);
     fread(bytes.data, sizFile, 1, f);
     fclose(f);
 
     JsonValue root;
-    Slice<const char> cbytes = bytes.asConst();
+    Slice<char> cbytes = bytes;
     bool accepted;
     bool crashed = true;
     bool expected;

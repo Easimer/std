@@ -46,7 +46,7 @@ Slice<T> makeSlice(Arena *arena, const T *src, u32 len) {
  * \param s A valid pointer to sequence of zero-terminated
  * characters.
  */
-Slice<const char> fromCStrWithZero(const char *s);
+Slice<char> fromCStrWithZero(const char *s);
 /**
  * \brief Creates a slice from a zero-terminated string that doesn't include
  * the zero-terminator.
@@ -54,21 +54,21 @@ Slice<const char> fromCStrWithZero(const char *s);
  * \param s A valid pointer to sequence of zero-terminated
  * characters.
  */
-Slice<const char> fromCStr(const char *s);
+Slice<char> fromCStr(const char *s);
 
 
 /**
  * \deprecated Prefer `operator==`
  * \private
  */
-b32 compareAsString(Slice<const char> left, Slice<const char> right);
+b32 compareAsString(Slice<char> left, Slice<char> right);
 
 /**
  * \deprecated Prefer Slice<T>::startsWith
  * \private
  */
 template <typename T>
-bool startsWith(Slice<const T> left, Slice<const T> prefix) {
+bool startsWith(Slice<T> left, Slice<T> prefix) {
   return left.startsWith(prefix);
 }
 
@@ -77,7 +77,7 @@ bool startsWith(Slice<const T> left, Slice<const T> prefix) {
  * `dst`.
  */
 template <typename T>
-T *copyElements(T *dst, const T *src, u32 numElements) {
+T *copyElements(T *dst, const T *src, size_t numElements) {
   return (T *)memcpy(dst, src, numElements * sizeof(T));
 }
 
@@ -86,12 +86,12 @@ T *copyElements(T *dst, const T *src, u32 numElements) {
  * into the provided arena.
  */
 template <typename T>
-Slice<T> duplicate(Arena *arena, Slice<const T> in) {
-  if (empty(in)) {
+MutSlice<T> duplicate(Arena *arena, Slice<T> in) {
+  if (in.empty()) {
     return {nullptr, 0};
   }
 
-  Slice<T> ret = {alloc<T>(arena, in.length), in.length};
+  MutSlice<T> ret = {alloc<T>(arena, in.length), in.length};
   copyElements(ret.data, in.data, ret.length);
   return ret;
 }
@@ -101,15 +101,15 @@ Slice<T> duplicate(Arena *arena, Slice<const T> in) {
  * into the provided arena.
  */
 template <typename T>
-Slice<T> duplicate(Arena *arena, Slice<T> in) {
-  return duplicate(arena, in.asConst());
+MutSlice<T> duplicate(Arena *arena, MutSlice<T> in) {
+  return duplicate<T>(arena, static_cast<Slice<T>>(in));
 }
 
 /**
  * \brief Creates a new zero-initialized slice with the specified length.
  */
 template <typename T>
-void alloc(Arena *arena, u32 length, Slice<T> &dst) {
+void alloc(Arena *arena, size_t length, MutSlice<T> &dst) {
   dst.length = length;
   dst.data = alloc<T>(arena, length);
 }
@@ -118,7 +118,7 @@ void alloc(Arena *arena, u32 length, Slice<T> &dst) {
  * \brief Creates a new **uninitialized** slice with the specified length.
  */
 template <typename T>
-void allocNZ(Arena *arena, u32 length, Slice<T> &dst) {
+void allocNZ(Arena *arena, size_t length, MutSlice<T> &dst) {
   dst.length = length;
   dst.data = allocNZ<T>(arena, length);
 }
@@ -127,7 +127,7 @@ void allocNZ(Arena *arena, u32 length, Slice<T> &dst) {
  * \brief Fills the slice with zeros.
  */
 template <typename T>
-void zeroMemory(Slice<T> s) {
+void zeroMemory(MutSlice<T> s) {
   if (s.data == nullptr) {
     return;
   }
@@ -140,29 +140,20 @@ void zeroMemory(Slice<T> s) {
  * destination slice must be at least as big as the source slice.
  */
 template <typename T>
-void copy(Slice<T> dst, Slice<const T> src) {
+[[deprecated]] void copy(MutSlice<T> dst, Slice<T> src) {
   dst.copy(src);
-}
-
-/**
- * \brief Copies all elements from `src` to the beginning of `dst`. The
- * destination slice must be at least as big as the source slice.
- */
-template <typename T>
-void copy(Slice<T> dst, Slice<T> src) {
-  copy(dst, src.asConst());
 }
 
 /** Takes two slices and returns their concatenation. */
 template <typename T>
-Slice<T> concat(Arena *arena, Slice<const T> left, Slice<const T> right) {
-  u32 lenOut = left.length + right.length;
+MutSlice<T> concat(Arena *arena, Slice<T> left, Slice<T> right) {
+  size_t lenOut = left.length + right.length;
 
-  Slice<T> ret;
+  MutSlice<T> ret;
   allocNZ(arena, lenOut, ret);
 
-  copy(subarray(ret, 0, left.length), left);
-  copy(subarray(ret, left.length), right);
+  ret.subarray(0, left.length).copy(left);
+  ret.subarray(left.length).copy(right);
 
   return ret;
 }
@@ -172,31 +163,38 @@ Slice<T> concat(Arena *arena, Slice<const T> left, Slice<const T> right) {
  * appended to the end. The resulting slice **includes** the zero-terminator.
  */
 template <typename T>
-Slice<T> concatZeroTerminate(Arena *arena,
-                             Slice<const T> left,
-                             Slice<const T> right) {
-  u32 lenOut = left.length + right.length + 1;
+MutSlice<T> concatZeroTerminate(Arena *arena, Slice<T> left, Slice<T> right) {
+  size_t lenOut = left.length + right.length + 1;
 
-  Slice<T> ret;
+  MutSlice<T> ret;
   allocNZ(arena, lenOut, ret);
 
-  copy(subarray(ret, 0, left.length), left);
-  copy(subarray(ret, left.length), right);
+  ret.subarray(0, left.length).copy(left);
+  ret.subarray(left.length).copy(right);
   ret[ret.length - 1] = {};
 
   return ret;
 }
 
 /**
+ * \brief Creates a zero-terminated copy of the input slice.
+ */
+template <typename T>
+MutSlice<T> zeroTerminated(Arena *arena, Slice<T> in) {
+  Slice<T> empty = {};
+  return concatZeroTerminate(arena, in, empty);
+}
+
+/**
  * \private
  */
 template <typename T>
-bool endsWith(Slice<const T> self, Slice<const T> suffix) {
+bool endsWith(Slice<T> self, Slice<T> suffix) {
   return self.endsWith(suffix);
 }
 
 template <typename T>
-Slice<T> append(Slice<T> dst, Slice<T> src) {
+MutSlice<T> append(MutSlice<T> dst, Slice<T> src) {
   CHECK(dst.length >= src.length);
   copyElementsInto(dst, src.data, src.length);
   shrinkFromLeftByCount(&dst, src.length);
@@ -204,15 +202,7 @@ Slice<T> append(Slice<T> dst, Slice<T> src) {
 }
 
 template <typename T>
-Slice<T> append(Slice<T> dst, Slice<const T> src) {
-  CHECK(dst.length >= src.length);
-  copyElementsInto(dst, src.data, src.length);
-  shrinkFromLeftByCount(&dst, src.length);
-  return dst;
-}
-
-template <typename T>
-Slice<T> append(Slice<T> dst, const T &elem) {
+MutSlice<T> append(MutSlice<T> dst, const T &elem) {
   CHECK(dst.length >= 1);
   copyElementsInto(dst, &elem, 1);
   shrinkFromLeftByCount(&dst, 1);
@@ -223,7 +213,7 @@ Slice<T> append(Slice<T> dst, const T &elem) {
  * \private
  */
 template <typename T>
-void fill(Slice<T> dst, const T &value) {
+void fill(MutSlice<T> dst, const T &value) {
   dst.fill(value);
 }
 
@@ -231,7 +221,7 @@ void fill(Slice<T> dst, const T &value) {
  * \private
  */
 template <typename D, typename S>
-void convert(Slice<D> dst, Slice<const S> src) {
+void convert(MutSlice<D> dst, Slice<S> src) {
   dst.copyWithConversionTo(dst);
 }
 

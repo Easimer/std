@@ -11,12 +11,12 @@
 #include "std/SliceUtils.hpp"
 
 static const char *DOT = ".";
-static const Slice<const char> DOT_STR = {DOT, 1};
+static const Slice<char> DOT_STR = {DOT, 1};
 
 static const char *SLASH = "/";
-static const Slice<const char> SLASH_STR = {SLASH, 1};
+static const Slice<char> SLASH_STR = {SLASH, 1};
 
-Slice<const char> dirname(Slice<const char> path) {
+Slice<char> dirname(Slice<char> path) {
   while (path.length > 0 &&
          (path[path.length - 1] == '/' || path[path.length - 1] == '\\')) {
     // Skip trailing separators
@@ -27,22 +27,20 @@ Slice<const char> dirname(Slice<const char> path) {
     return DOT_STR;
   }
 
-  u32 idxFwd = 0;
-  u32 idxBack = 0;
-  bool hasFwd = lastIndexOf<const char>(path, '/', &idxFwd);
-  bool hasBack = lastIndexOf<const char>(path, '\\', &idxBack);
+  Optional<size_t> idxFwd = path.lastIndexOf('/');
+  Optional<size_t> idxBack = path.lastIndexOf('\\');
 
-  if (!hasFwd && !hasBack) {
+  if (!idxFwd.hasValue() && !idxBack.hasValue()) {
     return DOT_STR;
   }
 
-  u32 idxSlash = 0;
-  if (hasFwd & hasBack) {
-    idxSlash = idxFwd > idxBack ? idxFwd : idxBack;
-  } else if (hasFwd) {
-    idxSlash = idxFwd;
-  } else if (hasBack) {
-    idxSlash = idxBack;
+  size_t idxSlash = 0;
+  if (idxFwd.hasValue() && idxBack.hasValue()) {
+    idxSlash = *idxFwd > *idxBack ? *idxFwd : *idxBack;
+  } else if (idxFwd.hasValue()) {
+    idxSlash = *idxFwd;
+  } else if (idxBack.hasValue()) {
+    idxSlash = *idxBack;
   }
 
   if (idxSlash == 0) {
@@ -52,7 +50,7 @@ Slice<const char> dirname(Slice<const char> path) {
   return {path.data, idxSlash};
 }
 
-Slice<const char> basename(Slice<const char> path) {
+Slice<char> basename(Slice<char> path) {
   while (path.length > 0 &&
          (path[path.length - 1] == '/' || path[path.length - 1] == '\\')) {
     // Skip trailing separators
@@ -60,60 +58,58 @@ Slice<const char> basename(Slice<const char> path) {
   }
 
   if (path.length == 0) {
-    return {nullptr, 0};
+    return {};
   }
 
-  u32 idxFwd = 0;
-  u32 idxBack = 0;
-  bool hasFwd = lastIndexOf<const char>(path, '/', &idxFwd);
-  bool hasBack = lastIndexOf<const char>(path, '\\', &idxBack);
+  Optional<size_t> idxFwd = path.lastIndexOf('/');
+  Optional<size_t> idxBack = path.lastIndexOf('\\');
 
-  if (!hasFwd && !hasBack) {
+  if (!idxFwd.hasValue() && !idxBack.hasValue()) {
     return path;
   }
 
-  u32 idxSlash = 0;
-  if (hasFwd & hasBack) {
-    idxSlash = idxFwd > idxBack ? idxFwd : idxBack;
-  } else if (hasFwd) {
-    idxSlash = idxFwd;
-  } else if (hasBack) {
-    idxSlash = idxBack;
+  size_t idxSlash = 0;
+  if (idxFwd.hasValue() && idxBack.hasValue()) {
+    idxSlash = *idxFwd > *idxBack ? *idxFwd : *idxBack;
+  } else if (idxFwd.hasValue()) {
+    idxSlash = *idxFwd;
+  } else if (idxBack.hasValue()) {
+    idxSlash = *idxBack;
   }
 
-  return subarray(path, idxSlash + 1);
+  return path.subarray(idxSlash + 1);
 }
 
-Slice<char> joinSimple(Arena *arena,
-                       Slice<const char> segment0,
-                       Slice<const char> segment1) {
-  Slice<char> ret;
+MutSlice<char> joinSimple(Arena *arena,
+                       Slice<char> segment0,
+                       Slice<char> segment1) {
+  MutSlice<char> ret;
   if (segment0.length == 0) {
     if (segment1.length == 0) {
       return {nullptr, 0};
     }
 
     allocNZ(arena, segment1.length, ret);
-    copy(ret, segment1);
+    ret.copy(segment1);
     return ret;
   }
 
   char lastCharSeg0 = segment0[segment0.length - 1];
   bool needSeparator = lastCharSeg0 != '/' && lastCharSeg0 != '\\';
-  u32 lenRet = segment0.length + (needSeparator ? 1 : 0) + segment1.length;
+  size_t lenRet = segment0.length + (needSeparator ? 1 : 0) + segment1.length;
 
   allocNZ(arena, lenRet, ret);
-  Slice<char> segment0Out, segment1Out;
+  MutSlice<char> segment0Out, segment1Out;
 
-  segment0Out = subarray(ret, 0, segment0.length);
+  segment0Out = ret.subarray(0, segment0.length);
   if (needSeparator) {
-    segment1Out = subarray(ret, segment0.length + 1);
+    segment1Out = ret.subarray(segment0.length + 1);
     ret[segment0.length] = '/';
   } else {
-    segment1Out = subarray(ret, segment0.length);
+    segment1Out = ret.subarray(segment0.length);
   }
 
-  copy(segment0Out, segment0);
-  copy(segment1Out, segment1);
+  segment0Out.copy(segment0);
+  segment1Out.copy(segment1);
   return ret;
 }

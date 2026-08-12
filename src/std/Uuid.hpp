@@ -87,8 +87,8 @@ struct Uuid {
             /* w3: */ (0x8000) | ((customC >> 48) & 0x3FFF),
             /* w48: */ (customC >> 0) & 0xFFFFFFFFFFFFULL) {}
 
-  operator Slice<u8>() noexcept { return sliceFrom(value); }
-  operator Slice<const u8>() const noexcept { return sliceFrom(value); }
+  operator MutSlice<u8>() noexcept { return sliceFrom(value); }
+  operator Slice<u8>() const noexcept { return sliceFrom(value); }
 
   bool operator==(const Uuid &rhs) const noexcept {
     return sliceFrom(value) == sliceFrom(rhs.value);

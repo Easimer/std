@@ -96,7 +96,7 @@ SN_TEST(Vector, elemsCopiedOnGrow) {
   Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 2);
 
   u8 *buf0 = v.data;
-  u32 cap0 = v.capacity;
+  size_t cap0 = v.capacity;
   while (v.length < cap0) {
     appendVal<u8>(temp, &v, 0x55);
   }

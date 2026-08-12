@@ -58,7 +58,7 @@ SN_TEST(RadixSort_u64, sortSucceeds) {
 }
 
 SN_TEST(MergeSort, emptySortSucceeds) {
-  Slice<u32> src, dst;
+  MutSlice<u32> src, dst;
   mergeSort(dst, src);
 }
 

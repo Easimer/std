@@ -69,18 +69,18 @@ SN_TEST(Pool, allocatedElemsAreIterable) {
   Vec2 *e4 = pool.alloc();
 
   Array<Vec2 *, 5> arrElemsNotSeen = {e2, e4, e0, e1, e3};
-  Slice<Vec2 *> elemsNotSeen = arrElemsNotSeen.asSlice();
+  MutSlice<Vec2 *> elemsNotSeen = arrElemsNotSeen.asSlice();
 
   // Iterate over the pool
   for (Vec2 &e : pool) {
     // Assert that we haven't seen the current element yet
-    u32 i;
-    bool notSeenYet = elemsNotSeen.any([&e](Vec2 *p) { return &e == p; }, i);
+    Optional<size_t> i = elemsNotSeen.any([&e](Vec2 *p) { return &e == p; });
+    bool notSeenYet = i.hasValue();
     CHECK(notSeenYet);
 
     // Remove it from the list of not seen elements
-    elemsNotSeen[i] = elemsNotSeen[0];
-    shrinkFromLeft(&elemsNotSeen);
+    elemsNotSeen[i.value()] = elemsNotSeen[0];
+    elemsNotSeen.shrinkFromLeft();
   }
 
   // Assert that we've seen all allocated elements

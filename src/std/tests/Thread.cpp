@@ -131,14 +131,14 @@ SN_TEST(WorkerPool, one_thread) {
   WorkerPool *wp = createWorkerPool(temp, 1);
 
   auto func = [](const Dispatch *D) {
-    u32 &buf2 = D->parametersAs<u32>();
-    u32 *buf = &buf2;
+    size_t &buf2 = D->parametersAs<size_t>();
+    size_t *buf = &buf2;
     buf[D->threadIndex.x] = D->threadIndex.x;
   };
 
   WorkContract *wc = wp->createWorkContract(temp, func);
 
-  u32 buffer[32];
+  size_t buffer[32];
   for (u32 i = 0; i < 32; i++) {
     buffer[i] = 0xFFFFFFFF;
   }
@@ -159,14 +159,14 @@ SN_TEST(WorkerPool, multi_thread) {
   WorkerPool *wp = createWorkerPool(temp, 8);
 
   auto func = [](const Dispatch *D) {
-    u32 &buf2 = D->parametersAs<u32>();
-    u32 *buf = &buf2;
+    size_t &buf2 = D->parametersAs<size_t>();
+    size_t *buf = &buf2;
     buf[D->threadIndex.x] = D->threadIndex.x;
   };
 
   WorkContract *wc = wp->createWorkContract(temp, func);
 
-  u32 buffer[32];
+  size_t buffer[32];
   for (u32 i = 0; i < 32; i++) {
     buffer[i] = 0xFFFFFFFF;
   }

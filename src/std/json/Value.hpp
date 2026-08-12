@@ -29,15 +29,18 @@ struct JsonValue {
   // - When `type` is String, this is the byte length of the utf-8 string
   // - When `type` is Array, this is the number of values in the array
   // - When `type` is Object, this is the number of key-values on the object
-  u32 length;
+  size_t length;
   JsonType type;
 
-  Slice<const char> string() const { return {str, length}; }
+  Slice<char> string() const { return {str, length}; }
   Slice<JsonValue> array() const { return {arr, length}; }
   Slice<JsonKeyValue> object() const { return {kv, length}; }
+
+  MutSlice<JsonValue> array() { return {arr, length}; }
+  MutSlice<JsonKeyValue> object() { return {kv, length}; }
 };
 
 struct JsonKeyValue {
-  Slice<const char> key;
+  Slice<char> key;
   JsonValue value;
 };

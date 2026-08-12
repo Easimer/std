@@ -9,8 +9,9 @@
 #pragma once
 
 #include "std/Arena.h"
+#include "std/Check.h"
 
-#include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
 /** @file Vector.hpp */
@@ -26,13 +27,17 @@
 template <typename T>
 struct Vector {
   T *data = nullptr;
-  u32 length = 0;
-  u32 capacity = 0;
+  size_t length = 0;
+  size_t capacity = 0;
 
-  T &operator[](u32 i) const {
-    assert(i < length);
+  T &operator[](size_t i) const {
+    DCHECK(i < length);
     return data[i];
   }
+
+  static const size_t GROW_FACTOR_MUL = 24;
+  static const size_t GROW_FACTOR_DIV = 16;
+  static const size_t MAX_CAPACITY = SIZE_MAX / GROW_FACTOR_MUL;
 };
 
 /**
@@ -41,13 +46,14 @@ struct Vector {
  * allocated into the provided arena and old elements are copied into it.
  */
 template <typename T>
-T *append(Arena *arena, Vector<T> *dst, u32 count) {
+T *append(Arena *arena, Vector<T> *dst, size_t count) {
   if (dst->length + count > dst->capacity) {
-    CHECK(dst->capacity <= 268435456);
-    u32 capRequired = dst->length + count;
-    u32 newCap = dst->capacity;
+    CHECK(dst->capacity <= Vector<T>::MAX_CAPACITY);
+    size_t capRequired = dst->length + count;
+    size_t newCap = dst->capacity;
     do {
-      newCap = (newCap * 24) / 16;
+      newCap =
+          (newCap * Vector<T>::GROW_FACTOR_MUL) / Vector<T>::GROW_FACTOR_DIV;
       if (newCap == 0) {
         newCap = 4;
       }
@@ -75,8 +81,9 @@ T *append(Arena *arena, Vector<T> *dst, u32 count) {
 template <typename T>
 T *append(Arena *arena, Vector<T> *dst) {
   if (dst->length + 1 > dst->capacity) {
-    assert(dst->capacity <= 268435456);
-    u32 newCap = (dst->capacity * 24) / 16;
+    CHECK(dst->capacity <= Vector<T>::MAX_CAPACITY);
+    size_t newCap = (dst->capacity * Vector<T>::GROW_FACTOR_MUL) /
+                    Vector<T>::GROW_FACTOR_DIV;
     if (newCap == 0) {
       newCap = 4;
     }
@@ -89,7 +96,7 @@ T *append(Arena *arena, Vector<T> *dst) {
     dst->capacity = newCap;
   }
 
-  assert(dst->length + 1 <= dst->capacity);
+  CHECK(dst->length + 1 <= dst->capacity);
   T *ret = &dst->data[dst->length];
   dst->length++;
   return ret;
@@ -110,7 +117,7 @@ T *appendVal(Arena *arena, Vector<T> *dst, const T &value) {
  * \brief Creates a vector with a predefined initial capacity.
  */
 template <typename T>
-Vector<T> vectorWithInitialCapacity(Arena *arena, u32 capacity) {
+Vector<T> vectorWithInitialCapacity(Arena *arena, size_t capacity) {
   Vector<T> ret;
   ret.data = alloc<T>(arena, capacity);
   ret.length = 0;

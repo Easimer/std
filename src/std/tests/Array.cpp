@@ -39,7 +39,7 @@ SN_TEST(Array, implicitConversionToSlice) {
 SN_TEST(Array, implicitConversionToConstSlice) {
   Array<u32, 4> arr = {1, 2, 4, 5};
 
-  Slice<const u32> view = arr;
+  Slice<u32> view = arr;
   CHECK(view.data == arr.data);
   CHECK(view.length == 4);
 }
@@ -47,7 +47,7 @@ SN_TEST(Array, implicitConversionToConstSlice) {
 SN_TEST(Array, constImplicitConversionToConstSlice) {
   const Array<u32, 4> arr = {1, 2, 4, 5};
 
-  Slice<const u32> view = arr;
+  Slice<u32> view = arr;
   CHECK(view.data == arr.data);
   CHECK(view.length == 4);
 }
@@ -61,7 +61,7 @@ SN_TEST(Array, subarray) {
 
 SN_TEST(Array, subarrayConst) {
   const Array<u32, 4> arr = {1, 2, 4, 5};
-  Slice<const u32> view = arr.subarray(0, 3);
+  Slice<u32> view = arr.subarray(0, 3);
   CHECK(view.data == arr.data);
   CHECK(view.length == 3);
 }
@@ -75,28 +75,28 @@ SN_TEST(Array, subarrayOffset) {
 
 SN_TEST(Array, subarraySpan) {
   Array<u32, 4> arr = {1, 2, 4, 5};
-  Slice<u32> view = arr.subarray(Span<u32>{.start = 2, .count = 2});
+  Slice<u32> view = arr.subarray(Span<size_t>{.start = 2, .count = 2});
   CHECK(view.data == arr.data + 2);
   CHECK(view.length == 2);
 }
 
 SN_TEST(Array, subarraySpanConst) {
   const Array<u32, 4> arr = {1, 2, 4, 5};
-  Slice<const u32> view = arr.subarray(Span<u32>{.start = 2, .count = 2});
+  Slice<u32> view = arr.subarray(Span<size_t>{.start = 2, .count = 2});
   CHECK(view.data == arr.data + 2);
   CHECK(view.length == 2);
 }
 
 SN_TEST(Array, subarrayRange) {
   Array<u32, 4> arr = {1, 2, 4, 5};
-  Slice<u32> view = arr.subarray(Range<u32>{.start = 2, .end = 3});
+  Slice<u32> view = arr.subarray(Range<size_t>{.start = 2, .end = 3});
   CHECK(view.data == arr.data + 2);
   CHECK(view.length == 1);
 }
 
 SN_TEST(Array, subarrayRangeConst) {
   const Array<u32, 4> arr = {1, 2, 4, 5};
-  Slice<const u32> view = arr.subarray(Range<u32>{.start = 2, .end = 3});
+  Slice<u32> view = arr.subarray(Range<size_t>{.start = 2, .end = 3});
   CHECK(view.data == arr.data + 2);
   CHECK(view.length == 1);
 }

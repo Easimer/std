@@ -29,8 +29,8 @@ struct CommandEncoder {
    * \brief Copies the encoded byte stream to a buffer allocated into the
    * specified arena. This buffer can be passed to a CommandDecoder.
    */
-  Slice<const u8> extractBuffer(Arena *arena) {
-    return copyToSlice(arena, _buffer).asConst();
+  Slice<u8> extractBuffer(Arena *arena) {
+    return copyToSlice(arena, _buffer);
   }
 
  protected:
@@ -169,7 +169,7 @@ struct CommandEncoder {
    */
   template <typename T>
   void pushBytesOf(const T &val) noexcept {
-    Slice<const u8> bytes = cast<const u8, const T>({&val, 1});
+    Slice<u8> bytes = Slice<T>(val).template cast<u8>();
     _buffer.push(bytes);
   }
 

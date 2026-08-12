@@ -68,12 +68,12 @@ SN_TEST(SegmentArray, multiPushWholeSegment) {
   SegmentArray<u32> s(temp);
 
   u32 arrBuf[64];
-  Slice<u32> buf = sliceFrom(arrBuf);
+  MutSlice<u32> buf = sliceFrom(arrBuf);
   for (u32 i = 0; i < 64; i++) {
     buf[i] = i;
   }
 
-  s.push(buf.asConst());
+  s.push(buf);
 
   CHECK(s.length == 64);
   for (u32 i = 0; i < 64; i++) {
@@ -89,12 +89,12 @@ SN_TEST(SegmentArray, multiPushWithGrow) {
   SegmentArray<u32> s(temp);
 
   u32 arrBuf[67];
-  Slice<u32> buf = sliceFrom(arrBuf);
+  MutSlice<u32> buf = sliceFrom(arrBuf);
   for (u32 i = 0; i < 67; i++) {
     buf[i] = i;
   }
 
-  s.push(buf.asConst());
+  s.push(buf);
 
   CHECK(s.length == 67);
   for (u32 i = 0; i < 67; i++) {
@@ -111,16 +111,16 @@ SN_TEST(SegmentArray, multiPushWithGrowNonEmpty) {
   s.push(0);
 
   u32 arrBuf[67];
-  Slice<u32> buf = sliceFrom(arrBuf);
+  MutSlice<u32> buf = sliceFrom(arrBuf);
   for (u32 i = 0; i < 67; i++) {
     buf[i] = i;
   }
 
-  s.push(buf.asConst());
+  s.push(buf);
 
   CHECK(s.length == 68);
   CHECK(s[0] == 0);
-  for (u32 i = 1; i < 68; i++) {
+  for (size_t i = 1; i < 68; i++) {
     CHECK(s[i] == buf[i - 1]);
   }
 }

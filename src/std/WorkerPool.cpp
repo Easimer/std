@@ -62,7 +62,7 @@ struct SignalTreeAndJobs {
 
 struct WorkerThreadProcInfo {
   SignalTreeAndJobs *stj;
-  u32 idxThread;
+  size_t idxThread;
   WorkerPool *workerPool;
 
   Optional<WorkerPoolWorkerInitializer> init;
@@ -160,12 +160,18 @@ static void workerThreadProc(void *arg) {
 }
 
 struct WorkerPoolImpl final : WorkerPool {
-  const Slice<Thread> threads;
+  const MutSlice<Thread> threads;
+  u32 numThreads;
   SignalTreeAndJobs signalTreeAndJobs;
   u32 idxLastJobSlotUsed;
 
-  WorkerPoolImpl(Slice<Thread> threads)
-      : threads(threads), signalTreeAndJobs(), idxLastJobSlotUsed(0) {}
+  WorkerPoolImpl(MutSlice<Thread> threads, u32 numThreads)
+      : threads(threads),
+        numThreads(numThreads),
+        signalTreeAndJobs(),
+        idxLastJobSlotUsed(0) {
+    DCHECK(numThreads == threads.length);
+  }
 
   WorkContract *createWorkContract(Arena *arena,
                                    KernelEntryPoint entry,
@@ -263,7 +269,7 @@ struct WorkerPoolImpl final : WorkerPool {
     // Set the shutdown flag
     signalTreeAndJobs.shutdown.store(true, std::memory_order_seq_cst);
     // Wake up all threads
-    signalTreeAndJobs.signalTree.setRoot(threads.length);
+    signalTreeAndJobs.signalTree.setRoot(numThreads);
 
     // Wait for threads to react to the shutdown flag
     for (auto [t, _] : threads) {
@@ -277,14 +283,14 @@ WorkerPool *createWorkerPool(Arena *arena,
   u32 numThreads =
       createInfo.numThreads.valueOrElse(Thread::hardwareConcurrency);
 
-  Slice<Thread> threads;
+  MutSlice<Thread> threads;
   alloc(arena, numThreads, threads);
-  Slice<WorkerThreadProcInfo> threadProcInfo;
+  MutSlice<WorkerThreadProcInfo> threadProcInfo;
   alloc(arena, numThreads, threadProcInfo);
 
   WorkerPoolImpl *wp = alloc<WorkerPoolImpl>(arena);
 
-  new (wp) WorkerPoolImpl(threads);
+  new (wp) WorkerPoolImpl(threads, numThreads);
 
   for (auto [_, i] : threadProcInfo) {
     threadProcInfo[i].stj = &wp->signalTreeAndJobs;

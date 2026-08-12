@@ -26,13 +26,13 @@ struct CommandDecoder {
   /**
    * \param encoded The output of a CommandEncoder.
    */
-  CommandDecoder(Slice<const u8> encoded) : _buffer(encoded) {}
+  CommandDecoder(Slice<u8> encoded) : _buffer(encoded) {}
 
   bool isOver() const noexcept { return _buffer.length == 0; }
 
  protected:
   u32 _dirtyMask = 0;
-  Slice<const u8> _buffer;
+  Slice<u8> _buffer;
 
   Array<FieldEnum, 32> bufChanges;
   Vector<FieldEnum> changes;
@@ -108,9 +108,9 @@ struct CommandDecoder {
       return false;
     }
 
-    out = _buffer.subarray(0, sizeof(T)).cast<const T>()[0];
+    out = _buffer.subarray(0, sizeof(T)).cast<T>()[0];
 
-    shrinkFromLeftByCount(&_buffer, sizeof(T));
+    _buffer.shrinkFromLeftByCount(sizeof(T));
     return true;
   }
 

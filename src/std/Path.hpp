@@ -11,8 +11,8 @@
 #include "std/Arena.h"
 #include "std/Slice.hpp"
 
-Slice<const char> dirname(Slice<const char> path);
-Slice<const char> basename(Slice<const char> path);
-Slice<char> joinSimple(Arena *arena,
-                       Slice<const char> segment0,
-                       Slice<const char> segment1);
+Slice<char> dirname(Slice<char> path);
+Slice<char> basename(Slice<char> path);
+MutSlice<char> joinSimple(Arena *arena,
+                          Slice<char> segment0,
+                          Slice<char> segment1);

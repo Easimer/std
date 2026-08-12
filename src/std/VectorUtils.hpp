@@ -31,18 +31,18 @@ Vector<T> makeVectorFrom(Arena *arena, Slice<T> s) {
  * will be allocated into the provided arena.
  */
 template <typename T>
-Slice<T> copyToSlice(Arena *arena, Vector<T> src) {
+MutSlice<T> copyToSlice(Arena *arena, Vector<T> src) {
   if (src.data == nullptr || src.length == 0) {
     return {nullptr, 0};
   }
   T *newData = alloc<T>(arena, src.length);
   copyElements(newData, src.data, src.length);
-  Slice<T> ret = {newData, src.length};
+  MutSlice<T> ret = {newData, src.length};
   return ret;
 }
 
 template <typename T>
-Slice<T> sliceFrom(Vector<T> src) {
+MutSlice<T> sliceFrom(Vector<T> src) {
   return {src.data, src.length};
 }
 

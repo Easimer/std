@@ -67,8 +67,33 @@ struct Arena::Scope {
 extern "C" {
 #endif
 
-u8 *alloc(Arena *a, u32 sizObj, u32 sizAlign, u32 numObjects);
-u8 *allocNZ(Arena *a, u32 sizObj, u32 sizAlign, u32 numObjects);
+/**
+ * \brief Allocates zero-initialized space from an arena.
+ *
+ * \param arena Target arena
+ * \param sizObject Size of the objects
+ * \param sizAlign Required alignment
+ * \param numObjects Number of objects
+ * 
+ * \returns A valid pointer to an zero-initialized allocation that is aligned
+ * and has capacity to store objects of the specified size and count.
+ */
+u8 *alloc(Arena *arena, size_t sizObject, size_t sizAlign, size_t numObjects);
+
+/**
+ * \brief Allocates uninitialized space from an arena. Prefer `alloc` unless the
+ * allocated space is going to be initialized or overwritten anyways.
+ *
+ * \param arena Target arena
+ * \param sizObject Size of the objects
+ * \param sizAlign Required alignment
+ * \param numObjects Number of objects
+ * 
+ * \returns A valid pointer to an uninitialized allocation that is aligned
+ * and has capacity to store objects of the specified size and count.
+ */
+u8 *allocNZ(Arena *arena, size_t sizObject, size_t sizAlign, size_t numObjects);
+
 /**
  * Finds a scratch arena that doesn't conflict with the provided arenas, saves
  * its state and returns it to the caller.
@@ -143,13 +168,13 @@ void restoreArena(Arena *dst, Arena saved);
 #endif
 
 template <typename T>
-T *alloc(Arena *a, u32 count = 1) {
+T *alloc(Arena *a, size_t count = 1) {
   void *ptr = alloc(a, sizeof(T), alignof(T), count);
   return reinterpret_cast<T *>(SN_ASSUME_ALIGNED(ptr, alignof(T)));
 }
 
 template <typename T>
-T *allocNZ(Arena *a, u32 count = 1) {
+T *allocNZ(Arena *a, size_t count = 1) {
   void *ptr = allocNZ(a, sizeof(T), alignof(T), count);
   return reinterpret_cast<T *>(SN_ASSUME_ALIGNED(ptr, alignof(T)));
 }

@@ -14,9 +14,9 @@
 #include <string.h>
 
 static u8 *allocImpl(Arena *a,
-                     u32 sizObj,
-                     u32 sizAlign,
-                     u32 numObjects,
+                     size_t sizObj,
+                     size_t sizAlign,
+                     size_t numObjects,
                      size_t *sizAllocOut) {
   DCHECK(numObjects >= 0);
 
@@ -25,7 +25,7 @@ static u8 *allocImpl(Arena *a,
   sizAlign = (sizAlign + 7) & (~7);
 #endif
 
-  u32 pad = (u64)a->end & (sizAlign - 1);
+  size_t pad = (size_t)a->end & (sizAlign - 1);
   while (!(numObjects <= (a->end - a->beg - pad) / sizObj)) {
     handleOOM(a);
   }
@@ -43,12 +43,12 @@ static u8 *allocImpl(Arena *a,
   return allocStart;
 }
 
-u8 *allocNZ(Arena *a, u32 sizObj, u32 sizAlign, u32 numObjects) {
+u8 *allocNZ(Arena *a, size_t sizObj, size_t sizAlign, size_t numObjects) {
   size_t discard;
   return allocImpl(a, sizObj, sizAlign, numObjects, &discard);
 }
 
-u8 *alloc(Arena *a, u32 sizObj, u32 sizAlign, u32 numObjects) {
+u8 *alloc(Arena *a, size_t sizObj, size_t sizAlign, size_t numObjects) {
   size_t sizAlloc;
   u8 *allocStart = allocImpl(a, sizObj, sizAlign, numObjects, &sizAlloc);
   return (u8 *)memset(allocStart, 0, sizAlloc);

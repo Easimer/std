@@ -23,13 +23,13 @@ static std::jmp_buf gJmpBuf;
 static bool gSnRunningInGA = false;
 static Slice<char> gSnCwd;
 
-Slice<char> getWorkingDir(Slice<char> dst, u32 &sizRequired);
+MutSlice<char> getWorkingDir(Slice<char> dst, size_t &sizRequired);
 
-#if WIN32
+#if _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-Slice<char> getWorkingDir(Slice<char> dst, u32 &sizRequired) {
+MutSlice<char> getWorkingDir(MutSlice<char> dst, size_t &sizRequired) {
   DWORD rc = GetCurrentDirectoryA(dst.length, dst.data);
   if (rc == 0) {
     sizRequired = 0;
@@ -42,14 +42,14 @@ Slice<char> getWorkingDir(Slice<char> dst, u32 &sizRequired) {
 
 #else
 #include <unistd.h>
-Slice<char> getWorkingDir(Slice<char> dst, u32 &sizRequired) {
+MutSlice<char> getWorkingDir(MutSlice<char> dst, size_t &sizRequired) {
   char *res = getcwd(dst.data, dst.length);
   if (res == nullptr) {
     sizRequired = dst.length != 0 ? dst.length * 2 : 1;
     return {};
   }
 
-  u32 len = strlen(res);
+  size_t len = strlen(res);
   sizRequired = len;
   return dst.subarray(0, len);
 }
@@ -63,8 +63,8 @@ static Arena makeArena() {
   return {base, end};
 }
 
-static Slice<const char> getRepoRelativePath(Slice<const char> file) {
-  if (!file.startsWith(gSnCwd.asConst())) {
+static Slice<char> getRepoRelativePath(Slice<char> file) {
+  if (!file.startsWith(gSnCwd)) {
     return file;
   }
 
@@ -73,8 +73,7 @@ static Slice<const char> getRepoRelativePath(Slice<const char> file) {
 
 extern "C" void checkFail(const char *pExpr, const char *pFile, unsigned line) {
   if (gSnRunningInGA) {
-    Slice<const char> pathFileRelRepo =
-        getRepoRelativePath({pFile, (u32)strlen(pFile)});
+    Slice<char> pathFileRelRepo = getRepoRelativePath({pFile, strlen(pFile)});
     printf("::error file=%.*s,line=%u::Assertion failed: %s\n",
            FMT_SLICE(pathFileRelRepo), line, pExpr);
   } else {
@@ -172,8 +171,8 @@ static void printfMarkdownRow(FILE *f,
                               const SnTestResult *cur,
                               const char *baseUrl) {
   const SnTestMetadata *meta = cur->test->metadata;
-  Slice<const char> pathFileRelRepo =
-      getRepoRelativePath({meta->file, (u32)strlen(meta->file)});
+  Slice<char> pathFileRelRepo =
+      getRepoRelativePath({meta->file, strlen(meta->file)});
 
   char url[1024];
   snprintf(url, sizeof(url) - 1, "%s%.*s#L%d", baseUrl,
@@ -256,8 +255,8 @@ int main(int numArgs, char **arrArgs) {
   Arena arena1 = makeArena();
   Arena arenaResults = makeArena();
 
-  Slice<char> cwd;
-  u32 sizRequired = 1;
+  MutSlice<char> cwd;
+  size_t sizRequired = 1;
   while (cwd.length < sizRequired) {
     Arena saved = arenaResults;
     alloc(&arenaResults, sizRequired, cwd);

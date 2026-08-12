@@ -16,14 +16,14 @@ struct WorkerPool;
 struct WorkContract;
 
 struct ThreadIndex {
-  u32 x, y, z;
+  size_t x, y, z;
 };
 
 struct Dispatch {
   void *parameters;
   ThreadIndex threadIndex;
 
-  u32 idxPhysicalThread;
+  size_t idxPhysicalThread;
   WorkerPool *workerPool;
 
   template <typename T>

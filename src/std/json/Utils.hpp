@@ -80,12 +80,12 @@ inline f32 coerceToF32(const JsonValue &v) {
   return coerceToF32(&v);
 }
 
-inline u32 length(const JsonValue *v) {
+inline size_t length(const JsonValue *v) {
   return v->length;
 }
 
 inline bool getKeyValue(JsonValue *obj,
-                        Slice<const char> key,
+                        Slice<char> key,
                         JsonValue **out) {
   *out = nullptr;
 
@@ -103,7 +103,7 @@ inline bool getKeyValue(JsonValue *obj,
   return false;
 }
 
-inline JsonValue *getKeyValue(JsonValue *obj, Slice<const char> key) {
+inline JsonValue *getKeyValue(JsonValue *obj, Slice<char> key) {
   if (obj->type != JsonType::Object) {
     return nullptr;
   }
@@ -118,7 +118,7 @@ inline JsonValue *getKeyValue(JsonValue *obj, Slice<const char> key) {
 }
 
 inline JsonValue *getKeyValueOfType(JsonValue *obj,
-                                    Slice<const char> key,
+                                    Slice<char> key,
                                     JsonType Type) {
   JsonValue *ret = getKeyValue(obj, key);
   if (ret == nullptr) {

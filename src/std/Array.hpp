@@ -14,7 +14,7 @@
 
 #include <initializer_list>
 
-template<typename T, size_t N>
+template <typename T, size_t N>
 struct Array {
   static constexpr size_t length = N;
 
@@ -43,60 +43,48 @@ struct Array {
   T &operator[](size_t idxElem) { return data[idxElem]; }
   const T &operator[](size_t idxElem) const { return data[idxElem]; }
 
-  operator Slice<T>() {
+  operator MutSlice<T>() { return {data, N}; }
+
+  operator Slice<T>() const { return {data, N}; }
+
+  MutSlice<T> asSlice() {
     DCHECK(N <= 0xFFFFFFFF);
-    return {data, u32(N)};
+    return {data, N};
   }
 
-  operator Slice<const T>() const {
-    DCHECK(N <= 0xFFFFFFFF);
-    return {data, u32(N)};
+  Slice<T> asSlice() const { return {data, N}; }
+
+  MutSlice<T> subarray(size_t idxStart) { return asSlice().subarray(idxStart); }
+
+  MutSlice<T> subarray(size_t idxStart, size_t idxEnd) {
+    return asSlice().subarray(idxStart, idxEnd);
   }
 
-  Slice<T> asSlice() {
-    DCHECK(N <= 0xFFFFFFFF);
-    return {data, u32(N)};
+  Slice<T> subarray(size_t idxStart) const {
+    return asSlice().subarray(idxStart);
   }
 
-  Slice<const T> asSlice() const {
-    DCHECK(N <= 0xFFFFFFFF);
-    return {data, u32(N)};
+  Slice<T> subarray(size_t idxStart, size_t idxEnd) const {
+    return asSlice().subarray(idxStart, idxEnd);
   }
 
-  Slice<T> subarray(u32 idxStart) {
-    Slice<T> whole = (*this);
-    return whole.subarray(idxStart);
-  }
-
-  Slice<T> subarray(u32 idxStart, u32 idxEnd) {
-    Slice<T> whole = (*this);
-    return whole.subarray(idxStart, idxEnd);
-  }
-
-  Slice<const T> subarray(u32 idxStart) const {
-    Slice<const T> whole = (*this);
-    return whole.subarray(idxStart);
-  }
-
-  Slice<const T> subarray(u32 idxStart, u32 idxEnd) const {
-    Slice<const T> whole = (*this);
-    return whole.subarray(idxStart, idxEnd);
-  }
-
-  Slice<T> subarray(Range<u32> range) {
+  MutSlice<T> subarray(Range<size_t> range) {
     return subarray(range.start, range.end);
   }
 
-  Slice<T> subarray(Span<u32> span) { return subarray(rangeFrom(span)); }
+  MutSlice<T> subarray(Span<size_t> span) { return subarray(rangeFrom(span)); }
 
-  Slice<const T> subarray(Range<u32> range) const {
+  Slice<T> subarray(Range<size_t> range) const {
     return subarray(range.start, range.end);
   }
 
-  Slice<const T> subarray(Span<u32> span) const {
+  Slice<T> subarray(Span<size_t> span) const {
     return subarray(rangeFrom(span));
   }
 
   T *begin() { return &data[0]; }
   T *end() { return &data[N]; }
+
+  const T *begin() const { return &data[0]; }
+  const T *end() const { return &data[N]; }
 };

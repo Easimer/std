@@ -6,6 +6,6 @@
 
 bool tryParseValue(Arena *arena,
                    Arena *tempArena,
-                   Slice<const char> &json,
+                   Slice<char> &json,
                    JsonValue &out);
-bool tryParseValue(Arena *arena, Slice<const char> &json, JsonValue &out);
+bool tryParseValue(Arena *arena, Slice<char> &json, JsonValue &out);

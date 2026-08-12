@@ -9,18 +9,18 @@
 
 #include <cmath> // pow
 
-static constexpr Slice<const char> NUL = sliceFromConstChar("null");
-static constexpr Slice<const char> FALSE = sliceFromConstChar("false");
-static constexpr Slice<const char> TRUE = sliceFromConstChar("true");
+static constexpr Slice<char> NUL = sliceFromConstChar("null");
+static constexpr Slice<char> FALSE = sliceFromConstChar("false");
+static constexpr Slice<char> TRUE = sliceFromConstChar("true");
 
-static void eatWhitespace(Slice<const char> &json) {
+static void eatWhitespace(Slice<char> &json) {
   while (json.length != 0) {
     switch (json[0]) {
       case ' ':
       case '\n':
       case '\r':
       case '\t':
-        shrinkFromLeft(&json);
+        json.shrinkFromLeft();
         break;
       default:
         return;
@@ -28,23 +28,23 @@ static void eatWhitespace(Slice<const char> &json) {
   }
 }
 
-static bool isDigit(Slice<const char> json) {
-  if (empty(json)) {
+static bool isDigit(Slice<char> json) {
+  if (json.empty()) {
     return false;
   }
 
   return '0' <= json[0] && json[0] <= '9';
 }
 
-static bool isDigitExceptZero(Slice<const char> json) {
-  if (empty(json)) {
+static bool isDigitExceptZero(Slice<char> json) {
+  if (json.empty()) {
     return false;
   }
 
   return '1' <= json[0] && json[0] <= '9';
 }
 
-static bool isHex(Slice<const char> json, u8 &out) {
+static bool isHex(Slice<char> json, u8 &out) {
   if (json.empty()) {
     return false;
   }
@@ -75,9 +75,9 @@ static bool isHex(Slice<const char> json, u8 &out) {
  * constructed), unless it was disarmed.
  */
 struct Rollback {
-  Slice<const char> *dst;
-  const Slice<const char> saved;
-  Rollback(Slice<const char> &subject) : dst(&subject), saved(subject) {}
+  Slice<char> *dst;
+  const Slice<char> saved;
+  Rollback(Slice<char> &subject) : dst(&subject), saved(subject) {}
 
   ~Rollback() {
     if (dst) {
@@ -88,7 +88,7 @@ struct Rollback {
   void disarm() { dst = nullptr; }
 };
 
-static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
+static bool tryParseNumber(Slice<char> &json, JsonValue &out) {
   out.type = JsonType::Number;
 
   if (json.empty()) {
@@ -121,7 +121,7 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
       json.shrinkFromLeft();
     }
 
-    if (empty(json)) {
+    if (json.empty()) {
       rollback.disarm();
       return true;
     }
@@ -129,7 +129,7 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
     return false;
   }
 
-  if (empty(json)) {
+  if (json.empty()) {
     out.number = sign * f64(whole);
     rollback.disarm();
     return true;
@@ -158,7 +158,7 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
   f64 combined = sign * (f64(whole) + fraction);
   out.number = combined;
 
-  if (empty(json)) {
+  if (json.empty()) {
     rollback.disarm();
     return true;
   }
@@ -180,7 +180,7 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
       json.shrinkFromLeft();
     }
 
-    if (empty(json) || !isDigit(json)) {
+    if (json.empty() || !isDigit(json)) {
       return false;
     }
 
@@ -216,7 +216,7 @@ static bool tryParseNumber(Slice<const char> &json, JsonValue &out) {
   return true;
 }
 
-static bool tryParseUnicodeCodepoint(Slice<const char> &json, u32 &out) {
+static bool tryParseUnicodeCodepoint(Slice<char> &json, u32 &out) {
   if (json.length < 5 || json[0] != 'u') {
     return false;
   }
@@ -241,12 +241,12 @@ static bool tryParseUnicodeCodepoint(Slice<const char> &json, u32 &out) {
   return true;
 }
 
-static bool tryParseEscapedChar(Slice<const char> &json, u32 &out) {
+static bool tryParseEscapedChar(Slice<char> &json, u32 &out) {
   if (json.empty() || json[0] != '\\') {
     return false;
   }
 
-  Slice<const char> saved = json;
+  Slice<char> saved = json;
   json.shrinkFromLeft();
 
   if (json.empty()) {
@@ -321,11 +321,11 @@ static void encodeToUtf8(Arena *arena, Vector<char> *vec, u32 codepoint) {
 
 static bool tryParseString(Arena *arena,
                            Arena *tempArena,
-                           Slice<const char> &json,
+                           Slice<char> &json,
                            JsonValue &out) {
   Arena::Scope temp = tempArena;
 
-  if (empty(json) || json[0] != '"') {
+  if (json.empty() || json[0] != '"') {
     return false;
   }
 
@@ -378,7 +378,7 @@ static bool tryParseString(Arena *arena,
 
   json.shrinkFromLeft();  // eat closing quotes
 
-  Slice<const char> contents = copyToSlice(arena, vec).asConst();
+  Slice<char> contents = copyToSlice(arena, vec);
   out.length = contents.length;
   out.str = contents.data;
 
@@ -388,14 +388,14 @@ static bool tryParseString(Arena *arena,
 
 bool tryParseValue(Arena *arena,
                    Arena *tempArena,
-                   Slice<const char> &json,
+                   Slice<char> &json,
                    JsonValue &out);
 
 static bool tryParseArray(Arena *arena,
                           Arena *tempArena,
-                          Slice<const char> &json,
+                          Slice<char> &json,
                           JsonValue &out) {
-  if (empty(json) || json[0] != '[') {
+  if (json.empty() || json[0] != '[') {
     return false;
   }
 
@@ -453,7 +453,7 @@ static bool tryParseArray(Arena *arena,
 
   json.shrinkFromLeft();  // eat ]
 
-  Slice<JsonValue> contents = copyToSlice(arena, values);
+  MutSlice<JsonValue> contents = copyToSlice(arena, values);
   out.length = contents.length;
   out.arr = contents.data;
 
@@ -463,7 +463,7 @@ static bool tryParseArray(Arena *arena,
 
 static bool tryParseObject(Arena *arena,
                            Arena *tempArena,
-                           Slice<const char> &json,
+                           Slice<char> &json,
                            JsonValue &out) {
   if (json.empty() || json[0] != '{') {
     return false;
@@ -478,12 +478,12 @@ static bool tryParseObject(Arena *arena,
 
   eatWhitespace(json);
 
-  if (empty(json)) {
+  if (json.empty()) {
     return false;
   }
 
   if (json[0] == '}') {
-    shrinkFromLeft(&json);
+    json.shrinkFromLeft();
     rollback.disarm();
     return true;
   }
@@ -508,7 +508,7 @@ static bool tryParseObject(Arena *arena,
 
     eatWhitespace(json);
 
-    if (empty(json) || json[0] != ':') {
+    if (json.empty() || json[0] != ':') {
       return false;
     }
 
@@ -547,7 +547,7 @@ static bool tryParseObject(Arena *arena,
 
   json.shrinkFromLeft();  // eat }
 
-  Slice<JsonKeyValue> contents = copyToSlice(arena, entries);
+  MutSlice<JsonKeyValue> contents = copyToSlice(arena, entries);
   out.length = contents.length;
   out.kv = contents.data;
 
@@ -557,39 +557,39 @@ static bool tryParseObject(Arena *arena,
 
 bool tryParseValue(Arena *arena,
                    Arena *tempArena,
-                   Slice<const char> &json,
+                   Slice<char> &json,
                    JsonValue &out) {
   if (json.empty()) {
     return false;
   }
 
-  Slice<const char> saved = json;
+  Slice<char> saved = json;
   eatWhitespace(json);
 
   if (tryParseNumber(json, out)) {
     return true;
   }
 
-  if (compareAsString(subarray(json, 0, 4), NUL)) {
+  if (compareAsString(json.subarray(0, 4), NUL)) {
     out.type = JsonType::Null;
 
-    shrinkFromLeftByCount(&json, NUL.length);
+    json.shrinkFromLeftByCount(NUL.length);
     eatWhitespace(json);
     return true;
   }
 
-  if (compareAsString(subarray(json, 0, 5), FALSE)) {
+  if (compareAsString(json.subarray(0, 5), FALSE)) {
     out.type = JsonType::False;
 
-    shrinkFromLeftByCount(&json, FALSE.length);
+    json.shrinkFromLeftByCount(FALSE.length);
     eatWhitespace(json);
     return true;
   }
 
-  if (compareAsString(subarray(json, 0, 4), TRUE)) {
+  if (compareAsString(json.subarray(0, 4), TRUE)) {
     out.type = JsonType::True;
 
-    shrinkFromLeftByCount(&json, TRUE.length);
+    json.shrinkFromLeftByCount(TRUE.length);
     eatWhitespace(json);
     return true;
   }
@@ -613,7 +613,7 @@ bool tryParseValue(Arena *arena,
   return false;
 }
 
-bool tryParseValue(Arena *arena, Slice<const char> &json, JsonValue &out) {
+bool tryParseValue(Arena *arena, Slice<char> &json, JsonValue &out) {
   Arena::Scope temp = getScratch(&arena, 1);
   bool accepted = tryParseValue(arena, temp, json, out);
 

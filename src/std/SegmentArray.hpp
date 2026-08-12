@@ -5,7 +5,7 @@
 #include "std/SliceUtils.hpp"
 #include "std/Types.h"
 
-inline static u32 _log2i(u64 x) {
+inline static u32 _log2i(size_t x) {
   return 8 * sizeof(unsigned long long) - countLeadingZeros64(x) - 1;
 }
 
@@ -31,8 +31,8 @@ struct SegmentArray {
   constexpr SegmentArray(Arena *arena)
       : arena(arena), length(0), numSegments(0) {}
 
-  T &operator[](u32 i) { return *getSlotForItem(i); }
-  const T &operator[](u32 i) const { return *getSlotForItem(i); }
+  T &operator[](size_t i) { return *getSlotForItem(i); }
+  const T &operator[](size_t i) const { return *getSlotForItem(i); }
 
   T &push() {
     growIfNeededPrePush();
@@ -52,17 +52,18 @@ struct SegmentArray {
     return *slot;
   }
 
-  void push(Slice<const T> elements) {
+  void push(Slice<T> elements) {
     while (!elements.empty()) {
       growIfNeededPrePush();
 
       u32 idxLastSegment = numSegments - 1;
-      Slice<T> freeSlots = sliceOfSegmentFreeHalf(idxLastSegment);
-      Slice<const T> src = elements.subarray(0, freeSlots.length);
-      copy(freeSlots, src);
+      MutSlice<T> freeSlots = sliceOfSegmentFreeHalf(idxLastSegment);
+      Slice<T> src = elements.subarray(0, freeSlots.length);
+      freeSlots.copy(src);
 
       elements.shrinkFromLeftByCount(src.length);
-      length += src.length;
+      DCHECK(src.length <= 0xFFFFFFFF);
+      length += (u32)src.length;
     }
   }
 
@@ -71,17 +72,17 @@ struct SegmentArray {
     return (1 << SMALL_SEGMENTS_TO_SKIP) << idxSegment;
   }
 
-  static constexpr u32 capacityForSegmentCount(u32 numSegments) {
+  static constexpr size_t capacityForSegmentCount(u32 numSegments) {
     return sizeOfSegment(numSegments) - sizeOfSegment(0);
   }
 
-  static u32 getSegmentForItem(u32 idxItem) {
+  static u32 getSegmentForItem(size_t idxItem) {
     return _log2i((idxItem >> SMALL_SEGMENTS_TO_SKIP) + 1);
   }
 
-  T *getSlotForItem(u32 idxItem) const {
+  T *getSlotForItem(size_t idxItem) const {
     u32 idxSegment = getSegmentForItem(idxItem);
-    u32 idxSlot = idxItem - capacityForSegmentCount(idxSegment);
+    size_t idxSlot = idxItem - capacityForSegmentCount(idxSegment);
     T *segment = arrSegments[idxSegment];
     DCHECK(segment != nullptr);
     return &segment[idxSlot];
@@ -109,7 +110,7 @@ struct SegmentArray {
   /**
    * \brief Returns a slice on the specified segment.
    */
-  Slice<T> sliceOfSegment(u32 idxSegment) {
+  MutSlice<T> sliceOfSegment(u32 idxSegment) {
     T *base = arrSegments[idxSegment];
     if (base == nullptr) {
       return {};
@@ -121,17 +122,17 @@ struct SegmentArray {
   /**
    * \brief Returns a slice on the free/upper half of the specified segment.
    */
-  Slice<T> sliceOfSegmentFreeHalf(u32 idxSegment) {
+  MutSlice<T> sliceOfSegmentFreeHalf(u32 idxSegment) {
     DCHECK(idxSegment < numSegments);
-    u32 cap = capacityForSegmentCount(idxSegment + 1);
+    size_t cap = capacityForSegmentCount(idxSegment + 1);
     if (length >= cap) {
       // This segment is full
       return {};
     }
 
-    u32 numFreeSlots = cap - length;
-    Slice<T> ret = sliceOfSegment(idxSegment);
-    shrinkFromLeftByCount(&ret, ret.length - numFreeSlots);
+    size_t numFreeSlots = cap - length;
+    MutSlice<T> ret = sliceOfSegment(idxSegment);
+    ret.shrinkFromLeftByCount(ret.length - numFreeSlots);
     return ret;
   }
 };
@@ -141,17 +142,17 @@ struct SegmentArray {
  * allocated into the specified arena.
  */
 template <typename T>
-Slice<T> copyToSlice(Arena *arena, const SegmentArray<T> &sa) {
-  const u32 numElems = sa.length;
+MutSlice<T> copyToSlice(Arena *arena, const SegmentArray<T> &sa) {
+  const size_t numElems = sa.length;
 
   if (numElems == 0) {
     return {};
   }
 
-  Slice<T> ret;
+  MutSlice<T> ret;
   alloc(arena, numElems, ret);
 
-  u32 idxElem = 0;
+  size_t idxElem = 0;
   const u32 numSegments = sa.numSegments;
 
   for (u32 idxSegment = 0; idxSegment < numSegments; idxSegment++) {
@@ -159,7 +160,7 @@ Slice<T> copyToSlice(Arena *arena, const SegmentArray<T> &sa) {
     T *const segment = sa.arrSegments[idxSegment];
     DCHECK(segment != nullptr);
 
-    for (u32 idxSlot = 0; idxSlot < lenSegment && idxElem < numElems;
+    for (size_t idxSlot = 0; idxSlot < lenSegment && idxElem < numElems;
          idxSlot++) {
       ret[idxElem] = segment[idxSlot];
       idxElem += 1;

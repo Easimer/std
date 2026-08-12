@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "std/Check.h"
-#include "std/Slice.hpp"
 
 namespace impl {
 using namespace std;
@@ -187,13 +186,5 @@ struct Optional {
   constexpr const T &operator*() const & noexcept { return value(); }
   constexpr const T &&operator*() const && noexcept {
     return std::move(value());
-  }
-
-  constexpr operator Slice<T>() noexcept {
-    if (!storage.present) {
-      return {nullptr, 0};
-    }
-
-    return {&storage.value, 1};
   }
 };

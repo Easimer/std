@@ -1,19 +1,19 @@
 ﻿#include "std/Testing.hpp"
 
-#include "std/json/Value.hpp"
 #include "std/json/Parser.hpp"
 #include "std/json/Utils.hpp"
+#include "std/json/Value.hpp"
 
 #include <math.h>
 
 #define CHECK_STR(Var, Literal) \
-  CHECK((Var).asConst() == Slice<const char>(sliceFromConstChar(Literal)))
+  CHECK((Var) == Slice<char>(sliceFromConstChar(Literal)))
 
 SN_TEST(JsonParser, EmptyObject) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("{}");
+  Slice<char> src = sliceFromConstChar("{}");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::Object);
@@ -24,7 +24,7 @@ SN_TEST(JsonParser, EmptyArray) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[]");
+  Slice<char> src = sliceFromConstChar("[]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::Array);
@@ -35,7 +35,7 @@ SN_TEST(JsonParser, OpenArray) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[");
+  Slice<char> src = sliceFromConstChar("[");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -44,7 +44,7 @@ SN_TEST(JsonParser, OpenArrayNested) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[[[[[[[[]]");
+  Slice<char> src = sliceFromConstChar("[[[[[[[[]]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -53,7 +53,7 @@ SN_TEST(JsonParser, OpenObject) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("{");
+  Slice<char> src = sliceFromConstChar("{");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -62,8 +62,7 @@ SN_TEST(JsonParser, OpenObjectNested) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src =
-      sliceFromConstChar("{\"k\": {\"k\": {\"k\": {\"k\": {");
+  Slice<char> src = sliceFromConstChar("{\"k\": {\"k\": {\"k\": {\"k\": {");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -72,8 +71,7 @@ SN_TEST(JsonParser, NumberArray) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src =
-      sliceFromConstChar("[1, 2.0, 1e+8, -4, -5.0, -6.7e+2]");
+  Slice<char> src = sliceFromConstChar("[1, 2.0, 1e+8, -4, -5.0, -6.7e+2]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::Array);
@@ -96,7 +94,7 @@ SN_TEST(JsonParser, EmptyArrayNewLine) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\n]");
+  Slice<char> src = sliceFromConstChar("[\n]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::Array);
@@ -108,7 +106,7 @@ SN_TEST(JsonParser, EmptyArrayWhitespace) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src =
+  Slice<char> src =
       sliceFromConstChar("     \n      \n \n\n \r\n  [    \n ]    \n\n");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
@@ -121,7 +119,7 @@ SN_TEST(JsonParser, StringEmpty) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("\"\"");
+  Slice<char> src = sliceFromConstChar("\"\"");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::String);
@@ -132,32 +130,32 @@ SN_TEST(JsonParser, StringSimple) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("\"asd\"");
+  Slice<char> src = sliceFromConstChar("\"asd\"");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::String);
-  CHECK(res.string() == Slice<const char>(sliceFromConstChar("asd")));
+  CHECK(res.string() == Slice<char>(sliceFromConstChar("asd")));
 }
 
 SN_TEST(JsonParser, StringCodepoint) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("\"\\u039B\"");
+  Slice<char> src = sliceFromConstChar("\"\\u039B\"");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::String);
 
   const u8 uc[2] = {0xCE, 0x9B};
-  Slice<const u8> ucs = sliceFrom(uc);
-  CHECK(res.string() == ucs.cast<const char>());
+  Slice<u8> ucs = sliceFrom(uc);
+  CHECK(res.string() == ucs.cast<char>());
 }
 
 SN_TEST(JsonParser, StringArray) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\"asd\", \"\", \"\\u0391\"]");
+  Slice<char> src = sliceFromConstChar("[\"asd\", \"\", \"\\u0391\"]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::Array);
@@ -173,7 +171,7 @@ SN_TEST(JsonParser, ObjectKeyValues) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar(
+  Slice<char> src = sliceFromConstChar(
       "{\"num\": -1.5, \"str\": \"string\", \"arr\": [1,2], \"obj\": {}, "
       "\"nul\": null, \"false\": false, \"tru\": true}");
   bool rc = tryParseValue(temp, src, res);
@@ -216,22 +214,22 @@ SN_TEST(JsonParser, StringUtf8) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char8_t> src8 = sliceFromConstChar(u8"[\"€𝄞\"]");
-  Slice<const char> src = src8.cast<const char>();
+  Slice<char8_t> src8 = sliceFromConstChar(u8"[\"€𝄞\"]");
+  Slice<char> src = src8.cast<char>();
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
 
   CHECK(res.type == JsonType::Array);
   CHECK(res.array().length == 1);
-  Slice<const char8_t> expected = sliceFromConstChar(u8"€𝄞");
-  CHECK(res.array()[0].string() == expected.cast<const char>());
+  Slice<char8_t> expected = sliceFromConstChar(u8"€𝄞");
+  CHECK(res.array()[0].string() == expected.cast<char>());
 }
 
 SN_TEST(JsonParser, ArrayDoubleComma) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[1,,2]");
+  Slice<char> src = sliceFromConstChar("[1,,2]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -240,7 +238,7 @@ SN_TEST(JsonParser, ArrayDoubleClose) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\"x\"]]");
+  Slice<char> src = sliceFromConstChar("[\"x\"]]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -249,7 +247,7 @@ SN_TEST(JsonParser, ArrayIncomplete) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\"x\"");
+  Slice<char> src = sliceFromConstChar("[\"x\"");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -258,7 +256,7 @@ SN_TEST(JsonParser, NumberWithAlpha) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[1.2a-3]");
+  Slice<char> src = sliceFromConstChar("[1.2a-3]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -267,7 +265,7 @@ SN_TEST(JsonParser, TrailingChars) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\"\"],");
+  Slice<char> src = sliceFromConstChar("[\"\"],");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -276,7 +274,7 @@ SN_TEST(JsonParser, ArrayExtraComma) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\"\",]");
+  Slice<char> src = sliceFromConstChar("[\"\",]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -285,7 +283,7 @@ SN_TEST(JsonParser, NumberWithNoFractionalDigits) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[-2.]");
+  Slice<char> src = sliceFromConstChar("[-2.]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -294,7 +292,7 @@ SN_TEST(JsonParser, StringStartEscapeUnclosed) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("[\"\\");
+  Slice<char> src = sliceFromConstChar("[\"\\");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -304,7 +302,7 @@ SN_TEST(JsonParser, NumberHugePosExponent) {
 
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("1.0e9999999");
+    Slice<char> src = sliceFromConstChar("1.0e9999999");
     bool rc = tryParseValue(temp, src, res);
     CHECK(rc);
     CHECK(res.type == JsonType::Number);
@@ -312,7 +310,7 @@ SN_TEST(JsonParser, NumberHugePosExponent) {
   }
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("-1.0e9999999");
+    Slice<char> src = sliceFromConstChar("-1.0e9999999");
     bool rc = tryParseValue(temp, src, res);
     CHECK(rc);
     CHECK(res.type == JsonType::Number);
@@ -325,7 +323,7 @@ SN_TEST(JsonParser, NumberHugeNegExponent) {
 
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("1.0e-9999999");
+    Slice<char> src = sliceFromConstChar("1.0e-9999999");
     bool rc = tryParseValue(temp, src, res);
     CHECK(rc);
     CHECK(res.type == JsonType::Number);
@@ -334,7 +332,7 @@ SN_TEST(JsonParser, NumberHugeNegExponent) {
 
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("-1.0e-9999999");
+    Slice<char> src = sliceFromConstChar("-1.0e-9999999");
     bool rc = tryParseValue(temp, src, res);
     CHECK(rc);
     CHECK(res.type == JsonType::Number);
@@ -347,25 +345,25 @@ SN_TEST(JsonParser, UnescapedCtrlChars) {
 
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("\"\n\"");
+    Slice<char> src = sliceFromConstChar("\"\n\"");
     bool rc = tryParseValue(temp, src, res);
     CHECK(!rc);
   }
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("\"\t\"");
+    Slice<char> src = sliceFromConstChar("\"\t\"");
     bool rc = tryParseValue(temp, src, res);
     CHECK(!rc);
   }
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("\"\b\"");
+    Slice<char> src = sliceFromConstChar("\"\b\"");
     bool rc = tryParseValue(temp, src, res);
     CHECK(!rc);
   }
   {
     JsonValue res;
-    Slice<const char> src = sliceFromConstChar("\"\x7f\"");
+    Slice<char> src = sliceFromConstChar("\"\x7f\"");
     bool rc = tryParseValue(temp, src, res);
     CHECK(rc);
   }
@@ -375,7 +373,7 @@ SN_TEST(JsonParser, ObjectExtraComma) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar("{\"k\":0,}");
+  Slice<char> src = sliceFromConstChar("{\"k\":0,}");
   bool rc = tryParseValue(temp, src, res);
   CHECK(!rc);
 }
@@ -384,7 +382,7 @@ SN_TEST(JsonUtils, GetKeyValue) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar(
+  Slice<char> src = sliceFromConstChar(
       "{\"num\": -1.5, \"str\": \"string\", \"arr\": [1,2], \"obj\": {}, "
       "\"nul\": null, \"false\": false, \"tru\": true}");
   bool rc = tryParseValue(temp, src, res);
@@ -418,7 +416,7 @@ SN_TEST(JsonUtils, GetKeyValueOfType) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<const char> src = sliceFromConstChar(
+  Slice<char> src = sliceFromConstChar(
       "{\"num\": -1.5, \"str\": \"string\", \"arr\": [1,2], \"obj\": {}, "
       "\"nul\": null, \"false\": false, \"tru\": true}");
   bool rc = tryParseValue(temp, src, res);

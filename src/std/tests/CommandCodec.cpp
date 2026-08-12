@@ -57,7 +57,7 @@ struct TestEncoder : CommandEncoder<TestFields> {
 };
 
 struct TestDecoder : CommandDecoder<TestFields> {
-  TestDecoder(Slice<const u8> encoded) : CommandDecoder(encoded) {}
+  TestDecoder(Slice<u8> encoded) : CommandDecoder(encoded) {}
 
   bool decodeNext(Slice<TestFields> &changes, TestState &outState) noexcept {
     if (!beginNextDecode()) {
@@ -166,11 +166,11 @@ SN_TEST(CommandCodec, encode_end_pushesBytes) {
 SN_TEST(CommandCodec, decode_empty) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
 
-  Slice<const u8> encoded;
+  Slice<u8> encoded;
   {
     Arena::Scope arena1 = getScratch(&arena0.arena, 0);
     TestEncoder enc(arena1);
-    encoded = enc.extractBuffer(arena0).asConst();
+    encoded = enc.extractBuffer(arena0);
   }
 
   TestDecoder dec(encoded);
@@ -182,7 +182,7 @@ SN_TEST(CommandCodec, decode_simple) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
   Arena::Scope arena1 = getScratch(&arena0.arena, 0);
 
-  Slice<const u8> encoded;
+  Slice<u8> encoded;
   {
     TestEncoder enc(arena0);
 
@@ -190,7 +190,7 @@ SN_TEST(CommandCodec, decode_simple) {
     enc.setFloat(2.0f);
     enc.end();
 
-    encoded = enc.extractBuffer(arena1).asConst();
+    encoded = enc.extractBuffer(arena1);
   }
 
   TestDecoder dec(encoded);
@@ -214,14 +214,14 @@ SN_TEST(CommandCodec, decode_simple_array) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
   Arena::Scope arena1 = getScratch(&arena0.arena, 0);
 
-  Slice<const u8> encoded;
+  Slice<u8> encoded;
   {
     TestEncoder enc(arena0);
     enc.setStructArrayElement(0, {1, 2});
     enc.setStructArrayElement(1, {3, 4});
     enc.end();
 
-    encoded = enc.extractBuffer(arena1).asConst();
+    encoded = enc.extractBuffer(arena1);
   }
 
   TestDecoder dec(encoded);
@@ -249,7 +249,7 @@ SN_TEST(CommandCodec, decode_multiple_commands) {
 
   const u32 NUM_COMMANDS = 16;
 
-  Slice<const u8> encoded;
+  Slice<u8> encoded;
   {
     TestEncoder enc(arena0);
 
@@ -259,7 +259,7 @@ SN_TEST(CommandCodec, decode_multiple_commands) {
       enc.end();
     }
 
-    encoded = enc.extractBuffer(arena1).asConst();
+    encoded = enc.extractBuffer(arena1);
   }
 
   TestDecoder dec(encoded);
@@ -292,7 +292,7 @@ SN_TEST(CommandCodec, decode_multiple_commands_array) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
   Arena::Scope arena1 = getScratch(&arena0.arena, 0);
 
-  Slice<const u8> encoded;
+  Slice<u8> encoded;
   {
     TestEncoder enc(arena0);
 
@@ -306,7 +306,7 @@ SN_TEST(CommandCodec, decode_multiple_commands_array) {
     enc.setStructArrayElement(0, {1, 1});
     enc.end();
 
-    encoded = enc.extractBuffer(arena1).asConst();
+    encoded = enc.extractBuffer(arena1);
   }
 
   TestDecoder dec(encoded);
@@ -346,7 +346,7 @@ SN_TEST(CommandCodec, decode_multiple_commands_same) {
   Arena::Scope arena0 = getScratch(nullptr, 0);
   Arena::Scope arena1 = getScratch(&arena0.arena, 0);
 
-  Slice<const u8> encoded;
+  Slice<u8> encoded;
   {
     TestEncoder enc(arena0);
 
@@ -354,7 +354,7 @@ SN_TEST(CommandCodec, decode_multiple_commands_same) {
     enc.end();
     enc.end();
 
-    encoded = enc.extractBuffer(arena1).asConst();
+    encoded = enc.extractBuffer(arena1);
   }
 
   TestDecoder dec(encoded);

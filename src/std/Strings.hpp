@@ -14,18 +14,18 @@
 #include "std/VectorUtils.hpp"
 
 template <typename T>
-Slice<Slice<T>> split(Arena *arena, Slice<T> arr, const T &sep) {
+MutSlice<Slice<T>> split(Arena *arena, Slice<T> arr, const T &sep) {
   if (arr.empty()) {
     return {};
   }
 
-  u32 numSeparators = arr.count(sep);
+  size_t numSeparators = arr.count(sep);
 
   Arena::Scope temp = getScratch(&arena, 1);
   Vector<Slice<T>> ret =
       vectorWithInitialCapacity<Slice<T>>(temp, numSeparators + 1);
 
-  u32 idxPrevStart = 0;
+  size_t idxPrevStart = 0;
   for (auto [elem, i] : arr) {
     if (elem == sep) {
       Slice<T> s = arr.subarray(idxPrevStart, i);
