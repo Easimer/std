@@ -178,6 +178,7 @@ if(SN_STD_BUILD_TESTS)
     tests/FixedRingBuffer.cpp
     tests/Endian.cpp
     tests/Json.cpp
+    tests/KhrTwoCall.cpp
     tests/Log.cpp
     tests/Optional.cpp
     tests/Path.cpp

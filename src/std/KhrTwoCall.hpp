@@ -14,7 +14,7 @@
 /**
  * @brief Arena and Slice-based helper for the two-call idiom found in Khronos
  * APIs.
- * 
+ *
  * @param arena Destination arena
  * @param dst The output slice
  * @param func A function like
@@ -26,7 +26,10 @@
  * success. If the API returns void, prefer twoCallV instead.
  */
 template <typename Result, typename T, typename F>
-Result twoCall(Arena *arena, Slice<T> &dst, F &&func, const T &defaultValue = {}) {
+Result twoCall(Arena *arena,
+               MutSlice<T> &dst,
+               F &&func,
+               const T &defaultValue = {}) {
   dst = {nullptr, 0};
 
   Result rc;
@@ -64,14 +67,17 @@ Result twoCall(Arena *arena, Slice<T> &dst, F &&func, const T &defaultValue = {}
 /**
  * @brief Arena and Slice-based helper for the two-call idiom found in Khronos
  * APIs.
- * 
+ *
  * @param arena Destination arena
  * @param dst The output slice
  * @param func A function like
  *   `(u32& outputElementCount, T* outputElements) -> void`.
  */
 template <typename T, typename F>
-void twoCallV(Arena *arena, Slice<T> &dst, F &&func, const T &defaultValue = {}) {
+void twoCallV(Arena *arena,
+              MutSlice<T> &dst,
+              F &&func,
+              const T &defaultValue = {}) {
   dst = {nullptr, 0};
 
   u32 numElems = 0;
