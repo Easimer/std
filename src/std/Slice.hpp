@@ -55,6 +55,9 @@ struct Range {
   T end;
 };
 
+/**
+ * \brief Converts a range to a span.
+ */
 template <typename T>
 Span<T> spanFrom(Range<T> r) {
   T start = r.start;
@@ -62,6 +65,9 @@ Span<T> spanFrom(Range<T> r) {
   return Span<T>{start, count};
 }
 
+/**
+ * \brief Converts a span to a range.
+ */
 template <typename T>
 Range<T> rangeFrom(Span<T> s) {
   T start = s.start;
@@ -69,6 +75,9 @@ Range<T> rangeFrom(Span<T> s) {
   return Range<T>{start, end};
 }
 
+/**
+ * \private
+ */
 template <typename T>
 struct SliceLegacyIterator {
   using Value = T;
@@ -115,6 +124,10 @@ struct Slice {
   /** \brief Constructs a slice over a single value. */
   constexpr Slice(const T &value) : data(&value), length(1) {}
 
+  /**
+   * \brief Accesses the element at the specified index and returns a reference
+   * to it.
+   */
   const T &operator[](size_t i) const {
     DCHECK(data != nullptr);
     DCHECK(i < length);
@@ -207,6 +220,7 @@ struct Slice {
 
   /**
    * \deprecated
+   * \private
    */
   bool indexOf(const T &needle, u32 *out) const {
     Optional<size_t> res = indexOf(needle);
@@ -240,6 +254,7 @@ struct Slice {
 
   /**
    * \deprecated
+   * \private
    */
   bool lastIndexOf(const T &needle, u32 *out) const {
     Optional<size_t> res = lastIndexOf(needle);
@@ -293,16 +308,30 @@ struct Slice {
     return {start, len};
   }
 
+  /**
+   * \deprecated
+   * \private
+   */
   Slice<T> subarray(Range<u32> range) const {
     return subarray(range.start, range.end);
   }
 
+  /**
+   * \deprecated
+   * \private
+   */
   Slice<T> subarray(Span<u32> span) const { return subarray(rangeFrom(span)); }
 
+  /**
+   * \brief Returns a new slice over a range of the original slice.
+   */
   Slice<T> subarray(Range<size_t> range) const {
     return subarray(range.start, range.end);
   }
 
+  /**
+   * \brief Returns a new slice over a span of the original slice.
+   */
   Slice<T> subarray(Span<size_t> span) const {
     return subarray(rangeFrom(span));
   }
@@ -319,6 +348,11 @@ struct Slice {
   Slice<T> subarray(size_t idxStart) const {
     return subarray(idxStart, length);
   }
+
+  /**
+   * \deprecated
+   * \private
+   */
   Slice<T> subarray(u32 idxStart) const { return subarray(idxStart, length); }
 
   /**
@@ -339,6 +373,14 @@ struct Slice {
     return length;
   }
 
+  /**
+   * \brief Decreases the length of the slice by the specified amount. This
+   * "pops" the last N elements from the view.
+   * 
+   * \param numElements Number of elements to pop; may be larger than the
+   * slice's current length.
+   * \returns The new length of the slice
+   */
   size_t pop(size_t numElements = 1) {
     if (numElements < length) {
       length -= numElements;
@@ -400,6 +442,10 @@ struct Slice {
     return {};
   }
 
+  /**
+   * \deprecated
+   * \private
+   */
   template <typename F>
   [[deprecated]] bool any(F &&condition, u32 &index) const {
     Optional<size_t> res = any(condition);
@@ -446,6 +492,10 @@ struct Slice {
     return subarray(length - suffix.length) == suffix;
   }
 
+  /**
+   * \brief Counts the number of elements in the slice that are equal to the
+   * specified value.
+   */
   size_t count(const T &value) const {
     size_t ret = 0;
     for (auto [elem, _] : *this) {
@@ -456,6 +506,10 @@ struct Slice {
     return ret;
   }
 
+  /**
+   * \brief Counts the number of elements in the slice that satisfy the
+   * predicate.
+   */
   template <typename F>
   size_t countIf(F &&condition) const {
     size_t ret = 0;
@@ -468,6 +522,9 @@ struct Slice {
   }
 };
 
+/**
+ * \private
+ */
 template <typename T>
 struct MutSliceLegacyIterator {
   using Value = T;
@@ -511,6 +568,10 @@ struct MutSlice {
   /** \brief Constructs a slice over a single value. */
   constexpr MutSlice(T &value) : data(&value), length(1) {}
 
+  /**
+   * \brief Accesses the element at the specified index and returns a reference
+   * to it.
+   */
   T &operator[](size_t i) const {
     DCHECK(data != nullptr);
     DCHECK(i < length);
@@ -520,8 +581,14 @@ struct MutSlice {
   MutSliceLegacyIterator<T> begin() const { return {data, 0}; }
   MutSliceLegacyIterator<T> end() const { return {data, length}; }
 
+  /**
+   * \brief Creates an immutable slice from this mutable once.
+   */
   Slice<T> asSlice() const { return {static_cast<const T *>(data), length}; }
 
+  /**
+   * \brief Creates an immutable slice from this mutable once.
+   */
   operator Slice<T>() const { return asSlice(); }
 
   /**
@@ -609,10 +676,16 @@ struct MutSlice {
     return {start, len};
   }
 
+  /**
+   * \brief Returns a new slice over a range of the original slice.
+   */
   MutSlice<T> subarray(Range<size_t> range) const {
     return subarray(range.start, range.end);
   }
 
+  /**
+   * \brief Returns a new slice over a span of the original slice.
+   */
   MutSlice<T> subarray(Span<size_t> span) const {
     return subarray(rangeFrom(span));
   }
@@ -642,6 +715,10 @@ struct MutSlice {
     return *this;
   }
 
+  /**
+   * \brief Steps the slice forward by one element and decreases its length.
+   * The slice must not be empty.
+   */
   MutSlice<T> &shrinkFromLeft() { return shrinkFromLeftByCount(1); }
 
   /**
@@ -754,6 +831,14 @@ struct MutSlice {
     return length;
   }
 
+  /**
+   * \brief Decreases the length of the slice by the specified amount. This
+   * "pops" the last N elements from the view.
+   * 
+   * \param numElements Number of elements to pop; may be larger than the
+   * slice's current length.
+   * \returns The new length of the slice
+   */
   size_t pop(size_t numElements = 1) {
     if (numElements < length) {
       length -= numElements;
@@ -797,14 +882,25 @@ struct MutSlice {
    */
   bool endsWith(Slice<T> suffix) const { return asSlice().endsWith(suffix); }
 
+  /**
+   * \brief Counts the number of elements in the slice that are equal to the
+   * specified value.
+   */
   size_t count(const T &value) const { return asSlice().count(value); }
 
+  /**
+   * \brief Counts the number of elements in the slice that satisfy the
+   * predicate.
+   */
   template <typename F>
   size_t countIf(F &&condition) const {
     return asSlice().countIf(condition);
   }
 };
 
+/**
+ * \private
+ */
 #define SLICE_DEFINE_COPY_SPECIALIZATION(T)                \
   template <>                                              \
   inline MutSlice<T> &MutSlice<T>::copy(Slice<T> source) { \
@@ -932,6 +1028,15 @@ template <typename D, typename S>
   return in.template cast<D>();
 }
 
+/**
+ * \brief Copies into a mutable slice values from a pointer. The length of the
+ * slice is not modified and values that would not fit are not copied.
+ * 
+ * \param s Target slice
+ * \param src Source pointer
+ * \param numElements Number of values to copy
+ * \param offset Destination offset index
+ */
 template <typename T>
 inline void copyElementsInto(MutSlice<T> s,
                              const T *src,
@@ -951,7 +1056,7 @@ template <typename T>
 }
 
 /**
- * Creates a slice from a C array.
+ * \brief Creates a slice from a C array.
  */
 template <typename T, size_t N>
 MutSlice<T> sliceFrom(T (&p)[N]) {
@@ -959,7 +1064,7 @@ MutSlice<T> sliceFrom(T (&p)[N]) {
 }
 
 /**
- * Creates a slice from a C array.
+ * \brief Creates a slice from a C array.
  */
 template <typename T, size_t N>
 constexpr Slice<T> sliceFrom(const T (&p)[N]) {
@@ -1020,19 +1125,27 @@ template <typename T>
 }
 
 /**
- * Create a mutable slice from an STL container.
+ * \brief Create a mutable slice from an STL container.
  */
 template <typename C>
-Slice<typename C::value_type> mutSliceFromStd(C &container) {
-  return {container.data(), (u32)container.size()};
+MutSlice<typename C::value_type> mutSliceFromStd(C &container) {
+  return {container.data(), container.size()};
 }
 
 /**
- * Create a slice from an STL container.
+ * \brief Create a mutable slice from an STL container.
  */
 template <typename C>
-Slice<const typename C::value_type> sliceFromStd(const C &container) {
-  return {container.data(), (u32)container.size()};
+MutSlice<typename C::value_type> sliceFromStd(C &container) {
+  return {container.data(), container.size()};
+}
+
+/**
+ * \brief Create a slice from an STL container.
+ */
+template <typename C>
+Slice<typename C::value_type> sliceFromStd(const C &container) {
+  return {container.data(), container.size()};
 }
 
 /**@}*/

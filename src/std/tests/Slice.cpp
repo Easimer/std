@@ -3,6 +3,8 @@
 #include <std/SliceUtils.hpp>
 #include <std/Testing.hpp>
 
+#include <vector>
+
 SN_TEST(Slice, defaultConstructedIsEmpty) {
   Slice<u8> s;
   CHECK(s.data == nullptr);
@@ -815,3 +817,22 @@ SN_TEST(MutSlice, shrinkFromLeftByCount3) {
   CHECK(s.empty());
 }
 
+SN_TEST(Slice, fromStd) {
+  const std::vector<u32> emptyVec;
+  std::vector<u32> vec = {5, 6};
+
+  Slice<u32> emptySlice = sliceFromStd(emptyVec);
+  CHECK(emptySlice.empty());
+
+  MutSlice<u32> slice = mutSliceFromStd(vec);
+  CHECK(slice.data == vec.data());
+  CHECK(slice.length == vec.size());
+
+  MutSlice<u32> slice2 = sliceFromStd(vec);
+  CHECK(slice2.data == vec.data());
+  CHECK(slice2.length == vec.size());
+
+  Slice<u32> slice3 = sliceFromStd(vec);
+  CHECK(slice3.data == vec.data());
+  CHECK(slice3.length == vec.size());
+}

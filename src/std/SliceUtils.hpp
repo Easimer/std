@@ -20,16 +20,24 @@
  * @{
  */
 
+/**
+ * \brief Creates a slice initializer from a zero-terminated string constant.
+ * Does not include the zero terminator!
+ */
 #define sliceFromConstChar(s) {(s), sizeof((s)) - 1}
+/**
+ * \brief Creates a slice initializer from a zero-terminated string constant,
+ * including the zero terminator!
+ */
 #define sliceFromConstCharWithZero(s) {(s), sizeof((s))}
 /**
- * \deprecated Prefer \ref sliceFrom from Slice.hpp
+ * \deprecated Prefer `::sliceFrom` from Slice.hpp
  * \private
  */
 #define sliceFromArray(arr) {(arr), sizeof((arr)) / sizeof((arr)[0])}
 
 /**
- * \deprecated Prefer \ref "duplicate" instead
+ * \deprecated Prefer `::duplicate` instead
  * \private
  */
 template <typename T>
