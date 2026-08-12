@@ -309,20 +309,6 @@ struct Slice {
   }
 
   /**
-   * \deprecated
-   * \private
-   */
-  Slice<T> subarray(Range<u32> range) const {
-    return subarray(range.start, range.end);
-  }
-
-  /**
-   * \deprecated
-   * \private
-   */
-  Slice<T> subarray(Span<u32> span) const { return subarray(rangeFrom(span)); }
-
-  /**
    * \brief Returns a new slice over a range of the original slice.
    */
   Slice<T> subarray(Range<size_t> range) const {
@@ -348,12 +334,6 @@ struct Slice {
   Slice<T> subarray(size_t idxStart) const {
     return subarray(idxStart, length);
   }
-
-  /**
-   * \deprecated
-   * \private
-   */
-  Slice<T> subarray(u32 idxStart) const { return subarray(idxStart, length); }
 
   /**
    * \brief Steps the slice forward by at most N elements and decreases its
