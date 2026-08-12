@@ -602,8 +602,7 @@ struct MutSlice {
   MutSlice<D> cast() const {
     static_assert(sizeof(D) < sizeof(T) || (sizeof(D) % sizeof(T)) == 0);
     static_assert(sizeof(T) < sizeof(D) || (sizeof(T) % sizeof(D)) == 0);
-    return MutSlice<D>(static_cast<const D *>(data),
-                       length * sizeof(T) / sizeof(D));
+    return MutSlice<D>(static_cast<D *>(data), length * sizeof(T) / sizeof(D));
   }
 
   /**
