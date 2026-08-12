@@ -10,7 +10,7 @@
 
 #include "./CompilerInfo.h"
 
-#if SN_MSVC
+#if SN_MSVC || (SN_CLANG && _WIN32)
 #define SN_DLLEXPORT __declspec(dllexport)
 #define SN_DLLIMPORT __declspec(dllimport)
 #define SN_WEAK_SYMBOL
