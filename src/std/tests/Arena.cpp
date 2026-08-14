@@ -88,3 +88,21 @@ SN_TEST(Arena, getScratchFor) {
   CHECK(a1.arena != a2.arena);
   CHECK(a0.arena == a2.arena);
 }
+
+SN_TEST(Arena, alignment) {
+  Arena::Scope temp;
+
+  struct alignas(16) A {
+    int x;
+  };
+
+  struct alignas(256) B {
+    int x;
+  };
+
+  uintptr_t ptrA = (uintptr_t)alloc(temp, sizeof(A), alignof(A), 3);
+  CHECK((ptrA & 15) == 0);
+
+  uintptr_t ptrB = (uintptr_t)alloc(temp, sizeof(B), alignof(B), 3);
+  CHECK((ptrB & 255) == 0);
+}

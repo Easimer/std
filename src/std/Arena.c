@@ -18,8 +18,6 @@ static u8 *allocImpl(Arena *a,
                      size_t sizAlign,
                      size_t numObjects,
                      size_t *sizAllocOut) {
-  DCHECK(numObjects >= 0);
-
 #ifdef SN_ASAN_ACTIVE
   // ASAN requires allocations to be 8-bytes aligned
   sizAlign = (sizAlign + 7) & (~7);
@@ -31,6 +29,8 @@ static u8 *allocImpl(Arena *a,
   }
 
   size_t sizAlloc = (size_t)sizObj * numObjects;
+  DCHECK((sizAlloc % sizAlign) == 0 &&
+         "Allocation size must be a multiple of its alignment");
 
   a->end -= sizAlloc + pad;
   DCHECK(a->beg <= a->end);
