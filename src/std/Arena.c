@@ -11,6 +11,7 @@
 #include "std/Sanitizer.h"
 #include "std/Types.h"
 
+#include <stdint.h>
 #include <string.h>
 
 static u8 *allocImpl(Arena *a,
@@ -23,18 +24,28 @@ static u8 *allocImpl(Arena *a,
   sizAlign = (sizAlign + 7) & (~7);
 #endif
 
-  size_t pad = (size_t)a->end & (sizAlign - 1);
-  while (!(numObjects <= (a->end - a->beg - pad) / sizObj)) {
+  const size_t sizAlloc = sizObj * numObjects;
+  size_t pad;
+  do {
+    uintptr_t baseUnaligned =
+        (uintptr_t)a->end - sizAlloc;  // Unaligned base address that has the
+                                       // required amount of space
+    uintptr_t baseAligned =
+        baseUnaligned &
+        ~(sizAlign - 1);  // Base address that has the required alignment
+    pad = (uintptr_t)a->end - baseAligned;  // Total bytes needed
+    if (a->end - a->beg >= pad) {
+      break;
+    }
+
     handleOOM(a);
-  }
+  } while (1);
 
-  size_t sizAlloc = (size_t)sizObj * numObjects;
-  DCHECK((sizAlloc % sizAlign) == 0 &&
-         "Allocation size must be a multiple of its alignment");
-
-  a->end -= sizAlloc + pad;
+  a->end -= pad;
   DCHECK(a->beg <= a->end);
+
   u8 *allocStart = a->end;
+  DCHECK(((uintptr_t)allocStart & (sizAlign - 1)) == 0);
 
   // Unpoison the allocated range if running an ASAN build
   SN_ASAN_UNPOISON(allocStart, sizAlloc);

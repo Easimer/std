@@ -106,3 +106,114 @@ SN_TEST(Arena, alignment) {
   uintptr_t ptrB = (uintptr_t)alloc(temp, sizeof(B), alignof(B), 3);
   CHECK((ptrB & 255) == 0);
 }
+
+static constexpr u64 a =
+    6364136223846793005ULL; /* see TAOCP Vol 2, 3.3.4, page 108 */
+static constexpr u64 c = 9754186451795953191ULL; /* some random start value */
+
+static u64 rand(u64 *r) {
+  u64 ret = (a * (*r)) + c;
+  *r = ret;
+  return ret;
+}
+
+SN_TEST(Arena, swarm) {
+  u64 randState = 2113148651ULL;
+
+  enum OpKind {
+    SET_COUNT,
+    SET_SIZE,
+    INCREASE_ALIGNMENT,
+    DECREASE_ALIGNMENT,
+    PUSH,
+    POP,
+    ALLOC,
+    COUNT
+  };
+
+  u32 enabled = (1 << OpKind::COUNT) - 1;
+
+  for (size_t idxRun = 0; idxRun < 1 << 16; idxRun++) {
+    // Each run starts with clean state, except randState which is not reset
+    Arena::Scope temp;
+
+    constexpr size_t STACK_SIZ = 8;
+    ArenaSaved stack[STACK_SIZ];
+    size_t stackIdx = 0;
+
+    size_t sizObj = 1;
+    size_t numObj = 1;
+    size_t alignObj = 1;
+
+    for (size_t idxScenario = 0; idxScenario < 1 << 8; idxScenario++) {
+      // Only a random subset of operations is enabled during a scenario
+      u32 toggle = rand(&randState) % OpKind::COUNT;
+      enabled ^= (1 << toggle);
+
+      for (size_t idxBurst = 0; idxBurst < 1 << 3; idxBurst++) {
+        // Perform random operations on an arena
+
+        if (enabled == 0) {
+          break;
+        }
+
+        OpKind kind;
+        for (;;) {
+          kind = OpKind(rand(&randState) % OpKind::COUNT);
+
+          if ((enabled & (1 << kind)) != 0) {
+            break;
+          }
+        }
+
+        switch (kind) {
+          case SET_COUNT: {
+            size_t next = rand(&randState) % 8;
+            numObj = next;
+            break;
+          }
+          case SET_SIZE: {
+            size_t next = rand(&randState) % 32;
+            sizObj = next;
+            break;
+          }
+          case INCREASE_ALIGNMENT:
+            if (alignObj != 128) {
+              alignObj *= 2;
+            }
+            break;
+          case DECREASE_ALIGNMENT:
+            if (alignObj != 1) {
+              alignObj /= 2;
+            }
+            break;
+          case PUSH:
+            if (stackIdx != STACK_SIZ) {
+              stack[stackIdx] = saveArena(temp.arena);
+              stackIdx++;
+            }
+            break;
+          case POP:
+            if (stackIdx != 0) {
+              restoreArena(temp.arena, stack[stackIdx - 1].saved);
+              stackIdx--;
+            }
+            break;
+          case ALLOC: {
+            Arena saved = *temp.arena;
+            u8 *ptr = alloc(temp, sizObj, alignObj, numObj);
+            CHECK(saved.beg <= ptr);
+            CHECK(ptr <= saved.end);
+            size_t sizAlloc = saved.end - ptr;
+            CHECK(((uintptr_t)ptr & (alignObj - 1)) == 0);
+            CHECK(sizAlloc >= sizObj * numObj);
+            break;
+          }
+          default:
+            CHECK(false);
+            break;
+        }
+      }
+    }
+  }
+}
