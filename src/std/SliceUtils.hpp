@@ -123,12 +123,32 @@ void alloc(Arena *arena, size_t length, MutSlice<T> &dst) {
 }
 
 /**
+ * \brief Creates a new zero-initialized slice with the specified length and
+ * alignment.
+ */
+template <typename T>
+void alloc(Arena *arena, size_t length, size_t alignment, MutSlice<T> &dst) {
+  dst.length = length;
+  dst.data = alloc<T>(arena, length, alignment);
+}
+
+/**
  * \brief Creates a new **uninitialized** slice with the specified length.
  */
 template <typename T>
 void allocNZ(Arena *arena, size_t length, MutSlice<T> &dst) {
   dst.length = length;
   dst.data = allocNZ<T>(arena, length);
+}
+
+/**
+ * \brief Creates a new **uninitialized** slice with the specified length and
+ * alignment.
+ */
+template <typename T>
+void allocNZ(Arena *arena, size_t length, size_t alignment, MutSlice<T> &dst) {
+  dst.length = length;
+  dst.data = allocNZ<T>(arena, length, alignment);
 }
 
 /**

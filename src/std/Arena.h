@@ -173,15 +173,25 @@ struct Arena::Scope {
 #endif
 
 template <typename T>
+T *alloc(Arena *a, size_t count, size_t alignment) {
+  void *ptr = alloc(a, sizeof(T), alignment, count);
+  return reinterpret_cast<T *>(SN_ASSUME_ALIGNED(ptr, alignment));
+}
+
+template <typename T>
+T *allocNZ(Arena *a, size_t count, size_t alignment) {
+  void *ptr = allocNZ(a, sizeof(T), alignment, count);
+  return reinterpret_cast<T *>(SN_ASSUME_ALIGNED(ptr, alignment));
+}
+
+template <typename T>
 T *alloc(Arena *a, size_t count = 1) {
-  void *ptr = alloc(a, sizeof(T), alignof(T), count);
-  return reinterpret_cast<T *>(SN_ASSUME_ALIGNED(ptr, alignof(T)));
+  return alloc<T>(a, count, alignof(T));
 }
 
 template <typename T>
 T *allocNZ(Arena *a, size_t count = 1) {
-  void *ptr = allocNZ(a, sizeof(T), alignof(T), count);
-  return reinterpret_cast<T *>(SN_ASSUME_ALIGNED(ptr, alignof(T)));
+  return allocNZ<T>(a, count, alignof(T));
 }
 
 /**

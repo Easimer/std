@@ -836,3 +836,30 @@ SN_TEST(Slice, fromStd) {
   CHECK(slice3.data == vec.data());
   CHECK(slice3.length == vec.size());
 }
+
+SN_TEST(Slice, alloc) {
+  Arena::Scope temp;
+
+  MutSlice<i32> arr;
+  alloc(temp, 15, arr);
+
+  CHECK(arr.data != nullptr);
+  CHECK(arr.length == 15);
+}
+
+SN_TEST(Slice, allocZero) {
+  Arena::Scope temp;
+
+  MutSlice<i32> arr;
+  alloc(temp, 0, arr);
+  CHECK(arr.empty());
+}
+
+SN_TEST(Slice, allocManualAlignment) {
+  Arena::Scope temp;
+
+  MutSlice<f32> vectors;
+  alloc(temp, 3 * 8, 32, vectors);
+  CHECK(vectors.length == 3 * 8);
+  CHECK(((uintptr_t)vectors.data & 31) == 0);
+}
