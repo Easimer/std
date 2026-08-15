@@ -100,3 +100,32 @@ SN_TEST(Array, subarrayRangeConst) {
   CHECK(view.data == arr.data + 2);
   CHECK(view.length == 1);
 }
+
+SN_TEST(Array, arrayOf) {
+  auto res = arrayOf<u32>({1, 2, 3});
+
+  CHECK(res.length == 3);
+  CHECK(res[0] == 1);
+  CHECK(res[1] == 2);
+  CHECK(res[2] == 3);
+}
+
+SN_TEST(Array, arrayOfNoCopy) {
+  struct NoCopy {
+    u32 x;
+    NoCopy() : x(0) {}
+    NoCopy(u32 x) : x(x) {}
+    NoCopy(const NoCopy &) = delete;
+    NoCopy(NoCopy &&other) noexcept : x(other.x) {}
+    void operator=(const NoCopy &) = delete;
+    void operator=(NoCopy &&other) noexcept { x = other.x; }
+    bool operator==(const u32 &other) const noexcept { return x == other; }
+  };
+  auto res = arrayOf<NoCopy>({1, 2, 3});
+
+  CHECK(res.length == 3);
+  CHECK(res[0] == 1);
+  CHECK(res[1] == 2);
+  CHECK(res[2] == 3);
+}
+
