@@ -859,7 +859,7 @@ SN_TEST(Slice, allocManualAlignment) {
   Arena::Scope temp;
 
   MutSlice<f32> vectors;
-  alloc(temp, 3 * 8, 32, vectors);
+  alloc<f32, 32>(temp, 3 * 8, vectors);
   CHECK(vectors.length == 3 * 8);
   CHECK(((uintptr_t)vectors.data & 31) == 0);
 }
