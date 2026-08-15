@@ -25,7 +25,7 @@ static u8 *allocImpl(Arena *a,
 #endif
 
   const size_t sizAlloc = sizObj * numObjects;
-  size_t pad;
+  ptrdiff_t pad;
   do {
     uintptr_t baseUnaligned =
         (uintptr_t)a->end - sizAlloc;  // Unaligned base address that has the
