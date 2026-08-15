@@ -9,7 +9,28 @@
 			</ArrayItems>
 		</Expand>
 	</Type>
-	<Type Name="Slice&lt;char const&gt;" Priority="High">
+	<Type Name="Slice&lt;char&gt;" Priority="High">
+		<DisplayString>{data,[length]s8}</DisplayString>
+		<StringView>data,[length]s8</StringView>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- MutSlice<T> -->
+	<Type Name="MutSlice&lt;*&gt;">
+		<DisplayString>{{ length={length} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="MutSlice&lt;char&gt;" Priority="High">
 		<DisplayString>{data,[length]s8}</DisplayString>
 		<StringView>data,[length]s8</StringView>
 		<Expand>
@@ -59,6 +80,66 @@
 				<ValueNode>value</ValueNode>
 			</LinkedListItems>
 			<Item Name="arena">arena</Item>
+		</Expand>
+	</Type>
+
+	<!-- Optional<T> -->
+	<Type Name="Optional&lt;*&gt;">
+		<DisplayString Condition="storage.present == false">None()</DisplayString>
+		<DisplayString>Some({storage.value})</DisplayString>
+		<Expand>
+			<Item Name="[value]" Condition="storage.present">storage.value</Item>
+		</Expand>
+	</Type>
+
+	<!-- Result<T, E> -->
+	<Type Name="Result&lt;*,*&gt;">
+		<DisplayString Condition="storage.isValue">Ok({storage.value})</DisplayString>
+		<DisplayString>Err({storage.error})</DisplayString>
+		<Expand>
+			<Item Name="[value]" Condition="storage.isValue">storage.value</Item>
+			<Item Name="[error]" Condition="!storage.isValue">storage.error</Item>
+		</Expand>
+	</Type>
+	
+    <!-- JSON -->
+    <Type Name="JsonKeyValue">
+        <DisplayString>{key,s8}: {value}</DisplayString>
+        <Expand>
+            <Item Name="key">key</Item>
+            <Item Name="value">value</Item>
+        </Expand>
+    </Type>
+    <Type Name="JsonValue">
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 0">null</DisplayString>
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 1">false</DisplayString>
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 2">true</DisplayString>
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 3">{number,g}</DisplayString>
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 4">"{ str , [length]s8 }"</DisplayString>
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 5">[{length,d} elements]</DisplayString>
+        <DisplayString Condition="static_cast&lt;u8&gt;(type) == 6">{{{length,d} members}}</DisplayString>
+        <DisplayString>(unknown type)</DisplayString>
+        <StringView Condition="static_cast&lt;u8&gt;(type) == 4">str,[length]s8</StringView>
+        <Expand>
+            <ArrayItems Condition="static_cast&lt;u8&gt;(type) == 5">
+                <Size>length</Size>
+                <ValuePointer>arr</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="static_cast&lt;u8&gt;(type) == 6">
+                <Size>length</Size>
+                <ValuePointer>kv</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+	<!-- Array<T> -->
+	<Type Name="Array&lt;*&gt;">
+		<DisplayString>{{ length={length} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
 		</Expand>
 	</Type>
 </AutoVisualizer>
