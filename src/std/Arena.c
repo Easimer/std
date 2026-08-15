@@ -14,6 +14,14 @@
 #include <stdint.h>
 #include <string.h>
 
+#if SN_GCC || SN_CLANG
+#define SN_STD_LIKELY(Expr) __builtin_expect((Expr), 1)
+#define SN_STD_UNLIKELY(Expr) __builtin_expect((Expr), 0)
+#else
+#define SN_STD_LIKELY(Expr) (Expr)
+#define SN_STD_UNLIKELY(Expr) (Expr)
+#endif
+
 static u8 *allocImpl(Arena *a,
                      size_t sizObj,
                      size_t sizAlign,
@@ -25,17 +33,23 @@ static u8 *allocImpl(Arena *a,
 #endif
 
   const size_t sizAlloc = sizObj * numObjects;
-  ptrdiff_t pad;
+  if (SN_STD_UNLIKELY(sizAlloc == 0)) {
+    return NULL;
+  }
+
+  size_t pad;
   do {
-    uintptr_t baseUnaligned =
-        (uintptr_t)a->end - sizAlloc;  // Unaligned base address that has the
-                                       // required amount of space
-    uintptr_t baseAligned =
-        baseUnaligned &
-        ~(sizAlign - 1);  // Base address that has the required alignment
-    pad = (uintptr_t)a->end - baseAligned;  // Total bytes needed
-    if (a->end - a->beg >= pad) {
-      break;
+    size_t sizAvailable = a->end - a->beg;
+    if (SN_STD_LIKELY(sizAvailable >= sizAlloc)) {
+      // Unaligned base address that has the required amount of space
+      uintptr_t baseUnaligned = (uintptr_t)a->end - sizAlloc;
+      // Base address that has the required alignment
+      uintptr_t baseAligned = baseUnaligned & ~(sizAlign - 1);
+      // Total bytes needed after alignment
+      pad = (size_t)a->end - baseAligned;
+      if (SN_STD_LIKELY(sizAvailable >= pad)) {
+        break;
+      }
     }
 
     handleOOM(a);
@@ -48,9 +62,9 @@ static u8 *allocImpl(Arena *a,
   DCHECK(((uintptr_t)allocStart & (sizAlign - 1)) == 0);
 
   // Unpoison the allocated range if running an ASAN build
-  SN_ASAN_UNPOISON(allocStart, sizAlloc);
+  SN_ASAN_UNPOISON(allocStart, pad);
 
-  *sizAllocOut = sizAlloc;
+  *sizAllocOut = pad;
   return allocStart;
 }
 
@@ -62,6 +76,10 @@ u8 *allocNZ(Arena *a, size_t sizObj, size_t sizAlign, size_t numObjects) {
 u8 *alloc(Arena *a, size_t sizObj, size_t sizAlign, size_t numObjects) {
   size_t sizAlloc;
   u8 *allocStart = allocImpl(a, sizObj, sizAlign, numObjects, &sizAlloc);
+  if (SN_STD_UNLIKELY(allocStart == NULL)) {
+    return NULL;
+  }
+
   return (u8 *)memset(allocStart, 0, sizAlloc);
 }
 

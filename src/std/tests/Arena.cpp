@@ -46,9 +46,33 @@ SN_TEST(Arena, memoryIsZeroInited) {
 }
 
 SN_TEST_MUST_FAIL(Arena, callsHandleOomWhenOutOfSpace) {
-  Arena::Scope temp;
+  u8 buf[32];
+  Arena test = {buf, buf + 32};
 
-  alloc<u8>(temp, 0xFFFFFFFF);
+  alloc<u8>(&test, 0xFFFFFFFF);
+}
+
+SN_TEST_MUST_FAIL(Arena, allocFailsOnEmptyArena) {
+  u8 buf[32];
+  Arena test = {buf, buf};
+
+  alloc<u32>(&test, 1);
+}
+
+SN_TEST(Arena, zeroSizeAllocReturnsNull) {
+  u8 buf[32];
+  Arena test = {buf, buf + 32};
+
+  u8* res = alloc<u8>(&test, 0);
+  CHECK(res == nullptr);
+}
+
+SN_TEST_MUST_FAIL(Arena, failsOnSizeMax) {
+  u8 buf[32];
+  Arena test = {buf, buf + 32};
+
+  size_t count = SIZE_MAX;
+  alloc<u8>(&test, count);
 }
 
 SN_TEST(Arena, exactSizeAllocSucceeds) {
@@ -202,11 +226,17 @@ SN_TEST(Arena, swarm) {
           case ALLOC: {
             Arena saved = *temp.arena;
             u8 *ptr = alloc(temp, sizObj, alignObj, numObj);
-            CHECK(saved.beg <= ptr);
-            CHECK(ptr <= saved.end);
-            size_t sizAlloc = saved.end - ptr;
-            CHECK(((uintptr_t)ptr & (alignObj - 1)) == 0);
-            CHECK(sizAlloc >= sizObj * numObj);
+            if (ptr != nullptr) {
+              CHECK(sizObj > 0);
+              CHECK(numObj > 0);
+              CHECK(saved.beg <= ptr);
+              CHECK(ptr <= saved.end);
+              size_t sizAlloc = saved.end - ptr;
+              CHECK(((uintptr_t)ptr & (alignObj - 1)) == 0);
+              CHECK(sizAlloc >= sizObj * numObj);
+            } else {
+              CHECK(sizObj == 0 || numObj == 0);
+            }
             break;
           }
           default:

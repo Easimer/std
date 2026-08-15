@@ -54,7 +54,7 @@ SN_TEST(Vector, vectorWithZeroInitialCapacityWorks) {
   Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 0);
 
   CHECK(v.capacity >= 0);
-  CHECK(v.data != nullptr);
+  CHECK(v.data == nullptr);
   CHECK(v.length == 0);
 }
 
