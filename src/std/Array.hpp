@@ -40,6 +40,28 @@ struct Array {
     }
   }
 
+  Array(Array<T, N> &&other) : data() {
+    for (size_t i = 0; i < N; i++) {
+      data[i] = std::move(other.data[i]);
+    }
+  }
+
+  Array<T, N>& operator=(const Array<T, N>& other) {
+    for (size_t i = 0; i < N; i++) {
+      data[i] = other.data[i];
+    }
+
+    return *this;
+  }
+
+  Array<T, N> &operator=(Array<T, N> &&other) {
+    for (size_t i = 0; i < N; i++) {
+      data[i] = std::move(other.data[i]);
+    }
+
+    return *this;
+  }
+
   T &operator[](size_t idxElem) { return data[idxElem]; }
   const T &operator[](size_t idxElem) const { return data[idxElem]; }
 
@@ -88,3 +110,21 @@ struct Array {
   const T *begin() const { return &data[0]; }
   const T *end() const { return &data[N]; }
 };
+
+template <typename T, size_t N>
+static inline constexpr Array<T, N> arrayOf(const T (&init)[N]) {
+  Array<T, N> ret;
+  for (size_t i = 0; i < N; i++) {
+    ret[i] = init[i];
+  }
+  return ret;
+}
+
+template <typename T, size_t N>
+static inline constexpr Array<T, N> arrayOf(T(&&init)[N]) {
+  Array<T, N> ret;
+  for (size_t i = 0; i < N; i++) {
+    ret[i] = std::move(init[i]);
+  }
+  return ret;
+}
