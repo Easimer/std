@@ -43,9 +43,19 @@ function(target_wall_werror_SN TGT)
 endfunction()
 
 option(SN_STD_EMSCRIPTEN_PTHREAD "Build with -pthread" ON)
+option(SN_STD_EMSCRIPTEN_FAKE_DYLIBS "Build with -sFAKE_DYLIBS on" OFF)
 if(EMSCRIPTEN AND SN_STD_EMSCRIPTEN_PTHREAD)
   add_compile_options(-pthread)
   add_link_options(-pthread)
+  # Required for dynamic linking
+  add_compile_options(-fPIC)
+
+  if (SN_STD_EMSCRIPTEN_FAKE_DYLIBS)
+	  add_link_options(-sFAKE_DYLIBS=1)
+  else()
+      # NOTE(danielm): pthreads + dylibs are experimental
+      # as of emscripten 6.0.6
+  endif()
 endif()
 
 add_subdirectory(src)

@@ -135,3 +135,24 @@ jobs:
         run: |
           cd out
           node src/std/std-tests.js
+
+  test-emscripten-6:
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:6.0.6
+    strategy:
+      matrix:
+        unity: ["ON", "OFF"]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Configure
+        run: |
+          emcmake cmake -S . -B out --preset ci-test-nodejs -DCMAKE_UNITY_BUILD=${{ matrix.unity }} -DSN_STD_EMSCRIPTEN_FAKE_DYLIBS=ON
+      - name: Build
+        run: |
+          cmake --build out --config DebugSan
+      - name: Test
+        run: |
+          cd out
+          node src/std/std-tests.js
