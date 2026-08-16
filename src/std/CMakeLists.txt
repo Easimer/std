@@ -130,6 +130,11 @@ target_compile_definitions(std-static
     SN_STD_SYSTEM=${SN_STD_SYSTEM}
 )
 
+target_precompile_headers(std-static
+  PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:"std/Slice.hpp">
+)
+
 if(MSVC)
   target_link_options(std-static PUBLIC "/alternatename:checkFail=checkFailDefault")
 endif()
@@ -203,6 +208,11 @@ if(SN_STD_BUILD_TESTS)
   add_test(
     NAME std-tests
     COMMAND $<TARGET_FILE:std-tests>
+  )
+
+  target_precompile_headers(std-tests
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:"std/Slice.hpp">
   )
 endif()
 
