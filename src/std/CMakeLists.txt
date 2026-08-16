@@ -1,3 +1,7 @@
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-msimd128 HAS_WASM128)
+check_cxx_compiler_flag(-msse4.2 HAS_SSE42)
+
 # Defines these CMake vars:
 # SN_STD_ARCHITECTURE: target CPU architecture; one of: [x64, a64, wasm32]
 # SN_STD_PLATFORM_ID: target platform; one of: [win-ARCH, linux-ARCH, android-ARCH, wasm32]
@@ -190,6 +194,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Pool.cpp
     tests/Result.cpp
     tests/SegmentArray.cpp
+    tests/SIMD.cpp
     tests/Slice.cpp
     tests/Sort.cpp
     tests/Strings.cpp
@@ -214,6 +219,16 @@ if(SN_STD_BUILD_TESTS)
     PRIVATE
       $<$<COMPILE_LANGUAGE:CXX>:"std/Slice.hpp">
   )
+
+  if(HAS_SSE42)
+    target_compile_options(std-tests PRIVATE -msse4.2)
+  endif()
+  if(HAS_WASM128)
+    # Even though the compiler flag checks have failed for `-msse*`, emcc does
+    # support them and they need to be supplied to enable SSE emulation
+    # TODO: remove -msse4.2 once we support simd128 natively
+    target_compile_options(std-tests PRIVATE -msimd128 -msse4.2)
+  endif()
 endif()
 
 if(SN_STD_BUILD_JSON_TEST_SUITE_RUNNER)
