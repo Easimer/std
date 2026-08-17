@@ -44,6 +44,7 @@ void barrierSync(Barrier *barrier) {
 void barrierDestroy(Barrier *barrier) {
   int rc = pthread_barrier_destroy(&barrier->inner);
   DCHECK(rc == 0);
+  (void)rc;
 }
 
 #elif SN_STD_SYSTEM_WINDOWS
@@ -59,6 +60,7 @@ Barrier *barrierCreate(Arena *arena, u32 count) {
 
   BOOL rc = InitializeSynchronizationBarrier(&b->inner, (LONG)count, -1);
   DCHECK(rc);
+  (void)rc;
 
   return b;
 }
@@ -71,6 +73,7 @@ void barrierSync(Barrier *barrier) {
 void barrierDestroy(Barrier *barrier) {
   BOOL rc = DeleteSynchronizationBarrier(&barrier->inner);
   DCHECK(rc);
+  (void)rc;
 }
 
 #endif
