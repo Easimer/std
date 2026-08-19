@@ -19,7 +19,7 @@ struct TrieStrKey {
   // Truncated hash of `key`; used during trie traversal
   u64 hash2;
 
-  TrieStrKey() : TrieStrKey({}, 0) {}
+  TrieStrKey() : TrieStrKey(Slice<char>()) {}
   TrieStrKey(Slice<char> key) : TrieStrKey(key, fnv64(key.data, key.length)) {}
   TrieStrKey(Slice<char> key, u64 hash) : TrieStrKey(key, hash, hash) {}
   TrieStrKey(Slice<char> key, u64 hash, u64 hash2)
