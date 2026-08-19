@@ -199,6 +199,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Sort.cpp
     tests/Strings.cpp
     tests/Thread.cpp
+    tests/Trie.cpp
     tests/Utils.cpp
     tests/Uuid.cpp
     tests/Vector.cpp
