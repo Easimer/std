@@ -13,18 +13,16 @@
 #include "std/Types.h"
 
 struct TrieStrKey {
-  Slice<const char> key;
+  Slice<char> key;
   // Hash of `key`; used during comparison
   u64 hash;
   // Truncated hash of `key`; used during trie traversal
   u64 hash2;
 
   TrieStrKey() : TrieStrKey({}, 0) {}
-  TrieStrKey(Slice<char> key) : TrieStrKey(key.asConst()) {}
-  TrieStrKey(Slice<const char> key)
-      : TrieStrKey(key, fnv64(key.data, key.length)) {}
-  TrieStrKey(Slice<const char> key, u64 hash) : TrieStrKey(key, hash, hash) {}
-  TrieStrKey(Slice<const char> key, u64 hash, u64 hash2)
+  TrieStrKey(Slice<char> key) : TrieStrKey(key, fnv64(key.data, key.length)) {}
+  TrieStrKey(Slice<char> key, u64 hash) : TrieStrKey(key, hash, hash) {}
+  TrieStrKey(Slice<char> key, u64 hash, u64 hash2)
       : key(key), hash(hash), hash2(hash2) {}
 
   TrieStrKey &operator=(const TrieStrKey &other) = default;
