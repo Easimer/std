@@ -91,10 +91,19 @@ struct SegmentArray {
   /**
    * \brief Grows the array by a new segment
    */
-  void grow() {
-    u32 idxNewSegment = numSegments;
-    arrSegments[idxNewSegment] = alloc<T>(arena, sizeOfSegment(idxNewSegment));
-    numSegments += 1;
+  void grow() { grow(1); }
+
+  /**
+   * \brief Grows the array by at most the specified number of segments
+   * \param count Number of new segments to allocate
+   */
+  void grow(size_t count) {
+    for (size_t i = 0; i < count && numSegments != 26; i++) {
+      u32 idxNewSegment = numSegments;
+      arrSegments[idxNewSegment] =
+          alloc<T>(arena, sizeOfSegment(idxNewSegment));
+      numSegments += 1;
+    }
   }
 
   /**
