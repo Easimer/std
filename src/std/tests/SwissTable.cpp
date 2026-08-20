@@ -6,6 +6,16 @@ struct TestElem {
   f32 y;
 };
 
+SN_TEST(SwissTable, hasKey) {
+  CHECK(impl::hasKey(0x0123456789ABCDEF, 0x01) == 0x80);
+  CHECK(impl::hasKey(0x0123456789ABCDEF, 0xEF) == 0x01);
+  CHECK(impl::hasKey(0x0123456789ABCDEF, 0x45) == 0x20);
+
+  CHECK(impl::hasKey(0x0101010102020202, 0x01) == 0xF0);
+  CHECK(impl::hasKey(0x0101010102020202, 0x02) == 0x0F);
+  CHECK(impl::hasKey(0x0303030303030303, 0x03) == 0xFF);
+}
+
 SN_TEST(SwissTable, empty) {
   Arena::Scope temp;
 

@@ -7,6 +7,7 @@
  */
 
 #include "std/Hash.h"
+#include "rapidhash.h"
 
 u64 fnv64(const void *in, size_t len) {
   const u64 prime = 0x100000001B3;
@@ -18,4 +19,16 @@ u64 fnv64(const void *in, size_t len) {
   }
 
   return result;
+}
+
+u64 rpdh_nano(const void *in, size_t len) {
+  return rapidhashNano(in, len);
+}
+
+u64 rpdh_micro(const void *in, size_t len) {
+  return rapidhashMicro(in, len);
+}
+
+u64 rpdh(const void *in, size_t len) {
+  return rapidhash(in, len);
 }

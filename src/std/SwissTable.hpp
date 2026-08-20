@@ -11,6 +11,7 @@
 #include <std/Hash.h>
 #include <std/Optional.hpp>
 #include <std/SegmentArray.hpp>
+#include "std/Types.h"
 
 namespace impl {
 static const u64 CW_MASK_EMPTY = 0x8080808080808080;
@@ -46,7 +47,7 @@ bool hasEmptySlot(u64 controlWord);
  * \brief Determines whether the group has an unused slot.
  * \param controlWord Control word of the group
  */
-bool hasUnusedSlot(u64 controlWord);
+bool hasUnusedSlot(const u64 &controlWord);
 
 /**
  * \brief Computes the index of the home group of a key
@@ -54,7 +55,8 @@ bool hasUnusedSlot(u64 controlWord);
  * \param M Number of groups in the table
  */
 static inline size_t homeGroup(u64 h1, size_t M) {
-  return (h1 / 8) % M;
+  // NOTE(danielm): number of groups is always a power-of-two
+  return (h1 / 8) & (M - 1);
 }
 
 /**
@@ -65,6 +67,17 @@ static inline size_t homeGroup(u64 h1, size_t M) {
 static inline u8 extractSlotFromControlWord(u64 controlWord, u8 slotIdx) {
   DCHECK(slotIdx < 8);
   return (controlWord >> (56 - slotIdx * 8)) & 0xFF;
+}
+
+u8 hasKey(const u64 &controlWord, u8 h2);
+
+static inline u64 nextPowerOfTwo(u64 x) {
+  if (x == 0) {
+    return 1;
+  }
+
+  i32 shift = 64 - countLeadingZeros64(x - 1) + 1;
+  return 1ULL << shift;
 }
 }  // namespace impl
 
@@ -111,7 +124,7 @@ struct SwissTable {
     const size_t M = controlWords.length;
     DCHECK(M != 0);
 
-    u64 hash = hashFNV64(key);
+    u64 hash = hashRapidMicro(key);
     u64 h1;
     u8 h2;
     impl::splitHash(hash, h1, h2);
@@ -120,7 +133,6 @@ struct SwissTable {
 
     for (size_t i = 0; i < M; i++) {
       size_t group = (homeGroup + i) % M;
-      u64 controlWord = controlWords[group];
 
       // Is the elem already in this group?
       V *v = _findWithinGroup(group, key, hash, h2);
@@ -129,7 +141,7 @@ struct SwissTable {
       }
 
       // Is there an unused slot in this group?
-      if (impl::hasUnusedSlot(controlWord)) {
+      if (impl::hasUnusedSlot(controlWords[group])) {
         // If so, an insertion would have used that slot, therefore the key is
         // not present
         return nullptr;
@@ -155,7 +167,7 @@ struct SwissTable {
     const size_t M = controlWords.length;
     DCHECK(M != 0);
 
-    u64 hash = hashFNV64(key);
+    u64 hash = hashRapidMicro(key);
     u64 h1;
     u8 h2;
     impl::splitHash(hash, h1, h2);
@@ -164,7 +176,6 @@ struct SwissTable {
 
     for (size_t i = 0; i < M; i++) {
       size_t group = (homeGroup + i) % M;
-      u64 controlWord = controlWords[group];
 
       // Is the elem already in this group?
       V *v = _findWithinGroup(group, key, hash, h2);
@@ -174,7 +185,7 @@ struct SwissTable {
       }
 
       // Is there an empty slot in this group?
-      if (impl::hasUnusedSlot(controlWord)) {
+      if (impl::hasUnusedSlot(controlWords[group])) {
         // There is an empty slot; if the key were to be present in this table,
         // it would be in this group, but it's not.
         return _insertIntoGroup(group, key, value, hash, h2);
@@ -193,7 +204,7 @@ struct SwissTable {
       }
 
       // Is there an empty slot in this group?
-      if (!impl::hasUnusedSlot(controlWord)) {
+      if (!impl::hasUnusedSlot(controlWords[group])) {
         continue;
       }
 
@@ -218,7 +229,7 @@ struct SwissTable {
     const size_t M = controlWords.length;
     DCHECK(M != 0);
 
-    u64 hash = hashFNV64(key);
+    u64 hash = hashRapidMicro(key);
     u64 h1;
     u8 h2;
     impl::splitHash(hash, h1, h2);
@@ -227,7 +238,6 @@ struct SwissTable {
 
     for (size_t i = 0; i < M; i++) {
       size_t group = (homeGroup + i) % M;
-      u64 controlWord = controlWords[group];
 
       // Is the elem already in this group?
       u8 idxSlot;
@@ -238,7 +248,7 @@ struct SwissTable {
       }
 
       // Is there an unused slot in this group?
-      if (impl::hasUnusedSlot(controlWord)) {
+      if (impl::hasUnusedSlot(controlWords[group])) {
         // If so, an insertion would have used that slot, therefore the key is
         // not present
         return false;
@@ -254,8 +264,10 @@ struct SwissTable {
     DCHECK(controlWords.length == keys.length);
     size_t idx = controlWords.length;
 
-    size_t lenDouble = controlWords.length * 5 / 2;
-    lenDouble = lenDouble != 0 ? lenDouble : 1;
+    // NOTE(danielm): number of groups always grows to the next power of two
+    size_t lenDouble = impl::nextPowerOfTwo(controlWords.length);
+    DCHECK(lenDouble != controlWords.length);
+
     while (controlWords.length < lenDouble) {
       controlWords.push(impl::CW_MASK_EMPTY);
       keys.push();
@@ -371,14 +383,19 @@ struct SwissTable {
                       u64 hash,
                       u64 h2,
                       u8 &groupIdxOut) {
-    u64 controlWord = controlWords[idxGroup];
+    u8 candidateMask = impl::hasKey(controlWords[idxGroup], h2);
+    if (candidateMask == 0) {
+      return nullptr;
+    }
 
-    for (u8 groupIdx = 0; groupIdx < 8; groupIdx++) {
-      u8 controlWordSlot =
-          impl::extractSlotFromControlWord(controlWord, groupIdx);
+    while (candidateMask != 0) {
+      i32 sb = countLeadingZeros(candidateMask);
+      i32 shift = 31 - sb;
+      i32 groupIdx = sb - 24;
+      candidateMask &= ~(1 << shift);
 
       const Slot &slot = keys[idxGroup][groupIdx];
-      if (controlWordSlot == h2 && slot.hash == hash && slot.key == key) {
+      if (slot.hash == hash && slot.key == key) {
         groupIdxOut = groupIdx;
         return &values[slot.idxValue];
       }
