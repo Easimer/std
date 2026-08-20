@@ -726,8 +726,8 @@ SN_TEST(Span, containsRight) {
 }
 
 SN_TEST(MutSlice, subarraySucceeds) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
 
   MutSlice<u32> sub = s.subarray(0, 1);
   CHECK(sub.data == s.data);
@@ -735,8 +735,8 @@ SN_TEST(MutSlice, subarraySucceeds) {
 }
 
 SN_TEST(MutSlice, subarraySucceeds2) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
 
   MutSlice<u32> sub = s.subarray(1, 2);
   CHECK(sub.data == s.data + 1);
@@ -744,32 +744,32 @@ SN_TEST(MutSlice, subarraySucceeds2) {
 }
 
 SN_TEST(MutSlice, subarrayStartOob) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
 
   MutSlice<u32> sub = s.subarray(100, 101);
   CHECK(sub.empty());
 }
 
 SN_TEST(MutSlice, subarrayLenZero) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
 
   MutSlice<u32> sub = s.subarray(0, 0);
   CHECK(sub.empty());
 }
 
 SN_TEST(MutSlice, subarraySwappedIndices) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
 
   MutSlice<u32> sub = s.subarray(1, 0);
   CHECK(sub.empty());
 }
 
 SN_TEST(MutSlice, subarraySpan) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
   Span<size_t> span = {};
   span.start = 1;
   span.count = 2;
@@ -780,8 +780,8 @@ SN_TEST(MutSlice, subarraySpan) {
 }
 
 SN_TEST(MutSlice, subarrayRange) {
-  u32 fiveValues[5];
-  MutSlice<u32> s = sliceFrom(fiveValues);
+  u32 buf[5];
+  MutSlice<u32> s = sliceFrom(buf);
   Range<size_t> range = {};
   range.start = 1;
   range.end = 3;

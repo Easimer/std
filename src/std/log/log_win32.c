@@ -140,12 +140,12 @@ static void log_win32_shutdown(const struct log_handler *handler) {
   DeleteCriticalSection(&data->lock);
 }
 
-static const struct log_handler_api api = {
+static const struct log_handler_api gApi = {
     .on_event = log_on_event,
     .shutdown = log_win32_shutdown,
 };
 
-static struct log_handler_win32_data data;
+static struct log_handler_win32_data gData;
 
 static int log_handler_win32_init(const struct log_handler *handler) {
   struct log_handler_win32_data *data = handler->data;
@@ -167,4 +167,4 @@ static int log_handler_win32_init(const struct log_handler *handler) {
   return LOG_ERR_OK;
 }
 
-SN_LOG_HANDLER_DEFINE(win32, &api, &data, log_handler_win32_init);
+SN_LOG_HANDLER_DEFINE(win32, &gApi, &gData, log_handler_win32_init);

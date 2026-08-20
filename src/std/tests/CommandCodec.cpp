@@ -59,7 +59,7 @@ struct TestEncoder : CommandEncoder<TestFields> {
 struct TestDecoder : CommandDecoder<TestFields> {
   TestDecoder(Slice<u8> encoded) : CommandDecoder(encoded) {}
 
-  bool decodeNext(Slice<TestFields> &changes, TestState &outState) noexcept {
+  bool decodeNext(Slice<TestFields> &changesOut, TestState &outState) noexcept {
     if (!beginNextDecode()) {
       return false;
     }
@@ -68,7 +68,7 @@ struct TestDecoder : CommandDecoder<TestFields> {
     readIfFlag<TF_FLOAT>(state.floatValue);
     readIfFlag<TF_STRUCT>(state.strct);
     readIfFlag<TF_ARRAY_OF_STRUCT0>(state.strctArray);
-    changes = getChangeList();
+    changesOut = getChangeList();
     outState = state;
 
     return true;
