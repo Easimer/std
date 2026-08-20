@@ -381,7 +381,7 @@ struct SwissTable {
   V *_findWithinGroup(size_t idxGroup,
                       Slice<K> key,
                       u64 hash,
-                      u64 h2,
+                      u8 h2,
                       u8 &groupIdxOut) {
     u8 candidateMask = impl::hasKey(controlWords[idxGroup], h2);
     if (candidateMask == 0) {
@@ -396,7 +396,7 @@ struct SwissTable {
 
       const Slot &slot = keys[idxGroup][groupIdx];
       if (slot.hash == hash && slot.key == key) {
-        groupIdxOut = groupIdx;
+        groupIdxOut = (u8)groupIdx;
         return &values[slot.idxValue];
       }
     }
@@ -404,7 +404,7 @@ struct SwissTable {
     return nullptr;
   }
 
-  V *_findWithinGroup(size_t idxGroup, Slice<K> key, u64 hash, u64 h2) {
+  V *_findWithinGroup(size_t idxGroup, Slice<K> key, u64 hash, u8 h2) {
     u8 groupIdx;
     return _findWithinGroup(idxGroup, key, hash, h2, groupIdx);
   }

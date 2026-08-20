@@ -92,7 +92,7 @@ u8 hasKey(const u64 &controlWord, u8 h2) {
   __m128i res = _mm_cmpeq_epi8(cw, h2x8);
   int mask = _mm_movemask_epi8(res);
   mask &= 0xFF;
-  return mask;
+  return (u8)mask;
 #else
   u8 ret = 0;
   for (u8 groupIdx = 0; groupIdx < 8; groupIdx++) {
