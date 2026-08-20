@@ -32,7 +32,10 @@ function(target_wall_werror_SN TGT)
   if(MSVC)
     target_compile_options(${TGT}
       PRIVATE
-        /W3 /WX
+        /W4 /WX
+        # Disable warnings:
+        /wd4324 # 'typename': structure was padded due to alignment specifier
+        /wd4611 # interaction between '_setjmp' and C++ object destruction is non-portable
     )
   else()
     target_compile_options(${TGT}
