@@ -47,6 +47,9 @@ struct SnTest {
 
 struct SnTestStats {
   u32 numSuccess;
+  u32 numTotalExecuted;
+
+  u32 numSkipped;
   u32 numTotal;
 };
 
@@ -91,4 +94,3 @@ struct SnTestResult {
   SN_TEST_DECL_FUNC(SuiteName, TestName);          \
   SN_TEST_DEFINE_DESC(SuiteName, TestName, false); \
   static void test_func_##SuiteName##_##TestName(void)
-

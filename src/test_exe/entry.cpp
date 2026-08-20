@@ -102,10 +102,22 @@ extern "C" void handleOOM(Arena *arena) {
   std::longjmp(gJmpBuf, 1);
 }
 
-extern "C" SnTestResult *testMain(Arena *arena0,
-                                  Arena *arena1,
-                                  Arena *arenaResults,
-                                  SnTestStats *stats) {
+struct TestRunConfig {
+  Arena *arena0;
+  Arena *arena1;
+  Arena *arenaResults;
+  SnTestStats *stats;
+
+  Slice<char> suiteNameFilter;
+};
+
+static SnTestResult *testMain(const TestRunConfig *cfg) {
+  Arena *arena0 = cfg->arena0;
+  Arena *arena1 = cfg->arena1;
+  Arena *arenaResults = cfg->arenaResults;
+  SnTestStats *stats = cfg->stats;
+  Slice<char> suiteNameFilter = cfg->suiteNameFilter;
+
   SnTestResult *res = nullptr;
   SnTestResult *ret = nullptr;
   setAllocatorsForThread(arena0, arena1);
@@ -114,12 +126,26 @@ extern "C" SnTestResult *testMain(Arena *arena0,
   bool didPass = false;
 
   u32 numSuccess = 0;
+  u32 numTotalExecuted = 0;
+  u32 numSkipped = 0;
   u32 numTotal = 0;
   TimePoint t_start = chrono_getCurrentTime();
   TimePoint t_end;
   SnTestResult *prev;
 
   while (currentTest != nullptr) {
+    numTotal += 1;
+
+    // If a suite filter is set and the testcase doesn't match it, skip
+    if (!suiteNameFilter.empty() &&
+        fromCStr(currentTest->metadata->suiteName) != suiteNameFilter) {
+      currentTest = currentTest->next;
+      numSkipped += 1;
+      continue;
+    }
+
+    numTotalExecuted += 1;
+
     prev = res;
     res = alloc<SnTestResult>(arenaResults);
     if (prev != nullptr) {
@@ -159,13 +185,14 @@ extern "C" SnTestResult *testMain(Arena *arena0,
       }
     }
     res->duration = chrono_secondsBetween(t_start, t_end);
-    numTotal += 1;
     currentTest = currentTest->next;
     if (gSnRunningInGA) {
       printf("::endgroup\n");
     }
   }
   stats->numSuccess = numSuccess;
+  stats->numTotalExecuted = numTotalExecuted;
+  stats->numSkipped = numSkipped;
   stats->numTotal = numTotal;
   return ret;
 }
@@ -219,14 +246,14 @@ static void generateActionsJobSummary(const SnTestStats *stats,
     return;
   }
 
-  u32 numFailed = stats->numTotal - stats->numSuccess;
+  u32 numFailed = stats->numTotalExecuted - stats->numSuccess;
 
   fprintf(f, "# %s\n", repository);
   fprintf(f, "|  |  |\n");
   fprintf(f, "| --- | --- |\n");
   fprintf(f, "| **Successful tests** | %u |\n", stats->numSuccess);
   fprintf(f, "| **Failed tests** | %u |\n", numFailed);
-  fprintf(f, "| **Total** | %u |\n", stats->numTotal);
+  fprintf(f, "| **Total** | %u |\n", stats->numTotalExecuted);
 
   if (numFailed != 0) {
     fprintf(f, "## Failed tests\n");
@@ -292,15 +319,41 @@ int main(int numArgs, char **arrArgs) {
 
   printf("Running in GA: %d\n", gSnRunningInGA ? 1 : 0);
 
+  Slice<char> suiteNameFilter;
+  bool repeat = false;
+
+  for (int idxArg = 1; idxArg < numArgs; idxArg++) {
+    Slice<char> arg = fromCStr(arrArgs[idxArg]);
+
+    if (arg.startsWith(sliceFromConstChar("--suite="))) {
+      suiteNameFilter = arg.subarray(arg.indexOf('=').value());
+      suiteNameFilter.shift();  // eat '='
+
+      printf("Test suite filter: \"%.*s\"\n", FMT_SLICE(suiteNameFilter));
+    } else if (arg.startsWith(sliceFromConstChar("--repeat"))) {
+      repeat = true;
+    }
+  }
+
   SnTestStats stats;
   TimePoint t_start = chrono_getCurrentTime();
-  SnTestResult *const results =
-      testMain(&arena0, &arena1, &arenaResults, &stats);
+  TestRunConfig cfg = {
+      .arena0 = &arena0,
+      .arena1 = &arena1,
+      .arenaResults = &arenaResults,
+      .stats = &stats,
+      .suiteNameFilter = suiteNameFilter,
+  };
+
+  SnTestResult *results;
+  do {
+    results = testMain(&cfg);
+  } while (repeat);
   TimePoint t_end = chrono_getCurrentTime();
 
-  u32 numFail = stats.numTotal - stats.numSuccess;
-  f64 percentSuccess = stats.numSuccess / f64(stats.numTotal) * 100.0;
-  f64 percentFail = numFail / f64(stats.numTotal) * 100.0;
+  u32 numFail = stats.numTotalExecuted - stats.numSuccess;
+  f64 percentSuccess = stats.numSuccess / f64(stats.numTotalExecuted) * 100.0;
+  f64 percentFail = numFail / f64(stats.numTotalExecuted) * 100.0;
 
   printf("\n");
   if (gSnRunningInGA) {
@@ -336,10 +389,13 @@ int main(int numArgs, char **arrArgs) {
     printf("\n");
   }
 
-  printf("Successful tests: %u/%u (%.2f%%)\n", stats.numSuccess, stats.numTotal,
-         percentSuccess);
-  printf("Failed tests:     %u/%u (%.2f%%)\n", numFail, stats.numTotal,
+  printf("Successful tests: %u/%u (%.2f%%)\n", stats.numSuccess,
+         stats.numTotalExecuted, percentSuccess);
+  printf("Failed tests:     %u/%u (%.2f%%)\n", numFail, stats.numTotalExecuted,
          percentFail);
+  if (stats.numSkipped != 0) {
+    printf("Skipped:          %u/%u\n", stats.numSkipped, stats.numTotal);
+  }
 
   if (gSnRunningInGA) {
     generateActionsJobSummary(&stats, results);
