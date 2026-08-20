@@ -118,6 +118,7 @@ struct CommandDecoder {
   void read(T &out) {
     bool res = tryRead(out);
     DCHECK(res);
+    ARG_UNUSED(res);
   }
 
   /**
