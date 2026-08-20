@@ -57,7 +57,7 @@ extern "C" u8 mipmapGetLevelCount3(u32 width, u32 height, u32 depth) {
   return 32 - MIN(MIN(n0w, n0h), n0d);
 }
 
-extern "C" u8 mipmapGetLevelDim(u32 dim0, u8 level) {
+extern "C" u32 mipmapGetLevelDim(u32 dim0, u8 level) {
   u32 res = dim0 >> level;
   return res > 0 ? res : 1;
 }

@@ -81,7 +81,7 @@ static inline i32 countLeadingZeros64(u64 x) {
 
 u8 mipmapGetLevelCount(u32 width, u32 height);
 u8 mipmapGetLevelCount3(u32 width, u32 height, u32 depth);
-u8 mipmapGetLevelDim(u32 dim0, u8 level);
+u32 mipmapGetLevelDim(u32 dim0, u8 level);
 
 #if __cplusplus
 }
