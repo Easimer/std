@@ -303,19 +303,19 @@ static void encodeToUtf8(Arena *arena, Vector<char> *vec, u32 codepoint) {
     pushByte(u8(codepoint));
   } else if (codepoint <= 0x7FF) {
     // 2 bytes: 110xxxxx 10xxxxxx
-    pushByte(0xC0 | (codepoint >> 6));
-    pushByte(0x80 | (codepoint & 0x3F));
+    pushByte(0xC0 | u8(codepoint >> 6));
+    pushByte(0x80 | u8(codepoint & 0x3F));
   } else if (codepoint <= 0xFFFF) {
     // 3 bytes: 1110xxxx 10xxxxxx 10xxxxxx
-    pushByte(0xE0 | (codepoint >> 12));
-    pushByte(0x80 | ((codepoint >> 6) & 0x3F));
-    pushByte(0x80 | (codepoint & 0x3F));
+    pushByte(0xE0 | u8(codepoint >> 12));
+    pushByte(0x80 | u8((codepoint >> 6) & 0x3F));
+    pushByte(0x80 | u8(codepoint & 0x3F));
   } else if (codepoint <= 0x10FFFF) {
     // 4 bytes: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    pushByte(0xF0 | (codepoint >> 18));
-    pushByte(0x80 | ((codepoint >> 12) & 0x3F));
-    pushByte(0x80 | ((codepoint >> 6) & 0x3F));
-    pushByte(0x80 | (codepoint & 0x3F));
+    pushByte(0xF0 | u8(codepoint >> 18));
+    pushByte(0x80 | u8((codepoint >> 12) & 0x3F));
+    pushByte(0x80 | u8((codepoint >> 6) & 0x3F));
+    pushByte(0x80 | u8(codepoint & 0x3F));
   }
 }
 
