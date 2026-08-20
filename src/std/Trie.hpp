@@ -23,7 +23,6 @@ template <typename K, typename V>
 V *upsert(Trie<K, V> **m, K key, Arena *arena, bool &wasPresent) {
   for (K h = key; (*m) != nullptr; h <<= 2) {
     if (key == (*m)->key) {
-      bool deleted = (*m)->deleted;
       if ((*m)->deleted) {
         // pArena is not null -> caller wants to insert a new node; undelete the
         // old node
