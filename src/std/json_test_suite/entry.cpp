@@ -336,7 +336,8 @@ int main(int argc, char **argv) {
     arena0 = arena0Saved;
     arena1 = arena1Saved;
 
-    Arena::Scope temp = getScratch(nullptr, 0);
+    ArenaSaved s = getScratch(nullptr, 0);
+    Arena *temp = s.arena;
 
     Slice<char> pathTestFiles =
         joinSimple(temp, pathRepo, sliceFromConstChar("test_parsing"));
@@ -346,6 +347,7 @@ int main(int argc, char **argv) {
     FILE *f = fopen(z.data, "rb");
     if (!f) {
       printf("Failed to open for reading: %s\n", z.data);
+      restoreArena(s.arena, s.saved);
       continue;
     }
     fseek(f, 0, SEEK_END);
@@ -369,6 +371,7 @@ int main(int argc, char **argv) {
 
     if (crashed) {
       printf("[ CRSH ] %.*s\n", FMT_SLICE(filename));
+      restoreArena(s.arena, s.saved);
       continue;
     }
 
@@ -392,6 +395,8 @@ int main(int argc, char **argv) {
     } else {
       printf("[ FAIL ] %.*s\n", FMT_SLICE(filename));
     }
+
+    restoreArena(s.arena, s.saved);
   }
 
   return 0;
