@@ -7,6 +7,8 @@
 SN_TEST(Log, registerHandler) {
   auto fun_on_event = [](const struct log_handler *handler,
                          const struct log_event *ev, va_list ap) {
+    ARG_UNUSED(ev);
+    ARG_UNUSED(ap);
     bool *p_called = (bool *)handler->data;
     *p_called = true;
   };
@@ -44,6 +46,7 @@ SN_TEST(Log, eventParams) {
 
   auto fun_on_event = [](const struct log_handler *handler,
                          const struct log_event *ev, va_list ap) {
+    ARG_UNUSED(ap);
     auto *out = (struct log_handler_test *)handler->data;
     out->level = ev->level;
     out->fmt = ev->fmt;

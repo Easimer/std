@@ -31,6 +31,8 @@ static LONG gIdxNextThread = 0;
 BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL,
                     _In_ DWORD fdwReason,
                     _In_ LPVOID lpvReserved) {
+  ARG_UNUSED(hinstDLL);
+
   switch (fdwReason) {
     case DLL_PROCESS_ATTACH: {
       // Allocate a TLS index for the per-thread context when the DLL is loaded

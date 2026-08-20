@@ -398,6 +398,7 @@ int main(int argc, char **argv) {
 }
 
 extern "C" void handleOOM(Arena *arena) {
+  ARG_UNUSED(arena);
   fprintf(stderr, "Out of memory\n");
   std::longjmp(gJmpBuf, 1);
 }

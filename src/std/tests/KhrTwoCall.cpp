@@ -22,6 +22,8 @@ static FoofResult foofEnumerateDevices(FoofInstance instance,
                                        FoofGetDeviceInfo *info,
                                        uint32_t *pDeviceCount,
                                        FoofDeviceDescriptor *pDevices) {
+  ARG_UNUSED(instance);
+
   if (pDeviceCount == nullptr || (*pDeviceCount != 0 && pDevices == nullptr)) {
     return FOOF_ERROR_VALIDATION_ERROR;
   }

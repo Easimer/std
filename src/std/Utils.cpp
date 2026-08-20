@@ -115,12 +115,12 @@ concept SliceLike = requires(S s,
   { s.shrinkFromLeft() } -> std::same_as<S &>;
   // Can query whether a predicate is true for all elements
   {
-    s.all([](const T &elem) { return true; })
+    s.all([](const T &) { return true; })
     } -> std::same_as<bool>;
   // Can query whether a predicate is true for any elements and if so, returns
   // an index
   {
-    s.any([](const T &elem) { return true; })
+    s.any([](const T &) { return true; })
     } -> std::same_as<Optional<size_t>>;
   // Can query whether the slice starts with another slice
   { s.startsWith(Slice<T>()) } -> std::same_as<bool>;
@@ -130,7 +130,7 @@ concept SliceLike = requires(S s,
   { s.count(value) } -> std::same_as<size_t>;
   // Can query how many times a value satisfying a predicate occurs in the slice
   {
-    s.countIf([](const T &v) { return true; })
+    s.countIf([](const T &) { return true; })
     } -> std::same_as<size_t>;
 };
 

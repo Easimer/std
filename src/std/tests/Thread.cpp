@@ -59,7 +59,7 @@ SN_TEST(Thread, nullFunc) {
 }
 
 SN_TEST(Thread, doubleJoin) {
-  auto func = [](void *arg) {};
+  auto func = [](void *) {};
   Result<Thread, ThreadError> res = Thread::create({
       .entryPoint = func,
       .param = nullptr,
