@@ -24,10 +24,19 @@ static bool gSnRunningInGA = false;
 static Slice<char> gSnCwd;
 
 MutSlice<char> getWorkingDir(Slice<char> dst, size_t &sizRequired);
+void tryBreakIntoDebuggerIfPresent();
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+void tryBreakIntoDebuggerIfPresent() {
+  if (!IsDebuggerPresent()) {
+    return;
+  }
+
+  DEBUGBREAK();
+}
 
 MutSlice<char> getWorkingDir(MutSlice<char> dst, size_t &sizRequired) {
   DWORD rc = GetCurrentDirectoryA(dst.length, dst.data);
@@ -52,6 +61,10 @@ MutSlice<char> getWorkingDir(MutSlice<char> dst, size_t &sizRequired) {
   size_t len = strlen(res);
   sizRequired = len;
   return dst.subarray(0, len);
+}
+
+void tryBreakIntoDebuggerIfPresent() {
+  // TODO(danielm): detect gdb?
 }
 #endif
 
@@ -79,6 +92,8 @@ extern "C" void checkFail(const char *pExpr, const char *pFile, unsigned line) {
   } else {
     log_fatal("\n  Assertion failed: %s\n    at %s:%u\n", pExpr, pFile, line);
   }
+
+  tryBreakIntoDebuggerIfPresent();
   std::longjmp(gJmpBuf, 1);
 }
 
