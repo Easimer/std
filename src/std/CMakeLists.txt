@@ -104,6 +104,7 @@ target_sources(std-static
     SliceUtils.hpp
     Sort.hpp
     Strings.hpp
+    SwissTable.cpp SwissTable.hpp
     Trie.hpp
     TrieStrKey.hpp
     Types.h
@@ -198,6 +199,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Slice.cpp
     tests/Sort.cpp
     tests/Strings.cpp
+    tests/SwissTable.cpp
     tests/Thread.cpp
     tests/Trie.cpp
     tests/Utils.cpp
