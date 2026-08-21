@@ -146,6 +146,9 @@ static SnTestResult *testMain(const TestRunConfig *cfg) {
 
     numTotalExecuted += 1;
 
+    Arena arena0Saved = *cfg->arena0;
+    Arena arena1Saved = *cfg->arena1;
+
     prev = res;
     res = alloc<SnTestResult>(arenaResults);
     if (prev != nullptr) {
@@ -173,7 +176,13 @@ static SnTestResult *testMain(const TestRunConfig *cfg) {
       CHECK((arena1->end - arena1->beg) == SIZ_ARENA);
       didPass = true;
     }
+
     t_end = chrono_getCurrentTime();
+
+    // Restore arenas
+    *cfg->arena0 = arena0Saved;
+    *cfg->arena1 = arena1Saved;
+
     if (currentTest->shouldPass == didPass) {
       res->ok = true;
       numSuccess += 1;
@@ -345,8 +354,11 @@ int main(int numArgs, char **arrArgs) {
       .suiteNameFilter = suiteNameFilter,
   };
 
+  Arena arenaResultsSaved = arenaResults;
+
   SnTestResult *results;
   do {
+    arenaResults = arenaResultsSaved;
     results = testMain(&cfg);
   } while (repeat);
   TimePoint t_end = chrono_getCurrentTime();
