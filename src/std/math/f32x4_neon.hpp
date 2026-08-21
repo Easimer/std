@@ -63,19 +63,19 @@ struct f32x4 {
 
   SN_FORCEINLINE i32x4 operator<=(f32x4 other) const noexcept {
     i32x4 ret;
-    ret.v = vcleq_f32(v, other.v);
+    ret.v = vreinterpretq_s32_u32(vcleq_f32(v, other.v));
     return ret;
   }
 
   SN_FORCEINLINE i32x4 operator<(f32x4 other) const noexcept {
     i32x4 ret;
-    ret.v = vcltq_f32(v, other.v);
+    ret.v = vreinterpretq_s32_u32(vcltq_f32(v, other.v));
     return ret;
   }
 
   SN_FORCEINLINE i32x4 operator>(f32x4 other) const noexcept {
     i32x4 ret;
-    ret.v = vcgtq_f32(v, other.v);
+    ret.v = vreinterpretq_s32_u32(vcgtq_f32(v, other.v));
     return ret;
   }
 
@@ -101,16 +101,14 @@ struct f32x4 {
     v = vld1q_f32(dst);
   }
 
-  SN_FORCEINLINE void storeTo(f32 dst[4]) const noexcept {
-    vst1q_f32(dst, v);
-  }
+  SN_FORCEINLINE void storeTo(f32 dst[4]) const noexcept { vst1q_f32(dst, v); }
 
   float32x4_t v;
 };
 
 inline f32x4 blend(const f32x4 &lhs,
-                    const f32x4 &rhs,
-                    const i32x4 &mask) noexcept {
+                   const f32x4 &rhs,
+                   const i32x4 &mask) noexcept {
   f32x4 ret;
   ret.v = vbslq_f32(vreinterpretq_u32_s32(mask.v), lhs.v, rhs.v);
   return ret;
