@@ -10,6 +10,10 @@
 #define ENABLE_SSE42_TESTS
 #endif
 
+#if defined(__ARM_NEON)
+#define ENABLE_NEON_TESTS
+#endif
+
 #if defined(ENABLE_SCALAR_TESTS)
 #include <std/math/f32x4_scalar.hpp>
 #include <std/math/i32x4_scalar.hpp>
@@ -30,9 +34,20 @@
 #define DECL_SSE42_TEST(Type, Name, Func)
 #endif /* defined(ENABLE_SSE42_TESTS) */
 
+#if defined(ENABLE_NEON_TESTS)
+#include <std/math/f32x4_neon.hpp>
+#include <std/math/i32x4_neon.hpp>
+
+#define DECL_NEON_TEST(Type, Name, Func) \
+  SN_TEST(Type##_neon, Name) { Func<neon::Type>(); }
+#else
+#define DECL_NEON_TEST(Type, Name, Func)
+#endif /* defined(ENABLE_NEON_TESTS) */
+
 #define DECL_TEST_FOR_ALL_ISA(Type, Name, Func) \
   DECL_SCALAR_TEST(Type, Name, Func)            \
-  DECL_SSE42_TEST(Type, Name, Func)
+  DECL_SSE42_TEST(Type, Name, Func)             \
+  DECL_NEON_TEST(Type, Name, Func)
 
 template <typename f32x4>
 void test_init() {
