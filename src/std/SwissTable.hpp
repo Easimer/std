@@ -9,9 +9,9 @@
 #pragma once
 
 #include <std/Hash.h>
+#include <std/Types.h>
 #include <std/Optional.hpp>
 #include <std/SegmentArray.hpp>
-#include <std/Types.h>
 
 namespace impl {
 static const u64 CW_MASK_EMPTY = 0x8080808080808080;
@@ -393,14 +393,12 @@ struct SwissTable {
     }
 
     while (candidateMask != 0) {
-      i32 sb = countLeadingZeros(candidateMask);
-      i32 shift = 31 - sb;
-      i32 groupIdx = sb - 24;
-      candidateMask &= ~(1 << shift);
+      u8 groupIdx = u8(7 - countTrailingZeros(candidateMask));
+      candidateMask &= candidateMask - 1;
 
       const Slot &slot = keys[idxGroup][groupIdx];
       if (slot.hash == hash && slot.key == key) {
-        groupIdxOut = (u8)groupIdx;
+        groupIdxOut = groupIdx;
         return &values[slot.idxValue];
       }
     }
