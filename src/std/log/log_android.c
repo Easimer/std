@@ -36,16 +36,12 @@ static void log_on_event(const struct log_handler *handler,
                          const struct log_event *ev,
                          va_list ap) {
   android_LogPriority prio = mapPrio(ev->level);
+  // Format the tag
   char tag[512];
-  char message[512];
   memset(tag, 0, 512);
-  memset(message, 0, 512);
+  snprintf(tag, 511, "%s:%d", ev->file, ev->line);
 
-  snprintf(tag, 511, "%s:%d: ", ev->file, ev->line);
-
-  vsnprintf(message, 511, ev->fmt, ap);
-
-  __android_log_write(prio, tag, message);
+  __android_log_vprint(prio, tag, ev->fmt, ap);
 }
 
 static const struct log_handler_api api = {
