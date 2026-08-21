@@ -69,7 +69,18 @@ static inline u8 extractSlotFromControlWord(u64 controlWord, u8 slotIdx) {
   return (controlWord >> (56 - slotIdx * 8)) & 0xFF;
 }
 
+/**
+ * \brief Compares the value against the entries in the control word
+ * \returns An 8-bit mask where bit `i` is set if entry `i` in the control word
+ * is equal to `h2`.
+ */
 u8 hasKey(const u64 &controlWord, u8 h2);
+/**
+ * \brief Compares the value against the entries in the control word
+ * \returns A 64-bit mask where the MSB of octet `i` is set if entry `i` in the
+ * control word is equal to `h2`.
+ */
+u64 hasKeyNEON(const u64 &controlWord, u8 h2);
 
 static inline u64 nextPowerOfTwo(u64 x) {
   if (x == 0) {
@@ -387,21 +398,35 @@ struct SwissTable {
                       u64 hash,
                       u8 h2,
                       u8 &groupIdxOut) {
-    u8 candidateMask = impl::hasKey(controlWords[idxGroup], h2);
-    if (candidateMask == 0) {
-      return nullptr;
-    }
+#if defined(__ARM_NEON)
+    u64 candidateMask = impl::hasKeyNEON(controlWords[idxGroup], h2);
 
     while (candidateMask != 0) {
-      u8 groupIdx = u8(7 - countTrailingZeros(candidateMask));
-      candidateMask &= candidateMask - 1;
+      u8 groupIdx = u8(7 - (countTrailingZeros64(candidateMask) >> 3));
 
       const Slot &slot = keys[idxGroup][groupIdx];
       if (slot.hash == hash && slot.key == key) {
         groupIdxOut = groupIdx;
         return &values[slot.idxValue];
       }
+
+      candidateMask &= candidateMask - 1;
     }
+#else
+    u8 candidateMask = impl::hasKey(controlWords[idxGroup], h2);
+
+    while (candidateMask != 0) {
+      u8 groupIdx = u8(7 - countTrailingZeros(candidateMask));
+
+      const Slot &slot = keys[idxGroup][groupIdx];
+      if (slot.hash == hash && slot.key == key) {
+        groupIdxOut = groupIdx;
+        return &values[slot.idxValue];
+      }
+
+      candidateMask &= candidateMask - 1;
+    }
+#endif
 
     return nullptr;
   }

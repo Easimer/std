@@ -6,6 +6,7 @@ struct TestElem {
   f32 y;
 };
 
+#if !defined(__ARM_NEON)
 SN_TEST(SwissTable, hasKey) {
   CHECK(impl::hasKey(0x0123456789ABCDEF, 0x01) == 0x80);
   CHECK(impl::hasKey(0x0123456789ABCDEF, 0xEF) == 0x01);
@@ -15,6 +16,19 @@ SN_TEST(SwissTable, hasKey) {
   CHECK(impl::hasKey(0x0101010102020202, 0x02) == 0x0F);
   CHECK(impl::hasKey(0x0303030303030303, 0x03) == 0xFF);
 }
+#endif
+
+#if defined(__ARM_NEON)
+SN_TEST(SwissTable, hasKeyNEON) {
+  CHECK(impl::hasKey(0x0123456789ABCDEF, 0x01) == 0x8000000000000000ULL);
+  CHECK(impl::hasKey(0x0123456789ABCDEF, 0xEF) == 0x0000000000000080ULL);
+  CHECK(impl::hasKey(0x0123456789ABCDEF, 0x45) == 0x0000800000000000ULL);
+
+  CHECK(impl::hasKey(0x0101010102020202, 0x01) == 0x8080808000000000ULL);
+  CHECK(impl::hasKey(0x0101010102020202, 0x02) == 0x0000000080808080ULL);
+  CHECK(impl::hasKey(0x0303030303030303, 0x03) == 0x8080808080808080ULL);
+}
+#endif
 
 SN_TEST(SwissTable, empty) {
   Arena::Scope temp;

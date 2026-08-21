@@ -61,6 +61,11 @@ bool hasUnusedSlot(const u64 &controlWordIn) {
   __m128i entries = _mm_set1_epi8(static_cast<char>(CW_ENTRY_UNUSED));
   __m128i res = _mm_cmpeq_epi8(controlWord, entries);
   return _mm_movemask_epi8(res) != 0;
+#elif defined(__ARM_NEON)
+  uint64x1_t controlWord = vld1_u64(&controlWordIn);
+  uint8x8_t entry = vdup_n_u8(CW_ENTRY_UNUSED);
+  uint8x8_t res = vceq_u8(vreinterpret_u8_u64(controlWord), entry);
+  return vget_lane_u64(vreinterpret_u64_u8(res), 0) != 0;
 #else
   u64 controlWord = controlWordIn;
   // Unused/deleted slots have their MSB set. Masking off everything except the
@@ -108,5 +113,14 @@ u8 hasKey(const u64 &controlWord, u8 h2) {
   return ret;
 #endif
 }
+
+#if defined(__ARM_NEON)
+u64 hasKeyNEON(const u64 &controlWord, u8 h2) {
+  uint64x1_t cw = vld1_u64(&controlWord);
+  uint8x8_t h2x8 = vdup_n_u8(h2);
+  uint8x8_t res = vceq_u8(vreinterpret_u8_u64(cw), h2x8);
+  return vget_lane_u64(vreinterpret_u64_u8(res), 0) & 0x8080808080808080ULL;
+}
+#endif
 
 }  // namespace impl
