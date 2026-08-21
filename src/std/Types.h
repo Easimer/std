@@ -79,6 +79,50 @@ static inline i32 countLeadingZeros64(u64 x) {
 #endif
 }
 
+/**
+ * \brief Count trailing zeros.
+ * \returns The number of training zeros. When x is zero, the result is 32,
+ * similarly to Rust's `u32::trailing_zeros`.
+ */
+static inline i32 countTrailingZeros(u32 x) {
+#if defined(_MSC_VER)
+  unsigned long index;
+  if (_BitScanForward(&index, x)) {
+    return index;
+  } else {
+    return 32;
+  }
+#else
+  if (x == 0) {
+    return 32;
+  }
+
+  return (i32)__builtin_ctz(x);
+#endif
+}
+
+/**
+ * \brief Count training zeros.
+ * \returns The number of training zeros. When x is zero, the result is 64,
+ * similarly to Rust's `u64::training_zeros`.
+ */
+static inline i32 countTrailingZeros64(u64 x) {
+#if defined(_MSC_VER)
+  unsigned long index;
+  if (_BitScanForward64(&index, x)) {
+    return index;
+  } else {
+    return 64;
+  }
+#else
+  if (x == 0) {
+    return 64;
+  }
+
+  return (i32)__builtin_ctzll(x);
+#endif
+}
+
 u8 mipmapGetLevelCount(u32 width, u32 height);
 u8 mipmapGetLevelCount3(u32 width, u32 height, u32 depth);
 u32 mipmapGetLevelDim(u32 dim0, u8 level);
