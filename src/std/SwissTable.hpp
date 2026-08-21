@@ -11,7 +11,7 @@
 #include <std/Hash.h>
 #include <std/Optional.hpp>
 #include <std/SegmentArray.hpp>
-#include "std/Types.h"
+#include <std/Types.h>
 
 namespace impl {
 static const u64 CW_MASK_EMPTY = 0x8080808080808080;
@@ -123,6 +123,7 @@ struct SwissTable {
 
     const size_t M = controlWords.length;
     DCHECK(M != 0);
+    const size_t MASK = M - 1;
 
     u64 hash = hashRapidMicro(key);
     u64 h1;
@@ -132,7 +133,7 @@ struct SwissTable {
     const size_t homeGroup = impl::homeGroup(h1, M);
 
     for (size_t i = 0; i < M; i++) {
-      size_t group = (homeGroup + i) % M;
+      size_t group = (homeGroup + i) & MASK;
 
       // Is the elem already in this group?
       V *v = _findWithinGroup(group, key, hash, h2);
@@ -166,6 +167,7 @@ struct SwissTable {
 
     const size_t M = controlWords.length;
     DCHECK(M != 0);
+    const size_t MASK = M - 1;
 
     u64 hash = hashRapidMicro(key);
     u64 h1;
@@ -175,7 +177,7 @@ struct SwissTable {
     const size_t homeGroup = impl::homeGroup(h1, M);
 
     for (size_t i = 0; i < M; i++) {
-      size_t group = (homeGroup + i) % M;
+      size_t group = (homeGroup + i) & MASK;
 
       // Is the elem already in this group?
       V *v = _findWithinGroup(group, key, hash, h2);
@@ -196,7 +198,7 @@ struct SwissTable {
 
     // Probing failed; look for an empty slot
     for (size_t i = 0; i < M; i++) {
-      size_t group = (homeGroup + i) % M;
+      size_t group = (homeGroup + i) & MASK;
       u64 controlWord = controlWords[group];
 
       if (!impl::hasEmptySlot(controlWord)) {
@@ -228,6 +230,7 @@ struct SwissTable {
 
     const size_t M = controlWords.length;
     DCHECK(M != 0);
+    const size_t MASK = M - 1;
 
     u64 hash = hashRapidMicro(key);
     u64 h1;
@@ -237,7 +240,7 @@ struct SwissTable {
     const size_t homeGroup = impl::homeGroup(h1, M);
 
     for (size_t i = 0; i < M; i++) {
-      size_t group = (homeGroup + i) % M;
+      size_t group = (homeGroup + i) & MASK;
 
       // Is the elem already in this group?
       u8 idxSlot;
@@ -279,6 +282,7 @@ struct SwissTable {
     }
 
     const size_t M = controlWords.length;
+    const size_t MASK = M - 1;
 
     Arena::Scope temp = getScratchFor(arena);
 
@@ -322,7 +326,7 @@ struct SwissTable {
 
         size_t i;
         for (i = 0; i < M; i++) {
-          size_t group = (homeGroup + i) % M;
+          size_t group = (homeGroup + i) & MASK;
           if ((this->controlWords[group] & impl::CW_MASK_EMPTY) == 0) {
             continue;
           }
