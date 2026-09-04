@@ -46,13 +46,19 @@ CHECK_NORETURN void checkFail(const char *pExpr, const char *pFile, unsigned lin
 }
 #endif
 
+#define CHECK_EX(Expression, Message) \
+  (void)((!!(Expression)) ||          \
+         (checkFail((Message), (__FILE__), (unsigned)(__LINE__)), 0))
+
 #define CHECK(expression)    \
   (void)((!!(expression)) || \
          (checkFail((#expression), (__FILE__), (unsigned)(__LINE__)), 0))
 
 #ifdef NDEBUG
+#define DCHECK_EX(Expression, Message) ((void)0)
 #define DCHECK(expr) ((void)0)
 #else
+#define DCHECK_EX(Expression, Message) CHECK_EX(Expression, Message)
 #define DCHECK(expr) CHECK(expr)
 #endif
 

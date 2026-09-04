@@ -10,12 +10,8 @@ struct NonTrivDtor {
   static i32 counter;
   i32 value;
 
-  explicit NonTrivDtor(i32 v) : value(v) {
-    NonTrivDtor::counter += value;
-  }
-  ~NonTrivDtor() {
-    NonTrivDtor::counter -= value;
-  }
+  explicit NonTrivDtor(i32 v) : value(v) { NonTrivDtor::counter += value; }
+  ~NonTrivDtor() { NonTrivDtor::counter -= value; }
 
   NonTrivDtor(const NonTrivDtor &other) : value(other.value) {
     NonTrivDtor::counter += value;
@@ -54,7 +50,7 @@ i32 NonTrivDtor::counter = 0;
 SN_TEST(Optional, defaultConstructedIsEmpty) {
   Optional<f32> v;
 
-  CHECK(!v.hasValue());
+  ASSERT_IS_FALSE(v.hasValue());
 }
 
 SN_TEST(Optional, defaultConstructedIsEmpty_nonTrivialDtor) {
@@ -62,7 +58,7 @@ SN_TEST(Optional, defaultConstructedIsEmpty_nonTrivialDtor) {
 
   Optional<NonTrivDtor> v;
 
-  CHECK(!v.hasValue());
+  ASSERT_IS_FALSE(v.hasValue());
 }
 
 SN_TEST(Optional, dtorIsCalled_nonTrivialDtor) {
@@ -70,15 +66,15 @@ SN_TEST(Optional, dtorIsCalled_nonTrivialDtor) {
 
   Optional<NonTrivDtor> v = NonTrivDtor(15);
 
-  CHECK(v->value == 15);
+  ASSERT_EQUAL(v->value, 15);
 }
 
 SN_TEST(Optional, valueAssign) {
   Optional<f32> v = 1.0f;
 
-  CHECK(v.hasValue());
-  CHECK(v.value() == 1.0f);
-  CHECK(*v == 1.0f);
+  ASSERT_IS_TRUE(v.hasValue());
+  ASSERT_EQUAL(v.value(), 1.0f);
+  ASSERT_EQUAL(*v, 1.0f);
 }
 
 SN_TEST(Optional, valueAssign_nonTrivialDtor) {
@@ -86,9 +82,9 @@ SN_TEST(Optional, valueAssign_nonTrivialDtor) {
 
   Optional<NonTrivDtor> v = NonTrivDtor(2);
 
-  CHECK(v.hasValue());
-  CHECK(v.value().value == 2);
-  CHECK((*v).value == 2);
+  ASSERT_IS_TRUE(v.hasValue());
+  ASSERT_EQUAL(v.value().value, 2);
+  ASSERT_EQUAL((*v).value, 2);
 }
 
 SN_TEST(Optional, copyEmptyToPresent_nonTrivialDtor) {
@@ -99,7 +95,7 @@ SN_TEST(Optional, copyEmptyToPresent_nonTrivialDtor) {
 
   present = empty;
 
-  CHECK(!present.hasValue());
+  ASSERT_IS_FALSE(present.hasValue());
 }
 
 SN_TEST(Optional, copyPresentToEmpty) {
@@ -108,8 +104,8 @@ SN_TEST(Optional, copyPresentToEmpty) {
 
   empty = present;
 
-  CHECK(empty.hasValue());
-  CHECK(empty.value() == present.value());
+  ASSERT_IS_TRUE(empty.hasValue());
+  ASSERT_EQUAL(empty.value(), present.value());
 }
 
 SN_TEST(Optional, copyPresentToEmpty_nonTrivialDtor) {
@@ -120,8 +116,8 @@ SN_TEST(Optional, copyPresentToEmpty_nonTrivialDtor) {
 
   empty = present;
 
-  CHECK(empty.hasValue());
-  CHECK(empty.value() == present.value());
+  ASSERT_IS_TRUE(empty.hasValue());
+  ASSERT_EQUAL(empty.value(), present.value());
 }
 
 SN_TEST(Optional, copyPresentToPresent) {
@@ -130,7 +126,7 @@ SN_TEST(Optional, copyPresentToPresent) {
 
   a = b;
 
-  CHECK(a.value() == b.value());
+  ASSERT_EQUAL(a.value(), b.value());
 }
 
 SN_TEST(Optional, copyPresentToPresent_nonTrivialDtor) {
@@ -141,15 +137,15 @@ SN_TEST(Optional, copyPresentToPresent_nonTrivialDtor) {
 
   a = b;
 
-  CHECK(a.value() == b.value());
+  ASSERT_EQUAL(a.value(), b.value());
 }
 
 SN_TEST(Optional, valueOr) {
   Optional<u32> empty;
   Optional<u32> present = 3;
 
-  CHECK(empty.valueOr(4) == 4);
-  CHECK(present.valueOr(4) == 3);
+  ASSERT_EQUAL(empty.valueOr(4), 4);
+  ASSERT_EQUAL(present.valueOr(4), 3);
 }
 
 SN_TEST(Optional, moveAssignment_emptyToEmpty_nonTrivialDtor) {
@@ -159,7 +155,7 @@ SN_TEST(Optional, moveAssignment_emptyToEmpty_nonTrivialDtor) {
   Optional<NonTrivDtor> empty1;
 
   empty0 = std::move(empty1);
-  CHECK(!empty0.hasValue());
+  ASSERT_IS_FALSE(empty0.hasValue());
 }
 
 SN_TEST(Optional, moveAssignment_presentToEmpty_nonTrivialDtor) {
@@ -169,8 +165,8 @@ SN_TEST(Optional, moveAssignment_presentToEmpty_nonTrivialDtor) {
   Optional<NonTrivDtor> present0 = NonTrivDtor(2);
 
   empty0 = std::move(present0);
-  CHECK(empty0.hasValue());
-  CHECK(empty0->value == 2);
+  ASSERT_IS_TRUE(empty0.hasValue());
+  ASSERT_EQUAL(empty0->value, 2);
 }
 
 SN_TEST(Optional, moveAssignment_emptyToPresent_nonTrivialDtor) {
@@ -180,7 +176,7 @@ SN_TEST(Optional, moveAssignment_emptyToPresent_nonTrivialDtor) {
   Optional<NonTrivDtor> present0 = NonTrivDtor(2);
 
   present0 = std::move(empty0);
-  CHECK(!present0.hasValue());
+  ASSERT_IS_FALSE(present0.hasValue());
 }
 
 SN_TEST(Optional, moveAssignment_presentToPresent_nonTrivialDtor) {
@@ -190,8 +186,8 @@ SN_TEST(Optional, moveAssignment_presentToPresent_nonTrivialDtor) {
   Optional<NonTrivDtor> present1 = NonTrivDtor(3);
 
   present0 = std::move(present1);
-  CHECK(present0.hasValue());
-  CHECK(present0->value == 3);
+  ASSERT_IS_TRUE(present0.hasValue());
+  ASSERT_EQUAL(present0->value, 3);
 }
 
 SN_TEST(Optional, valueOr_const) {
@@ -205,7 +201,7 @@ SN_TEST(Optional, valueOr_empty) {
   Optional<u32> empty;
 
   u32 actual = empty.valueOr(expected);
-  CHECK(actual == expected);
+  ASSERT_EQUAL(actual, expected);
 }
 
 SN_TEST(Optional, valueOr_present) {
@@ -213,7 +209,7 @@ SN_TEST(Optional, valueOr_present) {
   Optional<u32> present = expected;
 
   u32 actual = present.valueOr(3);
-  CHECK(actual == expected);
+  ASSERT_EQUAL(actual, expected);
 }
 
 SN_TEST(Optional, valueOrElse_const) {
@@ -226,7 +222,7 @@ SN_TEST(Optional, valueOrElse_empty_result) {
   Optional<u32> empty;
 
   u32 actual = empty.valueOrElse([]() { return 3; });
-  CHECK(actual == 3);
+  ASSERT_EQUAL(actual, 3);
 }
 
 SN_TEST(Optional, valueOrElse_empty_called) {
@@ -239,7 +235,7 @@ SN_TEST(Optional, valueOrElse_empty_called) {
   });
   ARG_UNUSED(actual);
 
-  CHECK(wasCalled);
+  ASSERT_IS_TRUE(wasCalled);
 }
 
 SN_TEST(Optional, valueOrElse_present_result) {
@@ -247,7 +243,7 @@ SN_TEST(Optional, valueOrElse_present_result) {
   Optional<u32> present = expected;
 
   u32 actual = present.valueOrElse([]() { return 3; });
-  CHECK(actual == expected);
+  ASSERT_EQUAL(actual, expected);
 }
 
 SN_TEST(Optional, valueOrElse_present_notCalled) {
@@ -261,7 +257,7 @@ SN_TEST(Optional, valueOrElse_present_notCalled) {
   });
   ARG_UNUSED(actual);
 
-  CHECK(!wasCalled);
+  ASSERT_IS_FALSE(wasCalled);
 }
 
 struct IThing {
@@ -278,26 +274,25 @@ struct Thing : IThing {
 
 SN_TEST(Optional, vtableMoveConstruct) {
   auto moveConstructed = Optional<Thing>(Thing(IThing::EXPECTED));
-  CHECK(moveConstructed->func() == IThing::EXPECTED);
+  ASSERT_EQUAL(moveConstructed->func(), IThing::EXPECTED);
 }
 
 SN_TEST(Optional, vtableCopyConstruct) {
   Thing t(IThing::EXPECTED);
   auto copyConstructed = Optional<Thing>(t);
-  CHECK(copyConstructed->func() == IThing::EXPECTED);
+  ASSERT_EQUAL(copyConstructed->func(), IThing::EXPECTED);
 }
 
 SN_TEST(Optional, vtableMoveAssign) {
   Optional<Thing> moveAssignedTo;
   Thing t(IThing::EXPECTED);
   moveAssignedTo = std::move(t);
-  CHECK(moveAssignedTo->func() == IThing::EXPECTED);
+  ASSERT_EQUAL(moveAssignedTo->func(), IThing::EXPECTED);
 }
 
 SN_TEST(Optional, vtableCopyAssign) {
   Optional<Thing> copyAssignedTo;
   Thing t(IThing::EXPECTED);
   copyAssignedTo = t;
-  CHECK(copyAssignedTo->func() == IThing::EXPECTED);
+  ASSERT_EQUAL(copyAssignedTo->func(), IThing::EXPECTED);
 }
-
