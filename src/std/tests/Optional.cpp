@@ -263,3 +263,41 @@ SN_TEST(Optional, valueOrElse_present_notCalled) {
 
   CHECK(!wasCalled);
 }
+
+struct IThing {
+  static constexpr u32 EXPECTED = 0xCAFEBEEF;
+  virtual u32 func() = 0;
+};
+
+struct Thing : IThing {
+  u32 token;
+
+  Thing(u32 token) : token(token) {}
+  u32 func() override { return token; }
+};
+
+SN_TEST(Optional, vtableMoveConstruct) {
+  auto moveConstructed = Optional<Thing>(Thing(IThing::EXPECTED));
+  CHECK(moveConstructed->func() == IThing::EXPECTED);
+}
+
+SN_TEST(Optional, vtableCopyConstruct) {
+  Thing t(IThing::EXPECTED);
+  auto copyConstructed = Optional<Thing>(t);
+  CHECK(copyConstructed->func() == IThing::EXPECTED);
+}
+
+SN_TEST(Optional, vtableMoveAssign) {
+  Optional<Thing> moveAssignedTo;
+  Thing t(IThing::EXPECTED);
+  moveAssignedTo = std::move(t);
+  CHECK(moveAssignedTo->func() == IThing::EXPECTED);
+}
+
+SN_TEST(Optional, vtableCopyAssign) {
+  Optional<Thing> copyAssignedTo;
+  Thing t(IThing::EXPECTED);
+  copyAssignedTo = t;
+  CHECK(copyAssignedTo->func() == IThing::EXPECTED);
+}
+
