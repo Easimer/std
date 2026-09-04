@@ -19,6 +19,16 @@
 			</ArrayItems>
 		</Expand>
 	</Type>
+	<Type Name="Slice&lt;wchar_t&gt;" Priority="High">
+		<DisplayString>{data,[length]s16}</DisplayString>
+		<StringView>data,[length]s16</StringView>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
 
 	<!-- MutSlice<T> -->
 	<Type Name="MutSlice&lt;*&gt;">
@@ -33,6 +43,16 @@
 	<Type Name="MutSlice&lt;char&gt;" Priority="High">
 		<DisplayString>{data,[length]s8}</DisplayString>
 		<StringView>data,[length]s8</StringView>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="MutSlice&lt;wchar_t&gt;" Priority="High">
+		<DisplayString>{data,[length]s16}</DisplayString>
+		<StringView>data,[length]s16</StringView>
 		<Expand>
 			<ArrayItems>
 				<Size>length</Size>
