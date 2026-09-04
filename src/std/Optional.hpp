@@ -93,7 +93,7 @@ struct OptionalStorage<T, enable_if_t<is_trivially_destructible_v<T>>> {
 
   constexpr OptionalStorage &operator=(const OptionalStorage<T> &other) {
     if (other.present) {
-      value = other.value;
+      new (&value) T(other.value);
     }
 
     present = other.present;
@@ -104,7 +104,7 @@ struct OptionalStorage<T, enable_if_t<is_trivially_destructible_v<T>>> {
     present = false;
 
     if (other.present) {
-      value = std::move(other.value);
+      new (&value) T(std::move(other.value));
       present = true;
     }
     return *this;
