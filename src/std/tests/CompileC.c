@@ -4,6 +4,7 @@
 #include <std/Check.h>
 #include <std/Chronometry.h>
 #include <std/Endian.h>
+#include <std/Error.h>
 #include <std/Hash.h>
 #include <std/Modules.h>
 #include <std/Random.h>
