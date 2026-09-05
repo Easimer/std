@@ -1,3 +1,4 @@
+#include <std/Random.h>
 #include <std/SwissTable.hpp>
 #include <std/Testing.hpp>
 
@@ -186,16 +187,6 @@ SN_TEST(SwissTable, valueSlotReuseAfterRemove) {
   CHECK(*slot == 456);
 }
 
-static constexpr u64 a =
-    6364136223846793005ULL; /* see TAOCP Vol 2, 3.3.4, page 108 */
-static constexpr u64 c = 9754186451795953191ULL; /* some random start value */
-
-static u64 rand(u64 *r) {
-  u64 ret = (a * (*r)) + c;
-  *r = ret;
-  return ret;
-}
-
 enum OpKind { OP_GET, OP_PUT, OP_REMOVE, OP_COUNT };
 
 SN_TEST(SwissTable, random64) {
@@ -203,7 +194,7 @@ SN_TEST(SwissTable, random64) {
 
   // Perform random operations on a table. There are only 64 unique keys and
   // the expected state of the table is mirrored using simple arrays.
-  u64 randState = 2113148651ULL;
+  RandLcgU64 rand;
 
   for (size_t j = 0; j < 1 << 5; j++) {
     Arena::Scope temp;
@@ -217,16 +208,16 @@ SN_TEST(SwissTable, random64) {
     u64 values[N];
 
     for (size_t i = 0; i < N; i++) {
-      keys[i] = rand(&randState);
+      keys[i] = rand.next();
       values[i] = 0;
     }
 
     for (u32 i = 0; i < 1 << 14; i++) {
-      OpKind op = OpKind(rand(&randState) % OP_COUNT);
+      OpKind op = OpKind(rand.next() % OP_COUNT);
 
       switch (op) {
         case OP_GET: {
-          u64 idx = rand(&randState) % N;
+          u64 idx = rand.next() % N;
           u64 key = keys[idx];
           bool shouldBePresent = present & (1ULL << idx);
           u64 *slot = table.get(key);
@@ -239,9 +230,9 @@ SN_TEST(SwissTable, random64) {
           break;
         }
         case OP_PUT: {
-          u64 idx = rand(&randState) % N;
+          u64 idx = rand.next() % N;
           u64 key = keys[idx];
-          u64 value = rand(&randState);
+          u64 value = rand.next();
           u64 *slot = table.put(key, value);
           CHECK(slot != nullptr);
           CHECK(*slot == value);
@@ -251,7 +242,7 @@ SN_TEST(SwissTable, random64) {
           break;
         }
         case OP_REMOVE: {
-          u64 idx = rand(&randState) % N;
+          u64 idx = rand.next() % N;
           u64 key = keys[idx];
           bool shouldBePresent = present & (1ULL << idx);
           bool wasPresent = table.remove(key);
@@ -271,7 +262,7 @@ SN_TEST(SwissTable, random64) {
 SN_TEST(SwissTable, random1024) {
   // Perform random operations on a table. There are only 1024 unique keys and
   // the expected state of the table is mirrored using simple arrays.
-  u64 randState = 2113148651ULL;
+  RandLcgU64 rand;
 
   static constexpr size_t N = 1024;
 
@@ -285,16 +276,16 @@ SN_TEST(SwissTable, random1024) {
     u32 values[N];
 
     for (size_t i = 0; i < N; i++) {
-      keys[i] = (u32)rand(&randState);
+      keys[i] = (u32)rand.next();
       values[i] = 0;
     }
 
     for (u32 i = 0; i < 1 << 14; i++) {
-      OpKind op = OpKind(rand(&randState) % OP_COUNT);
+      OpKind op = OpKind(rand.next() % OP_COUNT);
 
       switch (op) {
         case OP_GET: {
-          u64 idx = rand(&randState) % N;
+          u64 idx = rand.next() % N;
           u32 key = keys[idx];
           u32 *slot = table.get(key);
           if (slot != nullptr) {
@@ -303,9 +294,9 @@ SN_TEST(SwissTable, random1024) {
           break;
         }
         case OP_PUT: {
-          u64 idx = rand(&randState) % N;
+          u64 idx = rand.next() % N;
           u32 key = keys[idx];
-          u32 value = (u32)rand(&randState);
+          u32 value = (u32)rand.next();
           u32 *slot = table.put(key, value);
           CHECK(slot != nullptr);
           CHECK(*slot == value);
@@ -313,7 +304,7 @@ SN_TEST(SwissTable, random1024) {
           break;
         }
         case OP_REMOVE: {
-          u64 idx = rand(&randState) % N;
+          u64 idx = rand.next() % N;
           u32 key = keys[idx];
           table.remove(key);
           break;
@@ -331,7 +322,7 @@ SN_TEST(SwissTable, swarm64) {
   // Perform random operations on a table. Only a subset of operations is
   // enabled at any time. There are only 64 unique keys and the expected
   // state of the table is mirrored using simple arrays.
-  u64 randState = 2113148651ULL;
+  RandLcgU64 rand;
 
   for (size_t j = 0; j < 1 << 10; j++) {
     Arena::Scope temp;
@@ -345,23 +336,23 @@ SN_TEST(SwissTable, swarm64) {
     u64 values[64];
 
     for (size_t i = 0; i < 64; i++) {
-      keys[i] = rand(&randState);
+      keys[i] = rand.next();
       values[i] = 0;
     }
 
     u32 enabledOps = 0xFFFFFFFF;
 
     for (u32 i = 0; i < 1 << 14; i++) {
-      OpKind op = OpKind(rand(&randState) % OP_COUNT);
+      OpKind op = OpKind(rand.next() % OP_COUNT);
       u32 mask = u32(1) << op;
       if ((mask & enabledOps) == 0) {
         continue;
       }
 
       if (i != 0 && (i % 128) == 0) {
-        OpKind enOp = OpKind(rand(&randState) % OP_COUNT);
+        OpKind enOp = OpKind(rand.next() % OP_COUNT);
         u32 enMask = u32(1) << enOp;
-        if (rand(&randState) & 1) {
+        if (rand.next() & 1) {
           enabledOps |= enMask;
         } else {
           enabledOps &= ~enMask;
@@ -370,7 +361,7 @@ SN_TEST(SwissTable, swarm64) {
 
       switch (op) {
         case OP_GET: {
-          u64 idx = rand(&randState) % 64;
+          u64 idx = rand.next() % 64;
           u64 key = keys[idx];
           bool shouldBePresent = present & (1ULL << idx);
           u64 *slot = table.get(key);
@@ -383,9 +374,9 @@ SN_TEST(SwissTable, swarm64) {
           break;
         }
         case OP_PUT: {
-          u64 idx = rand(&randState) % 64;
+          u64 idx = rand.next() % 64;
           u64 key = keys[idx];
-          u64 value = rand(&randState);
+          u64 value = rand.next();
           u64 *slot = table.put(key, value);
           CHECK(slot != nullptr);
           CHECK(*slot == value);
@@ -395,7 +386,7 @@ SN_TEST(SwissTable, swarm64) {
           break;
         }
         case OP_REMOVE: {
-          u64 idx = rand(&randState) % 64;
+          u64 idx = rand.next() % 64;
           u64 key = keys[idx];
           bool shouldBePresent = present & (1ULL << idx);
           bool wasPresent = table.remove(key);

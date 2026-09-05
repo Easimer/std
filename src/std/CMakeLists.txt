@@ -93,6 +93,7 @@ target_sources(std-static
     Path.cpp Path.hpp
     Pool.hpp
     RadixSort.hpp
+    Random.h
     Ranges.hpp
     Result.hpp
     Sanitizer.h
@@ -193,6 +194,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Optional.cpp
     tests/Path.cpp
     tests/Pool.cpp
+    tests/Random.cpp
     tests/Result.cpp
     tests/SegmentArray.cpp
     tests/SIMD.cpp

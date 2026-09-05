@@ -100,7 +100,7 @@ struct SnTestResult {
            "Expected `" #Actual "' to equal `" #Expected "'");
 
 #define ASSERT_NOT_EQUAL(Actual, Expected) \
-  CHECK_EX((Actual) != (Expected),     \
+  CHECK_EX((Actual) != (Expected),         \
            "Expected `" #Actual "' not to equal `" #Expected "'");
 
 #define ASSERT_IS_TRUE(Actual) \
@@ -108,3 +108,11 @@ struct SnTestResult {
 
 #define ASSERT_IS_FALSE(Actual) \
   CHECK_EX(!(Actual), "Expected `" #Actual "' to be false");
+
+/**
+ * \brief Asserts that Actual is between Min and Max (inclusive). The expression
+ * `Actual` will be evaluated twice!
+ */
+#define ASSERT_BETWEEN(Actual, Min, Max)           \
+  CHECK_EX((Min) <= (Actual) && (Actual) <= (Max), \
+           "Expected `" #Actual "' to be between `" #Min "' and `" #Max "'");

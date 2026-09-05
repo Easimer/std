@@ -6,6 +6,7 @@
 #include <std/Endian.h>
 #include <std/Hash.h>
 #include <std/Modules.h>
+#include <std/Random.h>
 #include <std/Sanitizer.h>
 #include <std/Types.h>
 #include <std/VU128.h>

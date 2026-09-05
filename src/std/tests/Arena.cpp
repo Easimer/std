@@ -1,5 +1,6 @@
 #include <std/Arena.h>
 #include <std/Check.h>
+#include <std/Random.h>
 #include <std/Testing.hpp>
 
 SN_TEST(getScratch, returnsValidArena) {
@@ -63,7 +64,7 @@ SN_TEST(Arena, zeroSizeAllocReturnsNull) {
   u8 buf[32];
   Arena test = {buf, buf + 32};
 
-  u8* res = alloc<u8>(&test, 0);
+  u8 *res = alloc<u8>(&test, 0);
   CHECK(res == nullptr);
 }
 
@@ -131,18 +132,8 @@ SN_TEST(Arena, alignment) {
   CHECK((ptrB & 255) == 0);
 }
 
-static constexpr u64 a =
-    6364136223846793005ULL; /* see TAOCP Vol 2, 3.3.4, page 108 */
-static constexpr u64 c = 9754186451795953191ULL; /* some random start value */
-
-static u64 rand(u64 *r) {
-  u64 ret = (a * (*r)) + c;
-  *r = ret;
-  return ret;
-}
-
 SN_TEST(Arena, swarm) {
-  u64 randState = 2113148651ULL;
+  RandLcgU64 rand;
 
   enum OpKind {
     SET_COUNT,
@@ -171,7 +162,7 @@ SN_TEST(Arena, swarm) {
 
     for (size_t idxScenario = 0; idxScenario < 1 << 8; idxScenario++) {
       // Only a random subset of operations is enabled during a scenario
-      u32 toggle = rand(&randState) % OpKind::COUNT;
+      u32 toggle = rand.next() % OpKind::COUNT;
       enabled ^= (1 << toggle);
 
       for (size_t idxBurst = 0; idxBurst < 1 << 3; idxBurst++) {
@@ -183,7 +174,7 @@ SN_TEST(Arena, swarm) {
 
         OpKind kind;
         for (;;) {
-          kind = OpKind(rand(&randState) % OpKind::COUNT);
+          kind = OpKind(rand.next() % OpKind::COUNT);
 
           if ((enabled & (1 << kind)) != 0) {
             break;
@@ -192,12 +183,12 @@ SN_TEST(Arena, swarm) {
 
         switch (kind) {
           case SET_COUNT: {
-            size_t next = rand(&randState) % 8;
+            size_t next = rand.next() % 8;
             numObj = next;
             break;
           }
           case SET_SIZE: {
-            size_t next = rand(&randState) % 32;
+            size_t next = rand.next() % 32;
             sizObj = next;
             break;
           }
