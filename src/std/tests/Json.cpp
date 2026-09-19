@@ -71,12 +71,12 @@ SN_TEST(JsonParser, NumberArray) {
   Arena::Scope temp = getScratch(nullptr, 0);
 
   JsonValue res;
-  Slice<char> src = sliceFromConstChar("[1, 2.0, 1e+8, -4, -5.0, -6.7e+2]");
+  Slice<char> src = sliceFromConstChar("[1, 2.0, 1e+8, -4, -5.0, -6.7e+2, 1e-8, -1e-8]");
   bool rc = tryParseValue(temp, src, res);
   CHECK(rc);
   CHECK(res.type == JsonType::Array);
   Slice<JsonValue> elems = res.array();
-  CHECK(elems.length == 6);
+  CHECK(elems.length == 8);
 
   for (auto [e, _] : elems) {
     CHECK(isNumeric(e));
@@ -88,6 +88,8 @@ SN_TEST(JsonParser, NumberArray) {
   CHECK(elems[3].number == -4);
   CHECK(elems[4].number == -5.0);
   CHECK(elems[5].number == -6.7e+2);
+  CHECK(elems[6].number == 1e-8);
+  CHECK(elems[7].number == -1e-8);
 }
 
 SN_TEST(JsonParser, EmptyArrayNewLine) {

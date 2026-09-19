@@ -171,7 +171,7 @@ static bool tryParseNumber(Slice<char> &json, JsonValue &out) {
     }
 
     i8 exponentSign = 1;
-    u32 exponent = 0;
+    i32 exponent = 0;
 
     if (json[0] == '+') {
       json.shrinkFromLeft();
@@ -193,7 +193,7 @@ static bool tryParseNumber(Slice<char> &json, JsonValue &out) {
       }
 
       exponent *= 10;
-      exponent += u32(json[0] - '0');
+      exponent += i32(json[0] - '0');
       json.shrinkFromLeft();
     }
 
