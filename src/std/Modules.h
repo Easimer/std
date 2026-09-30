@@ -24,3 +24,8 @@
 #define SN_WEAK_SYMBOL
 #endif
 
+#if SN_STD_BUILDING
+#define SN_STD_API SN_DLLEXPORT
+#else
+#define SN_STD_API SN_DLLIMPORT
+#endif

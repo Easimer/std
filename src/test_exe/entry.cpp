@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-SnTest *gSnTestFirst = nullptr;
-SnTest *gSnTestPrev = nullptr;
+#include <csetjmp>
+
 static std::jmp_buf gJmpBuf;
 static bool gSnRunningInGA = false;
 static Slice<char> gSnCwd;
@@ -122,7 +122,7 @@ static SnTestResult *testMain(const TestRunConfig *cfg) {
   SnTestResult *ret = nullptr;
   setAllocatorsForThread(arena0, arena1);
 
-  SnTest *currentTest = gSnTestFirst;
+  SnTest *currentTest = snTestFrom(snTestGetFirst());
   bool didPass = false;
 
   u32 numSuccess = 0;
@@ -139,7 +139,7 @@ static SnTestResult *testMain(const TestRunConfig *cfg) {
     // If a suite filter is set and the testcase doesn't match it, skip
     if (!suiteNameFilter.empty() &&
         fromCStr(currentTest->metadata->suiteName) != suiteNameFilter) {
-      currentTest = currentTest->next;
+      currentTest = snTestNext(currentTest);
       numSkipped += 1;
       continue;
     }
@@ -194,7 +194,7 @@ static SnTestResult *testMain(const TestRunConfig *cfg) {
       }
     }
     res->duration = chrono_secondsBetween(t_start, t_end);
-    currentTest = currentTest->next;
+    currentTest = snTestNext(currentTest);
     if (gSnRunningInGA) {
       printf("::endgroup\n");
     }

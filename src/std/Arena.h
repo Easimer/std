@@ -11,12 +11,6 @@
 #include "./Modules.h"
 #include "./Types.h"
 
-#if SN_STD_BUILDING
-#define SN_STD_API SN_DLLEXPORT
-#else
-#define SN_STD_API SN_DLLIMPORT
-#endif
-
 typedef struct Arena Arena;
 
 #if __cplusplus

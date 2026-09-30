@@ -160,6 +160,7 @@ add_library(std-context SHARED)
 target_sources(std-context
   PRIVATE
     ArenaTls.c
+    TestRegistry.c
 )
 target_compile_definitions(std-context
   PRIVATE SN_STD_BUILDING=1

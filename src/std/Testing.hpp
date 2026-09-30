@@ -1,20 +1,30 @@
 #pragma once
 
-#include "std/Arena.h"
-#include "std/Check.h"
-#include "std/Chronometry.h"
-#include "std/Types.h"
-
-#include <csetjmp>
-
-#ifndef SN_TEST_EXECUTABLE
-#define SN_TEST_EXECUTABLE 0
-#endif
+#include "./Arena.h"
+#include "./Check.h"
+#include "./Chronometry.h"
+#include "./Types.h"
 
 struct SnTest;
-using SnTestFunc = void (*)(void);
-extern SnTest *gSnTestFirst;
-extern SnTest *gSnTestPrev;
+struct SnTestMetadata;
+typedef void (*SnTestFunc)(void);
+
+struct SnTestChain {
+  struct SnTestChain *next;
+};
+
+#if __cplusplus
+extern "C" {
+#endif
+
+SN_STD_API void snTestRegister(struct SnTestChain *test);
+SN_STD_API struct SnTestChain *snTestGetFirst(void);
+
+#if __cplusplus
+}
+#endif
+
+#if __cplusplus
 
 struct SnTestMetadata {
   const char *suiteName;
@@ -25,25 +35,29 @@ struct SnTestMetadata {
 };
 
 struct SnTest {
-  SnTest *next;
-  const SnTestMetadata *metadata;
+  struct SnTestChain chain;
+
+  const struct SnTestMetadata *metadata;
   bool shouldPass;
 
   void (*pfnTest)(void);
 
   SnTest(const SnTestMetadata *metadata, void (*pfnTest)(void), bool shouldPass)
-      : next(nullptr),
+      : chain({nullptr}),
         metadata(metadata),
         shouldPass(shouldPass),
         pfnTest(pfnTest) {
-    if (gSnTestFirst != nullptr) {
-      gSnTestPrev->next = this;
-      gSnTestPrev = this;
-    } else {
-      gSnTestFirst = gSnTestPrev = this;
-    }
+    snTestRegister(&chain);
   }
 };
+
+static inline SnTest *snTestFrom(SnTestChain *node) {
+  return reinterpret_cast<SnTest *>(node);
+}
+
+static inline SnTest *snTestNext(SnTest *test) {
+  return snTestFrom(test->chain.next);
+}
 
 struct SnTestStats {
   u32 numSuccess;
@@ -67,7 +81,6 @@ struct SnTestResult {
 #define SN_TEST_DECL_FUNC(SuiteName, TestName) \
   static void test_func_##SuiteName##_##TestName(void)
 
-#if SN_TEST_EXECUTABLE
 /** \brief Creates a test definition */
 #define SN_TEST_DEFINE_DESC(SuiteName, TestName, ShouldPass)         \
   static const SnTestMetadata test_meta_##SuiteName##_##TestName = { \
@@ -79,9 +92,6 @@ struct SnTestResult {
   static SnTest test_##SuiteName##_##TestName =                      \
       SnTest(&test_meta_##SuiteName##_##TestName,                    \
              test_func_##SuiteName##_##TestName, ShouldPass)
-#else
-#define SN_TEST_DEFINE_DESC(SuiteName, TestName, ShouldPass)
-#endif
 
 /** \brief Defines a test that must pass. */
 #define SN_TEST(SuiteName, TestName)              \
@@ -94,6 +104,8 @@ struct SnTestResult {
   SN_TEST_DECL_FUNC(SuiteName, TestName);          \
   SN_TEST_DEFINE_DESC(SuiteName, TestName, false); \
   static void test_func_##SuiteName##_##TestName(void)
+
+#endif
 
 #define ASSERT_EQUAL(Actual, Expected) \
   CHECK_EX((Actual) == (Expected),     \

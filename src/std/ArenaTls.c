@@ -135,3 +135,4 @@ void SN_STD_WEAK_SYMBOL checkFail(const char *pExpr,
 
   for(;;) {}
 }
+
