@@ -45,7 +45,7 @@ static inline f32 f32FromBits_0_1(u32 bits) {
   // interpreted as a float `(-1)^0 * 2^0 * 1.m` (where m is the 23 random bits
   // above), i.e. a float from 1.0 and 2.0 (inclusive-exclusive).
   bits |= 0x3f800000;
-  ret = *(f32 *)&bits;
+  memcpy(&ret, &bits, sizeof(f32));
   // Shift the range from [1, 2[ to [0, 1[
   ret = ret - 1.0f;
 
@@ -66,7 +66,7 @@ static inline f32 f32FromBits_1_1(u32 bits) {
   // interpreted as a float `(-1)^0 * 2^1 * 1.m` (where m is the 23 random bits
   // above), i.e. a float from 2.0 to 4.0 (inclusive-exclusive).
   bits |= 0x40000000;
-  ret = *(f32 *)&bits;
+  memcpy(&ret, &bits, sizeof(f32));
   // Shift the range from [2, 4[ to [-1, 1[
   ret = ret - 3.0f;
 
