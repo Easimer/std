@@ -6,6 +6,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#include <std/CompilerInfo.h>
 #include <std/SwissTable.hpp>
 
 #if defined(__SSE2__) || defined(_M_X64)
@@ -123,4 +124,18 @@ u64 hasKeyNEON(const u64 &controlWord, u8 h2) {
 }
 #endif
 
+size_t count(u64 controlWord) {
+#if SN_COMPILER == SN_COMPILER_MSVC
+  unsigned __int64 numEmptySlots =
+      __popcnt64(controlWord & impl::CW_MASK_EMPTY);
+  DCHECK(numEmptySlots <= 8);
+  return 8 - numEmptySlots;
+#elif SN_COMPILER == SN_COMPILER_GCC || SN_COMPILER == SN_COMPILER_CLANG
+  int numEmptySlots = __builtin_popcountg(controlWord & impl::CW_MASK_EMPTY);
+  DCHECK(numEmptySlots <= 8);
+  return 8 - numEmptySlots;
+#else
+#error "Unsupported compiler"
+#endif
+}
 }  // namespace impl

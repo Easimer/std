@@ -121,6 +121,13 @@ target_sources(std-static
     json/Parser.hpp
     json/Utils.hpp
 
+    serializer/SegmentArrayWriter.hpp
+    serializer/Serializer2.cpp
+    serializer/Serializer2.hpp
+    serializer/SliceReader.hpp
+    serializer/Optional.hpp
+    serializer/SwissTable.hpp
+
     log/log.c log/log.h
 )
 target_include_directories(std-static
@@ -198,6 +205,7 @@ if(SN_STD_BUILD_TESTS)
     tests/Random.cpp
     tests/Result.cpp
     tests/SegmentArray.cpp
+    tests/Serializer.cpp
     tests/SIMD.cpp
     tests/Slice.cpp
     tests/Sort.cpp

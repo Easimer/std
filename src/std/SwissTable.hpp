@@ -49,6 +49,8 @@ bool hasEmptySlot(u64 controlWord);
  */
 bool hasUnusedSlot(const u64 &controlWord);
 
+size_t count(u64 controlWord);
+
 /**
  * \brief Computes the index of the home group of a key
  * \param h1 Upper 57 bits of the hash of the key
@@ -274,6 +276,15 @@ struct SwissTable {
     return false;
   }
 
+  size_t size() const {
+    size_t sum = 0;
+    const size_t N = controlWords.length;
+    for (size_t group = 0; group < N; group++) {
+      sum += impl::count(controlWords[group]);
+    }
+    return sum;
+  }
+
   size_t _growAndRehash() {
     DCHECK(controlWords.length == keys.length);
     size_t idx = controlWords.length;
@@ -437,4 +448,72 @@ struct SwissTable {
   }
 
   bool _empty() const { return controlWords.length == 0; }
+};
+
+template <typename K, typename V>
+struct SwissTableIterable {
+  SwissTable<K, V> &table;
+  SwissTableIterable(SwissTable<K, V> &table) : table(table) {}
+
+  struct Iterator {
+    SwissTable<K, V> &table;
+    size_t i;
+    u8 j;
+
+    Iterator(SwissTable<K, V> &table, size_t i, u8 j)
+        : table(table), i(i), j(j) {
+      if (i == 0 && j == 0 && table.controlWords.length != 0) {
+        if ((impl::extractSlotFromControlWord(table.controlWords[0], 0) &
+             impl::CW_MASK_EMPTY) != 0) {
+          _advanceToNextNonEmpty();
+        }
+      }
+    }
+
+    bool operator!=(const Iterator &other) const {
+      return i != other.i || j != other.j;
+    }
+
+    void _advanceToNextNonEmpty() {
+      for (; i < table.controlWords.length;) {
+        if (j < 7) {
+          j++;
+        } else {
+          i++;
+          j = 0;
+
+          if (i >= table.controlWords.length) {
+            break;
+          }
+        }
+
+        if ((impl::extractSlotFromControlWord(table.controlWords[i], j) &
+             impl::CW_MASK_EMPTY) == 0) {
+          break;
+        }
+      }
+    }
+
+    Iterator &operator++() {
+      _advanceToNextNonEmpty();
+
+      return *this;
+    }
+
+    struct KV {
+      Slice<K> key;
+      V &value;
+    };
+
+    KV operator*() {
+      const auto &slot = table.keys[i][j];
+      Slice<K> key = slot.key;
+      V &value = table.values[slot.idxValue];
+      return {key, value};
+    }
+  };
+
+  Iterator begin() { return Iterator{table, 0, 0}; }
+
+  Iterator end() { return Iterator{table, table.keys.length, 0}; }
 };
