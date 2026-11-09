@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 	<!-- Slice<T> -->
 	<Type Name="Slice&lt;*&gt;">
@@ -160,6 +161,140 @@
 				<Size>length</Size>
 				<ValuePointer>data</ValuePointer>
 			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- Array<T, N> -->
+	<Type Name="Array&lt;*,*&gt;">
+		<DisplayString>{{ length={length} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>length</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- SegmentArray<T> -->
+	<Type Name="SegmentArray&lt;*&gt;">
+		<DisplayString>{{ length={length} }}</DisplayString>
+		<Expand>
+			<Item Name="[numSegments]">numSegments</Item>
+			<Item Name="[arena]">arena</Item>
+			<CustomListItems Optional="true">
+				<Variable Name="i" InitialValue="(unsigned long long)0" />
+				<Variable Name="seg" InitialValue="0" />
+				<Variable Name="off" InitialValue="(unsigned long long)0" />
+				<Variable Name="segSz" InitialValue="(unsigned long long)64" />
+				<Size>length</Size>
+				<Loop>
+					<Break Condition="i &gt;= length" />
+					<Item Name="[{i}]">arrSegments.data[seg][off]</Item>
+					<Exec>off = off + 1</Exec>
+					<Exec>i = i + 1</Exec>
+					<If Condition="off &gt;= segSz">
+						<Exec>seg = seg + 1</Exec>
+						<Exec>off = 0</Exec>
+						<Exec>segSz = segSz * 2</Exec>
+					</If>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<!-- SwissTable<K, V> -->
+	<Type Name="SwissTable&lt;*,*&gt;">
+		<DisplayString Condition="controlWords.length == 0">(empty)</DisplayString>
+		<DisplayString>{{ groups={controlWords.length} }}</DisplayString>
+		<Expand>
+			<CustomListItems Optional="true">
+				<Variable Name="g" InitialValue="(unsigned long long)0" />
+				<Variable Name="s" InitialValue="0" />
+				<Variable Name="n" InitialValue="0" />
+				<Variable Name="vv" InitialValue="(unsigned long long)0" />
+				<Variable Name="gseg" InitialValue="0" />
+				<Variable Name="goff" InitialValue="(unsigned long long)0" />
+				<Variable Name="cw" InitialValue="(unsigned long long)0" />
+				<Variable Name="ctrl" InitialValue="0" />
+				<Variable Name="vidx" InitialValue="(unsigned long long)0" />
+				<Variable Name="vseg" InitialValue="0" />
+				<Variable Name="voff" InitialValue="(unsigned long long)0" />
+				<Size>controlWords.length * 16</Size>
+				<Loop>
+					<Break Condition="g &gt;= controlWords.length" />
+					<Exec>vv = (g &gt;&gt; 6) + 1</Exec>
+					<Exec>gseg = 0</Exec>
+					<If Condition="vv &gt;= 0x10000">
+						<Exec>gseg = gseg + 16</Exec>
+						<Exec>vv = vv &gt;&gt; 16</Exec>
+					</If>
+					<If Condition="vv &gt;= 0x100">
+						<Exec>gseg = gseg + 8</Exec>
+						<Exec>vv = vv &gt;&gt; 8</Exec>
+					</If>
+					<If Condition="vv &gt;= 0x10">
+						<Exec>gseg = gseg + 4</Exec>
+						<Exec>vv = vv &gt;&gt; 4</Exec>
+					</If>
+					<If Condition="vv &gt;= 0x4">
+						<Exec>gseg = gseg + 2</Exec>
+						<Exec>vv = vv &gt;&gt; 2</Exec>
+					</If>
+					<If Condition="vv &gt;= 0x2">
+						<Exec>gseg = gseg + 1</Exec>
+					</If>
+					<Exec>goff = g - (((unsigned long long)64 &lt;&lt; gseg) - 64)</Exec>
+					<Exec>cw = controlWords.arrSegments.data[gseg][goff]</Exec>
+					<Exec>ctrl = (cw &gt;&gt; (56 - 8 * s)) &amp; 0xFF</Exec>
+					<If Condition="(ctrl &amp; 0x80) == 0">
+						<Item Name="[{n}].key">keys.arrSegments.data[gseg][goff].data[s].key</Item>
+						<Exec>vidx = keys.arrSegments.data[gseg][goff].data[s].idxValue</Exec>
+						<Exec>vv = (vidx &gt;&gt; 6) + 1</Exec>
+						<Exec>vseg = 0</Exec>
+						<If Condition="vv &gt;= 0x10000">
+							<Exec>vseg = vseg + 16</Exec>
+							<Exec>vv = vv &gt;&gt; 16</Exec>
+						</If>
+						<If Condition="vv &gt;= 0x100">
+							<Exec>vseg = vseg + 8</Exec>
+							<Exec>vv = vv &gt;&gt; 8</Exec>
+						</If>
+						<If Condition="vv &gt;= 0x10">
+							<Exec>vseg = vseg + 4</Exec>
+							<Exec>vv = vv &gt;&gt; 4</Exec>
+						</If>
+						<If Condition="vv &gt;= 0x4">
+							<Exec>vseg = vseg + 2</Exec>
+							<Exec>vv = vv &gt;&gt; 2</Exec>
+						</If>
+						<If Condition="vv &gt;= 0x2">
+							<Exec>vseg = vseg + 1</Exec>
+						</If>
+						<Exec>voff = vidx - (((unsigned long long)64 &lt;&lt; vseg) - 64)</Exec>
+						<Item Name="[{n}].value">values.arrSegments.data[vseg][voff]</Item>
+						<Exec>n = n + 1</Exec>
+					</If>
+					<Exec>s = s + 1</Exec>
+					<If Condition="s &gt;= 8">
+						<Exec>s = 0</Exec>
+						<Exec>g = g + 1</Exec>
+					</If>
+				</Loop>
+			</CustomListItems>
+			<Item Name="[controlWords]">controlWords</Item>
+			<Item Name="[keys]">keys</Item>
+			<Item Name="[values]">values</Item>
+			<Item Name="[arena]">arena</Item>
+		</Expand>
+	</Type>
+
+	<!-- SwissTable::Slot -->
+	<Type Name="SwissTable&lt;*,*&gt;::Slot">
+		<DisplayString>key={key}, val#{idxValue}</DisplayString>
+		<Expand>
+			<Item Name="key">key</Item>
+			<Item Name="hash">hash</Item>
+			<Item Name="idxValue">idxValue</Item>
 		</Expand>
 	</Type>
 </AutoVisualizer>
