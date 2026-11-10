@@ -14,7 +14,7 @@
 #include <std/SegmentArray.hpp>
 
 namespace impl {
-static const u64 CW_MASK_EMPTY = 0x8080808080808080;
+static const u64 CW_MASK_EMPTY = u64(0x8080808080808080);
 static const u64 CW_ENTRY_UNUSED = 0x80;
 static const u64 CW_ENTRY_DELETED = 0xFE;
 static const u64 CW_ENTRY_MASK = 0x80;
