@@ -82,6 +82,12 @@ struct SegmentArray {
 
   T *getSlotForItem(size_t idxItem) const {
     u32 idxSegment = getSegmentForItem(idxItem);
+
+    DCHECK(idxSegment < 26);
+    if (idxSegment >= 26) {
+      return nullptr;
+    }
+
     size_t idxSlot = idxItem - capacityForSegmentCount(idxSegment);
     T *segment = arrSegments[idxSegment];
     DCHECK(segment != nullptr);
