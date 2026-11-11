@@ -15,6 +15,21 @@
 #include <intrin.h>
 #endif
 
+#if SN_GCC || SN_CLANG
+#define SN_ASSUME_ALIGNED(expr, alignment) \
+  __builtin_assume_aligned(expr, alignment)
+#else
+#define SN_ASSUME_ALIGNED(expr, alignment) (expr)
+#endif
+
+#if SN_GCC || SN_CLANG
+#define SN_STD_LIKELY(Expr) __builtin_expect((Expr), 1)
+#define SN_STD_UNLIKELY(Expr) __builtin_expect((Expr), 0)
+#else
+#define SN_STD_LIKELY(Expr) (Expr)
+#define SN_STD_UNLIKELY(Expr) (Expr)
+#endif
+
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;

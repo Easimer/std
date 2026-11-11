@@ -2,7 +2,7 @@
 #include "std/Testing.hpp"
 
 SN_TEST(Strings, split_empty) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Slice<char> empty;
   Slice<Slice<char>> res = split(temp, empty, ',');
@@ -10,7 +10,7 @@ SN_TEST(Strings, split_empty) {
 }
 
 SN_TEST(Strings, split_normal) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Slice<char> input = sliceFromConstChar("asd,123,wawa");
   Slice<Slice<char>> res = split(temp, input, ',');
@@ -21,7 +21,7 @@ SN_TEST(Strings, split_normal) {
 }
 
 SN_TEST(Strings, split_leadingSeparator) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Slice<char> input = sliceFromConstChar(",123,wawa");
   Slice<Slice<char>> res = split(temp, input, ',');
@@ -32,7 +32,7 @@ SN_TEST(Strings, split_leadingSeparator) {
 }
 
 SN_TEST(Strings, split_trailingSeparator) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Slice<char> input = sliceFromConstChar("asd,123,");
   Slice<Slice<char>> res = split(temp, input, ',');
@@ -43,7 +43,7 @@ SN_TEST(Strings, split_trailingSeparator) {
 }
 
 SN_TEST(Strings, split_emptyMiddle) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Slice<char> input = sliceFromConstChar("asd,,wawa");
   Slice<Slice<char>> res = split(temp, input, ',');
@@ -54,7 +54,7 @@ SN_TEST(Strings, split_emptyMiddle) {
 }
 
 SN_TEST(Strings, split_singleSeparator) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Slice<char> input = sliceFromConstChar(",");
   Slice<Slice<char>> res = split(temp, input, ',');

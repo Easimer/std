@@ -10,7 +10,7 @@
   CHECK((Var) == Slice<char>(sliceFromConstChar(Literal)))
 
 SN_TEST(JsonParser, EmptyObject) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("{}");
@@ -21,7 +21,7 @@ SN_TEST(JsonParser, EmptyObject) {
 }
 
 SN_TEST(JsonParser, EmptyArray) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[]");
@@ -32,7 +32,7 @@ SN_TEST(JsonParser, EmptyArray) {
 }
 
 SN_TEST(JsonParser, OpenArray) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[");
@@ -41,7 +41,7 @@ SN_TEST(JsonParser, OpenArray) {
 }
 
 SN_TEST(JsonParser, OpenArrayNested) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[[[[[[[[]]");
@@ -50,7 +50,7 @@ SN_TEST(JsonParser, OpenArrayNested) {
 }
 
 SN_TEST(JsonParser, OpenObject) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("{");
@@ -59,7 +59,7 @@ SN_TEST(JsonParser, OpenObject) {
 }
 
 SN_TEST(JsonParser, OpenObjectNested) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("{\"k\": {\"k\": {\"k\": {\"k\": {");
@@ -68,7 +68,7 @@ SN_TEST(JsonParser, OpenObjectNested) {
 }
 
 SN_TEST(JsonParser, NumberArray) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[1, 2.0, 1e+8, -4, -5.0, -6.7e+2, 1e-8, -1e-8]");
@@ -93,7 +93,7 @@ SN_TEST(JsonParser, NumberArray) {
 }
 
 SN_TEST(JsonParser, EmptyArrayNewLine) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\n]");
@@ -105,7 +105,7 @@ SN_TEST(JsonParser, EmptyArrayNewLine) {
 }
 
 SN_TEST(JsonParser, EmptyArrayWhitespace) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src =
@@ -118,7 +118,7 @@ SN_TEST(JsonParser, EmptyArrayWhitespace) {
 }
 
 SN_TEST(JsonParser, StringEmpty) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("\"\"");
@@ -129,7 +129,7 @@ SN_TEST(JsonParser, StringEmpty) {
 }
 
 SN_TEST(JsonParser, StringSimple) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("\"asd\"");
@@ -140,7 +140,7 @@ SN_TEST(JsonParser, StringSimple) {
 }
 
 SN_TEST(JsonParser, StringCodepoint) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("\"\\u039B\"");
@@ -154,7 +154,7 @@ SN_TEST(JsonParser, StringCodepoint) {
 }
 
 SN_TEST(JsonParser, StringArray) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\"asd\", \"\", \"\\u0391\"]");
@@ -170,7 +170,7 @@ SN_TEST(JsonParser, StringArray) {
 }
 
 SN_TEST(JsonParser, ObjectKeyValues) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar(
@@ -213,7 +213,7 @@ SN_TEST(JsonParser, ObjectKeyValues) {
 }
 
 SN_TEST(JsonParser, StringUtf8) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char8_t> src8 = sliceFromConstChar(u8"[\"€𝄞\"]");
@@ -228,7 +228,7 @@ SN_TEST(JsonParser, StringUtf8) {
 }
 
 SN_TEST(JsonParser, ArrayDoubleComma) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[1,,2]");
@@ -237,7 +237,7 @@ SN_TEST(JsonParser, ArrayDoubleComma) {
 }
 
 SN_TEST(JsonParser, ArrayDoubleClose) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\"x\"]]");
@@ -246,7 +246,7 @@ SN_TEST(JsonParser, ArrayDoubleClose) {
 }
 
 SN_TEST(JsonParser, ArrayIncomplete) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\"x\"");
@@ -255,7 +255,7 @@ SN_TEST(JsonParser, ArrayIncomplete) {
 }
 
 SN_TEST(JsonParser, NumberWithAlpha) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[1.2a-3]");
@@ -264,7 +264,7 @@ SN_TEST(JsonParser, NumberWithAlpha) {
 }
 
 SN_TEST(JsonParser, TrailingChars) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\"\"],");
@@ -273,7 +273,7 @@ SN_TEST(JsonParser, TrailingChars) {
 }
 
 SN_TEST(JsonParser, ArrayExtraComma) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\"\",]");
@@ -282,7 +282,7 @@ SN_TEST(JsonParser, ArrayExtraComma) {
 }
 
 SN_TEST(JsonParser, NumberWithNoFractionalDigits) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[-2.]");
@@ -291,7 +291,7 @@ SN_TEST(JsonParser, NumberWithNoFractionalDigits) {
 }
 
 SN_TEST(JsonParser, StringStartEscapeUnclosed) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("[\"\\");
@@ -300,7 +300,7 @@ SN_TEST(JsonParser, StringStartEscapeUnclosed) {
 }
 
 SN_TEST(JsonParser, NumberHugePosExponent) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   {
     JsonValue res;
@@ -321,7 +321,7 @@ SN_TEST(JsonParser, NumberHugePosExponent) {
 }
 
 SN_TEST(JsonParser, NumberHugeNegExponent) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   {
     JsonValue res;
@@ -343,7 +343,7 @@ SN_TEST(JsonParser, NumberHugeNegExponent) {
 }
 
 SN_TEST(JsonParser, UnescapedCtrlChars) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   {
     JsonValue res;
@@ -372,7 +372,7 @@ SN_TEST(JsonParser, UnescapedCtrlChars) {
 }
 
 SN_TEST(JsonParser, ObjectExtraComma) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar("{\"k\":0,}");
@@ -381,7 +381,7 @@ SN_TEST(JsonParser, ObjectExtraComma) {
 }
 
 SN_TEST(JsonUtils, GetKeyValue) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar(
@@ -415,7 +415,7 @@ SN_TEST(JsonUtils, GetKeyValue) {
 }
 
 SN_TEST(JsonUtils, GetKeyValueOfType) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   JsonValue res;
   Slice<char> src = sliceFromConstChar(

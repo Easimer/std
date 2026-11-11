@@ -6,10 +6,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include "./Arena.h"
+#include "./Arena.hpp"
 #include "./Check.h"
 #include "./CompilerInfo.h"
-#include "./Types.h"
 
 typedef struct {
   Arena *arena0;
@@ -103,24 +102,30 @@ static ThreadContext *getCurrentThreadContext() {
 }
 #endif
 
-SN_STD_API ArenaTemp getScratch(Arena **pConflicts, u32 numConflicts) {
+static Arena *getScratchImpl(Arena *conflict) {
   ThreadContext *S = getCurrentThreadContext();
 
-  if (numConflicts == 0) {
-    return saveArena(S->arena0);
+  if (conflict == nullptr) {
+    return S->arena0;
   }
 
-  DCHECK(numConflicts == 1);
-
-  Arena *conflict = pConflicts[0];
-  if (S->arena0 == conflict) {
-    return saveArena(S->arena1);
+  if (conflict == S->arena0) {
+    return S->arena1;
   }
 
-  return saveArena(S->arena0);
+  return S->arena0;
 }
 
-SN_STD_API void setAllocatorsForThread(Arena *arena0, Arena *arena1) {
+SN_STD_API Arena *Arena::getScratch(Arena *conflict) {
+  return getScratchImpl(conflict);
+}
+
+SN_STD_API Arena *Arena::getScratch() {
+  return getScratchImpl(nullptr);
+}
+
+SN_STD_API void Arena::setAllocatorsForThisThread(Arena *arena0,
+                                                  Arena *arena1) {
   ThreadContext *S = getCurrentThreadContext();
   S->arena0 = arena0;
   S->arena1 = arena1;
@@ -133,6 +138,6 @@ void SN_STD_WEAK_SYMBOL checkFail(const char *pExpr,
   (void)pFile;
   (void)line;
 
-  for(;;) {}
+  for (;;) {
+  }
 }
-

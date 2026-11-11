@@ -11,7 +11,7 @@ SN_TEST(Vector, defaultConstructedIsEmpty) {
 }
 
 SN_TEST(Vector, allocatesOnFirstAppend) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Vector<u8> s;
 
@@ -24,7 +24,7 @@ SN_TEST(Vector, allocatesOnFirstAppend) {
 }
 
 SN_TEST(Vector, growsWhenOutOfSpace) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   u8 stk[3] = {1, 2, 3};
   Vector<u8> s = {stk, 3, 3};
@@ -39,7 +39,7 @@ SN_TEST(Vector, growsWhenOutOfSpace) {
 }
 
 SN_TEST(Vector, vectorWithInitialCapacityWorks) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 16);
 
@@ -49,7 +49,7 @@ SN_TEST(Vector, vectorWithInitialCapacityWorks) {
 }
 
 SN_TEST(Vector, vectorWithZeroInitialCapacityWorks) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 0);
 
@@ -92,7 +92,7 @@ SN_TEST(Vector, appendVal) {
 }
 
 SN_TEST(Vector, elemsCopiedOnGrow) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 2);
 
   u8 *buf0 = v.data;
@@ -116,7 +116,7 @@ SN_TEST(Vector, elemsCopiedOnGrow) {
 }
 
 SN_TEST(Vector, makeVectorFrom) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   u8 elems[3] = {1, 2, 3};
 
   Slice<u8> s = sliceFrom(elems);
@@ -132,7 +132,7 @@ SN_TEST(Vector, makeVectorFrom) {
 }
 
 SN_TEST(Vector, copyToSlice) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   u8 elems[4] = {1, 2, 3, 4};
 
   Vector<u8> v = {elems, 3, 4};
@@ -167,7 +167,7 @@ SN_TEST(Vector, appendWithCount) {
 }
 
 SN_TEST(Vector, appendWithCountGrow) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Vector<u8> v = vectorWithInitialCapacity<u8>(temp, 8);
 

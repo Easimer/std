@@ -255,7 +255,7 @@ SN_TEST(MutSlice, reverseOdd) {
 }
 
 SN_TEST(Slice, duplicate) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   u32 elems[5] = {0, 1, 2, 3, 4};
   Slice<u32> s = sliceFrom(elems);
@@ -345,7 +345,7 @@ SN_TEST(MutSlice, memcopy) {
 }
 
 SN_TEST(MutSlice, concat) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   const u8 left[2] = {1, 2};
   const u8 right[2] = {3, 4};
 
@@ -357,7 +357,7 @@ SN_TEST(MutSlice, concat) {
 }
 
 SN_TEST(MutSlice, concatZeroTerminate) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   const char left[4] = "hey";
   const char right[3] = "ho";
 
@@ -368,7 +368,7 @@ SN_TEST(MutSlice, concatZeroTerminate) {
 }
 
 SN_TEST(MutSlice, zeroTerminated) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   const char left[4] = "hey";
 
   MutSlice<char> result = zeroTerminated(temp, fromCStr(left));
@@ -610,7 +610,7 @@ SN_TEST(MutSlice, replace_empty) {
 }
 
 SN_TEST(MutSlice, replace_normal) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   char str[] = "asd,123,wawa";
   Slice<char> expected = sliceFromConstChar("asd 123 wawa");
@@ -626,7 +626,7 @@ SN_TEST(MutSlice, replace_normal) {
 }
 
 SN_TEST(MutSlice, replace_nothingToReplace) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   char str[] = "asd";
   Slice<char> expected = sliceFromConstChar("asd");

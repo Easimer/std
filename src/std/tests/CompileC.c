@@ -1,6 +1,5 @@
 // Header files that are supposed to compile under C
 
-#include <std/Arena.h>
 #include <std/Check.h>
 #include <std/Chronometry.h>
 #include <std/Endian.h>
@@ -13,6 +12,3 @@
 #include <std/VU128.h>
 #include <std/log.h>
 #include <std/Testing.hpp>
-
-#include <std/os/OsInfo.h>
-#include <std/os/Sync.h>

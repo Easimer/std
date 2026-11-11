@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "std/Arena.h"
+#include "std/Allocator.hpp"
 #include "std/Check.h"
 #include "std/Sanitizer.h"
 #include "std/Types.h"
@@ -44,11 +44,22 @@ struct Pool {
     using pointer = T *;
   };
 
-  Arena *arena = nullptr;
+  sn::Allocator *allocator = nullptr;
   Node *head = nullptr;
   Node *freeListHead = nullptr;
   Pool() {}
-  Pool(Arena *arena) : arena(arena) {}
+  Pool(sn::Allocator *allocator) : allocator(allocator) {}
+
+  ~Pool() {
+    for (Node *const start : {this->head, this->freeListHead}) {
+      Node *cur = start;
+      while (cur != nullptr) {
+        Node *next = cur->next;
+        allocator->free(cur);
+        cur = next;
+      }
+    }
+  }
 
   Iterator begin() const { return Iterator{head}; }
   Iterator end() const { return Iterator{nullptr}; }
@@ -59,18 +70,18 @@ struct Pool {
    * \brief Preallocates space for `count` new objects.
    */
   void preallocate(u32 count) {
-    Node *nodes = ::alloc<Node>(arena, count);
     Node *next = freeListHead;
     for (u32 i = 0; i < count; i++) {
+      Node *node = allocator->alloc<Node>();
 #ifndef NDEBUG
-      nodes[i].sentinel = POOL_NODE_SENTINEL;
+      node->sentinel = POOL_NODE_SENTINEL;
 #endif
-      nodes[i].next = next;
-      nodes[i].prev = nullptr;
-      SN_ASAN_POISON(&nodes[i].value, sizeof(nodes[i].value));
-      next = &nodes[i];
+      node->next = next;
+      node->prev = nullptr;
+      SN_ASAN_POISON(&node->value, sizeof(node->value));
+      next = node;
     }
-    freeListHead = &nodes[count - 1];
+    freeListHead = next;
   }
 
   /**
@@ -88,7 +99,7 @@ struct Pool {
       SN_ASAN_UNPOISON(&node->value, sizeof(node->value));
     } else {
       // Allocate a new node
-      node = ::alloc<Node>(arena);
+      node = allocator->alloc<Node>();
     }
 
     new (&node->value) T();
@@ -171,9 +182,9 @@ struct Pool {
 };
 
 template <typename T>
-void Pool_init(Pool<T> *self, Arena *arena) {
+void Pool_init(Pool<T> *self, sn::Allocator *allocator) {
   memset(self, 0, sizeof(Pool<T>));
-  self->arena = arena;
+  self->allocator = allocator;
 }
 
 template <typename T>

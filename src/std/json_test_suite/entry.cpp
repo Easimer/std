@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
 
   Arena arena0 = makeArena();
   Arena arena1 = makeArena();
-  setAllocatorsForThread(&arena0, &arena1);
+  Arena::setAllocatorsForThisThread(&arena0, &arena1);
 
   Slice<char> pathRepo = {argv[1], (u32)strlen(argv[1])};
   Slice<Slice<char>> test_files = sliceFrom(TEST_PARSER);
@@ -333,11 +333,10 @@ int main(int argc, char **argv) {
   Arena arena1Saved = arena1;
 
   for (auto [filename, _] : test_files) {
-    arena0 = arena0Saved;
-    arena1 = arena1Saved;
+    arena0.restoreFrom(arena0Saved);
+    arena1.restoreFrom(arena1Saved);
 
-    ArenaSaved s = getScratch(nullptr, 0);
-    Arena *temp = s.arena;
+    Arena::Scope temp = Arena::getScratch();
 
     Slice<char> pathTestFiles =
         joinSimple(temp, pathRepo, sliceFromConstChar("test_parsing"));
@@ -345,17 +344,24 @@ int main(int argc, char **argv) {
     Slice<char> z = concatZeroTerminate(temp, pathFile, {});
 
     FILE *f = fopen(z.data, "rb");
-    if (!f) {
+    if (f == nullptr) {
       printf("Failed to open for reading: %s\n", z.data);
-      restoreArena(s.arena, s.saved);
       continue;
     }
     fseek(f, 0, SEEK_END);
     long sizFile = ftell(f);
     fseek(f, 0, SEEK_SET);
     MutSlice<char> bytes;
-    alloc(temp, sizFile, bytes);
-    fread(bytes.data, sizFile, 1, f);
+    if (sizFile != 0) {
+      alloc(temp, sizFile, bytes);
+      u64 sizRead = fread(bytes.data, sizFile, 1, f);
+      if (sizRead < 1) {
+        printf("Failed to read from file '%s'\n", z.data);
+        fclose(f);
+        continue;
+      }
+    }
+
     fclose(f);
 
     JsonValue root;
@@ -371,7 +377,6 @@ int main(int argc, char **argv) {
 
     if (crashed) {
       printf("[ CRSH ] %.*s\n", FMT_SLICE(filename));
-      restoreArena(s.arena, s.saved);
       continue;
     }
 
@@ -395,8 +400,6 @@ int main(int argc, char **argv) {
     } else {
       printf("[ FAIL ] %.*s\n", FMT_SLICE(filename));
     }
-
-    restoreArena(s.arena, s.saved);
   }
 
   return 0;

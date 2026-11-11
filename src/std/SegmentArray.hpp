@@ -1,5 +1,6 @@
 #pragma once
 
+#include "std/Allocator.hpp"
 #include "std/Array.hpp"
 #include "std/Slice.hpp"
 #include "std/SliceUtils.hpp"
@@ -20,16 +21,22 @@ template <typename T>
 struct SegmentArray {
   static constexpr u32 SMALL_SEGMENTS_TO_SKIP = 6;
 
-  Arena *arena;
+  sn::Allocator *allocator;
   /** \brief Number of valid elements in the array */
   u32 length;
 
   u32 numSegments;
   Array<T *, 26> arrSegments;
 
-  constexpr SegmentArray() : arena(nullptr), length(0), numSegments(0) {}
-  constexpr SegmentArray(Arena *arena)
-      : arena(arena), length(0), numSegments(0) {}
+  constexpr SegmentArray() : allocator(nullptr), length(0), numSegments(0) {}
+  constexpr SegmentArray(sn::Allocator *arena)
+      : allocator(arena), length(0), numSegments(0) {}
+
+  ~SegmentArray() {
+    for (T *segment : arrSegments) {
+      allocator->free(segment);
+    }
+  }
 
   T &operator[](size_t i) { return *getSlotForItem(i); }
   const T &operator[](size_t i) const { return *getSlotForItem(i); }
@@ -107,7 +114,7 @@ struct SegmentArray {
     for (size_t i = 0; i < count && numSegments != 26; i++) {
       u32 idxNewSegment = numSegments;
       arrSegments[idxNewSegment] =
-          alloc<T>(arena, sizeOfSegment(idxNewSegment));
+          allocator->alloc<T>(sizeOfSegment(idxNewSegment));
       numSegments += 1;
     }
   }

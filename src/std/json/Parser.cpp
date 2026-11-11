@@ -614,7 +614,7 @@ bool tryParseValue(Arena *arena,
 }
 
 bool tryParseValue(Arena *arena, Slice<char> &json, JsonValue &out) {
-  Arena::Scope temp = getScratch(&arena, 1);
+  Arena::Scope temp = Arena::getScratch(arena);
   bool accepted = tryParseValue(arena, temp, json, out);
 
   eatWhitespace(json);

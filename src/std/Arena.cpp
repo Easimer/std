@@ -6,21 +6,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include "std/Arena.h"
+#include "std/Arena.hpp"
 #include "std/Check.h"
 #include "std/Sanitizer.h"
 #include "std/Types.h"
 
 #include <stdint.h>
 #include <string.h>
-
-#if SN_GCC || SN_CLANG
-#define SN_STD_LIKELY(Expr) __builtin_expect((Expr), 1)
-#define SN_STD_UNLIKELY(Expr) __builtin_expect((Expr), 0)
-#else
-#define SN_STD_LIKELY(Expr) (Expr)
-#define SN_STD_UNLIKELY(Expr) (Expr)
-#endif
 
 static u8 *allocImpl(Arena *a,
                      size_t sizObj,
@@ -38,6 +30,8 @@ static u8 *allocImpl(Arena *a,
   }
 
   size_t pad;
+  // FIXME(danielm): eliminate this loop. We were previously calling
+  // handleOOM(Arena*) in a loop here which had a chance to grow the arena.
   do {
     size_t sizAvailable = a->end - a->beg;
     if (SN_STD_LIKELY(sizAvailable >= sizAlloc)) {
@@ -52,7 +46,7 @@ static u8 *allocImpl(Arena *a,
       }
     }
 
-    handleOOM(a);
+    return nullptr;
   } while (1);
 
   a->end -= pad;
@@ -83,10 +77,39 @@ u8 *alloc(Arena *a, size_t sizObj, size_t sizAlign, size_t numObjects) {
   return (u8 *)memset(allocStart, 0, sizAlloc);
 }
 
-void restoreArena(Arena *dst, Arena saved) {
-  u8 *regionStart = dst->end;
+void Arena::restoreFrom(const Arena &saved) noexcept {
+  u8 *regionStart = this->end;
   u8 *regionEnd = saved.end;
   SN_ASAN_POISON(regionStart, regionEnd - regionStart);
 
-  *dst = saved;
+  *this = saved;
+}
+
+u8 *Arena::alloc(size_t byteLength, size_t alignment) noexcept {
+  return ::alloc(this, byteLength, alignment, 1);
+}
+
+bool Arena::resize(u8 *allocation,
+                   size_t alignment,
+                   size_t nextLength) noexcept {
+  (void)allocation;
+  (void)alignment;
+  (void)nextLength;
+  return false;
+}
+
+u8 *Arena::remap(u8 *allocation, size_t alignment, size_t nextLength) noexcept {
+  (void)allocation;
+  (void)alignment;
+  (void)nextLength;
+  return nullptr;
+}
+
+void Arena::free(u8 *allocation, size_t alignment) noexcept {
+  (void)alignment;
+  if (allocation == nullptr) {
+    return;
+  }
+
+  DCHECK(end <= allocation);
 }

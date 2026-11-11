@@ -3,7 +3,7 @@
 #include <std/Testing.hpp>
 
 SN_TEST(SegmentArray, defaultConstructedIsEmpty) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
 
@@ -19,7 +19,7 @@ SN_TEST(SegmentArray, getSegmentForItem) {
 }
 
 SN_TEST(SegmentArray, pushOne) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
 
@@ -29,7 +29,7 @@ SN_TEST(SegmentArray, pushOne) {
 }
 
 SN_TEST(SegmentArray, push67) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
 
@@ -45,7 +45,7 @@ SN_TEST(SegmentArray, push67) {
 }
 
 SN_TEST(SegmentArray, multiPush) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
 
@@ -63,7 +63,7 @@ SN_TEST(SegmentArray, multiPush) {
 SN_TEST(SegmentArray, multiPushWholeSegment) {
   // Multipush where the number of pushed elements is equal to the size of
   // segment 0
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
 
@@ -84,7 +84,7 @@ SN_TEST(SegmentArray, multiPushWholeSegment) {
 SN_TEST(SegmentArray, multiPushWithGrow) {
   // Multipush where the number of pushed elements is large enough that they
   // have to be copied in two batches
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
 
@@ -105,7 +105,7 @@ SN_TEST(SegmentArray, multiPushWithGrow) {
 SN_TEST(SegmentArray, multiPushWithGrowNonEmpty) {
   // Multipush where the number of pushed elements is large enough that they
   // have to be copied in two batches. The array is not empty before the push
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   SegmentArray<u32> s(temp);
   s.push(0);

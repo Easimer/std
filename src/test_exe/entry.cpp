@@ -120,7 +120,7 @@ static SnTestResult *testMain(const TestRunConfig *cfg) {
 
   SnTestResult *res = nullptr;
   SnTestResult *ret = nullptr;
-  setAllocatorsForThread(arena0, arena1);
+  Arena::setAllocatorsForThisThread(arena0, arena1);
 
   SnTest *currentTest = snTestFrom(snTestGetFirst());
   bool didPass = false;

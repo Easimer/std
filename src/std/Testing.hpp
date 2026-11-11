@@ -3,6 +3,7 @@
 #include "./Arena.h"
 #include "./Check.h"
 #include "./Chronometry.h"
+#include "./Modules.h"
 #include "./Types.h"
 
 struct SnTest;

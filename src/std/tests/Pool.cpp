@@ -8,17 +8,17 @@ struct Vec2 {
 };
 
 SN_TEST(Pool, defaultConstructedIsEmpty) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
-  CHECK(pool.arena == temp);
+  CHECK(pool.allocator == temp);
   CHECK(pool.head == nullptr);
   CHECK(pool.freeListHead == nullptr);
 }
 
 SN_TEST(Pool, allocSucceeds) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -28,7 +28,7 @@ SN_TEST(Pool, allocSucceeds) {
 }
 
 SN_TEST(Pool, deallocSucceeds) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -43,7 +43,7 @@ SN_TEST(Pool, deallocSucceeds) {
 }
 
 SN_TEST(Pool, allocDeallocOutOfOrder) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -58,7 +58,7 @@ SN_TEST(Pool, allocDeallocOutOfOrder) {
 }
 
 SN_TEST(Pool, allocatedElemsAreIterable) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -88,7 +88,7 @@ SN_TEST(Pool, allocatedElemsAreIterable) {
 }
 
 SN_TEST(Pool, preallocateSucceeds) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -104,7 +104,7 @@ SN_TEST(Pool, preallocateSucceeds) {
 }
 
 SN_TEST(Pool, clearSucceeds) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -120,7 +120,7 @@ SN_TEST(Pool, clearSucceeds) {
 }
 
 SN_TEST(Pool, noMemoryStomp) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -146,7 +146,7 @@ SN_TEST(Pool, noMemoryStomp) {
 }
 
 SN_TEST(Pool, handsBackFreedElement) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   Pool<Vec2> pool(temp);
 
@@ -157,7 +157,7 @@ SN_TEST(Pool, handsBackFreedElement) {
   pool.dealloc(e2);
   pool.dealloc(e0);
 
-  Vec2* e3 = pool.alloc();
+  Vec2 *e3 = pool.alloc();
 
   // e3 has the same pointer as one of the dealloc'd elements
   CHECK(e3 == e0 || e3 == e2);

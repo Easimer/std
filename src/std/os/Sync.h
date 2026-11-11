@@ -8,19 +8,6 @@
 
 #pragma once
 
-#include <std/Arena.h>
-#include <std/Types.h>
-
-typedef struct Barrier Barrier;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-Barrier *barrierCreate(Arena *arena, u32 count);
-void barrierSync(Barrier *barrier);
-void barrierDestroy(Barrier *barrier);
-
-#ifdef __cplusplus
-}
+#if __cplusplus
+#include "./Sync.hpp"
 #endif

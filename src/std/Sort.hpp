@@ -79,7 +79,7 @@ void mergeSort(MutSlice<T> s) {
   if (s.empty()) {
     return;
   }
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   MutSlice<T> copy = duplicate<T>(temp, s);
   ::impl::mergeSort<T>(s, copy, impl::Less<T>{});
 }
@@ -110,7 +110,7 @@ void mergeSort(MutSlice<T> s, const Cmp &cmp) {
     return;
   }
 
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   MutSlice<T> copy = duplicate<T>(temp, s);
 
   ::impl::mergeSort<T, Cmp>(s, copy, cmp);

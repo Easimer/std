@@ -21,7 +21,7 @@ MutSlice<Slice<T>> split(Arena *arena, Slice<T> arr, const T &sep) {
 
   size_t numSeparators = arr.count(sep);
 
-  Arena::Scope temp = getScratch(&arena, 1);
+  Arena::Scope temp = Arena::getScratch(arena);
   Vector<Slice<T>> ret =
       vectorWithInitialCapacity<Slice<T>>(temp, numSeparators + 1);
 
@@ -50,7 +50,7 @@ Slice<Slice<const T>> split(Arena *arena, Slice<const T> arr, const T &sep) {
 
   u32 numSeparators = arr.count(sep);
 
-  Arena::Scope temp = getScratch(&arena, 1);
+  Arena::Scope temp = Arena::getScratch(arena);
   Vector<Slice<const T>> ret =
       vectorWithInitialCapacity<Slice<const T>>(temp, numSeparators + 1);
 

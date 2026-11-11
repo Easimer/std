@@ -4,13 +4,13 @@
 #include <std/Testing.hpp>
 
 SN_TEST(getScratch, returnsValidArena) {
-  Arena *ret = getScratch(nullptr, 0).arena;
+  Arena *ret = Arena::getScratch();
   CHECK(ret != nullptr);
 }
 
 SN_TEST(getScratch, respectsConflictArenaList) {
-  Arena *arena0 = getScratch(nullptr, 0).arena;
-  Arena *arena1 = getScratch(&arena0, 1).arena;
+  Arena *arena0 = Arena::getScratch();
+  Arena *arena1 = Arena::getScratch(arena0);
   CHECK(arena0 != nullptr);
   CHECK(arena1 != nullptr);
   CHECK(arena0 != arena1);
@@ -23,11 +23,12 @@ SN_TEST(ArenaScope, cleansUp) {
     u8 *bytes = alloc<u8>(temp, 128);
     (void)bytes;
   };
-  ArenaSaved s = getScratch(nullptr, 0);
-  inner(s.arena);
+  Arena *s = Arena::getScratch();
+  Arena saved = *s;
+  inner(s);
 
-  CHECK(s.arena->beg == s.saved.beg);
-  CHECK(s.arena->end == s.saved.end);
+  CHECK(s->beg == saved.beg);
+  CHECK(s->end == saved.end);
 }
 
 SN_TEST(Arena, succeeds) {
@@ -46,18 +47,12 @@ SN_TEST(Arena, memoryIsZeroInited) {
   }
 }
 
-SN_TEST_MUST_FAIL(Arena, callsHandleOomWhenOutOfSpace) {
-  u8 buf[32];
-  Arena test = {buf, buf + 32};
-
-  alloc<u8>(&test, 0xFFFFFFFF);
-}
-
-SN_TEST_MUST_FAIL(Arena, allocFailsOnEmptyArena) {
+SN_TEST(Arena, allocFailsOnEmptyArena) {
   u8 buf[32];
   Arena test = {buf, buf};
 
-  alloc<u32>(&test, 1);
+  u32* res = alloc<u32>(&test, 1);
+  ASSERT_EQUAL(res, nullptr);
 }
 
 SN_TEST(Arena, zeroSizeAllocReturnsNull) {
@@ -68,12 +63,13 @@ SN_TEST(Arena, zeroSizeAllocReturnsNull) {
   CHECK(res == nullptr);
 }
 
-SN_TEST_MUST_FAIL(Arena, failsOnSizeMax) {
+SN_TEST(Arena, failsOnSizeMax) {
   u8 buf[32];
   Arena test = {buf, buf + 32};
 
   size_t count = SIZE_MAX;
-  alloc<u8>(&test, count);
+  u8* res = alloc<u8>(&test, count);
+  ASSERT_EQUAL(res, nullptr);
 }
 
 SN_TEST(Arena, exactSizeAllocSucceeds) {
@@ -87,31 +83,31 @@ SN_TEST(Arena, exactSizeAllocSucceeds) {
 }
 
 SN_TEST(ArenaScope, defaultCtor) {
-  ArenaSaved saved = getScratch(nullptr, 0);
+  Arena *a = Arena::getScratch();
+  Arena saved = *a;
 
   {
     Arena::Scope temp;
-    CHECK(temp.arena == saved.arena);
+    CHECK(temp.arena == a);
     alloc<u8>(temp, 64);
   }
 
-  ArenaSaved now = getScratch(nullptr, 0);
-  CHECK(now.arena->beg == saved.arena->beg);
-  CHECK(now.arena->end == saved.arena->end);
+  CHECK(a->beg == saved.beg);
+  CHECK(a->end == saved.end);
 }
 
 SN_TEST(Arena, getScratchFor) {
-  ArenaSaved a0 = getScratch(nullptr, 0);
-  ArenaSaved a1 = getScratchFor(a0.arena);
-  ArenaSaved a2 = getScratchFor(a1.arena);
+  Arena *a0 = Arena::getScratch();
+  Arena *a1 = Arena::getScratch(a0);
+  Arena *a2 = Arena::getScratch(a1);
 
-  CHECK(a0.arena != nullptr);
-  CHECK(a1.arena != nullptr);
-  CHECK(a2.arena != nullptr);
+  CHECK(a0 != nullptr);
+  CHECK(a1 != nullptr);
+  CHECK(a2 != nullptr);
 
-  CHECK(a0.arena != a1.arena);
-  CHECK(a1.arena != a2.arena);
-  CHECK(a0.arena == a2.arena);
+  CHECK(a0 != a1);
+  CHECK(a1 != a2);
+  CHECK(a0 == a2);
 }
 
 SN_TEST(Arena, alignment) {
@@ -147,6 +143,11 @@ SN_TEST(Arena, swarm) {
   };
 
   u32 enabled = (1 << OpKind::COUNT) - 1;
+
+  struct ArenaSaved {
+    Arena *arena;
+    Arena saved;
+  };
 
   for (size_t idxRun = 0; idxRun < 1 << 16; idxRun++) {
     // Each run starts with clean state, except randState which is not reset
@@ -204,13 +205,13 @@ SN_TEST(Arena, swarm) {
             break;
           case PUSH:
             if (stackIdx != STACK_SIZ) {
-              stack[stackIdx] = saveArena(temp.arena);
+              stack[stackIdx] = {temp.arena, *temp.arena};
               stackIdx++;
             }
             break;
           case POP:
             if (stackIdx != 0) {
-              restoreArena(temp.arena, stack[stackIdx - 1].saved);
+              temp.arena->restoreFrom(stack[stackIdx - 1].saved);
               stackIdx--;
             }
             break;

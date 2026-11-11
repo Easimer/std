@@ -306,7 +306,7 @@ struct SwissTable {
     const size_t M = controlWords.length;
     const size_t MASK = M - 1;
 
-    Arena::Scope temp = getScratchFor(arena);
+    Arena::Scope temp = Arena::getScratch(arena);
 
     // Make a copy of all slots and control words
     SegmentArray<Array<Slot, 8>> keysCopy(temp);

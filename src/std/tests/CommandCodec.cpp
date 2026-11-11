@@ -78,7 +78,7 @@ struct TestDecoder : CommandDecoder<TestFields> {
 };
 
 SN_TEST(CommandCodec, encode_mask_uintValue) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setUint(32);
@@ -87,7 +87,7 @@ SN_TEST(CommandCodec, encode_mask_uintValue) {
 }
 
 SN_TEST(CommandCodec, encode_state_uintValue) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setUint(32);
@@ -96,7 +96,7 @@ SN_TEST(CommandCodec, encode_state_uintValue) {
 }
 
 SN_TEST(CommandCodec, encode_mask_uintAndFloatValue) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setUint(32);
@@ -106,7 +106,7 @@ SN_TEST(CommandCodec, encode_mask_uintAndFloatValue) {
 }
 
 SN_TEST(CommandCodec, encode_state_struct) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setStruct({1, 2});
@@ -116,7 +116,7 @@ SN_TEST(CommandCodec, encode_state_struct) {
 }
 
 SN_TEST(CommandCodec, encode_mask_array0) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setStructArrayElement(0, {2, 3});
@@ -125,7 +125,7 @@ SN_TEST(CommandCodec, encode_mask_array0) {
 }
 
 SN_TEST(CommandCodec, encode_mask_array1) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setStructArrayElement(1, {1, 4});
@@ -134,7 +134,7 @@ SN_TEST(CommandCodec, encode_mask_array1) {
 }
 
 SN_TEST(CommandCodec, encode_state_array1) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setStructArrayElement(1, {6, 12});
@@ -144,7 +144,7 @@ SN_TEST(CommandCodec, encode_state_array1) {
 }
 
 SN_TEST(CommandCodec, encode_mask_zeroAfterEnd) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setUint(1);
@@ -154,7 +154,7 @@ SN_TEST(CommandCodec, encode_mask_zeroAfterEnd) {
 }
 
 SN_TEST(CommandCodec, encode_end_pushesBytes) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   TestEncoder enc(temp);
   enc.setUint(1);
@@ -164,11 +164,11 @@ SN_TEST(CommandCodec, encode_end_pushesBytes) {
 }
 
 SN_TEST(CommandCodec, decode_empty) {
-  Arena::Scope arena0 = getScratch(nullptr, 0);
+  Arena::Scope arena0 = Arena::getScratch();
 
   Slice<u8> encoded;
   {
-    Arena::Scope arena1 = getScratch(&arena0.arena, 0);
+    Arena::Scope arena1 = Arena::getScratch(arena0.arena);
     TestEncoder enc(arena1);
     encoded = enc.extractBuffer(arena0);
   }
@@ -179,8 +179,8 @@ SN_TEST(CommandCodec, decode_empty) {
 }
 
 SN_TEST(CommandCodec, decode_simple) {
-  Arena::Scope arena0 = getScratch(nullptr, 0);
-  Arena::Scope arena1 = getScratch(&arena0.arena, 0);
+  Arena::Scope arena0 = Arena::getScratch();
+  Arena::Scope arena1 = Arena::getScratch(arena0.arena);
 
   Slice<u8> encoded;
   {
@@ -211,8 +211,8 @@ SN_TEST(CommandCodec, decode_simple) {
 }
 
 SN_TEST(CommandCodec, decode_simple_array) {
-  Arena::Scope arena0 = getScratch(nullptr, 0);
-  Arena::Scope arena1 = getScratch(&arena0.arena, 0);
+  Arena::Scope arena0 = Arena::getScratch();
+  Arena::Scope arena1 = Arena::getScratch(arena0.arena);
 
   Slice<u8> encoded;
   {
@@ -244,8 +244,8 @@ SN_TEST(CommandCodec, decode_simple_array) {
 }
 
 SN_TEST(CommandCodec, decode_multiple_commands) {
-  Arena::Scope arena0 = getScratch(nullptr, 0);
-  Arena::Scope arena1 = getScratch(&arena0.arena, 0);
+  Arena::Scope arena0 = Arena::getScratch();
+  Arena::Scope arena1 = Arena::getScratch(arena0.arena);
 
   const u32 NUM_COMMANDS = 16;
 
@@ -289,8 +289,8 @@ SN_TEST(CommandCodec, decode_multiple_commands) {
 }
 
 SN_TEST(CommandCodec, decode_multiple_commands_array) {
-  Arena::Scope arena0 = getScratch(nullptr, 0);
-  Arena::Scope arena1 = getScratch(&arena0.arena, 0);
+  Arena::Scope arena0 = Arena::getScratch();
+  Arena::Scope arena1 = Arena::getScratch(arena0.arena);
 
   Slice<u8> encoded;
   {
@@ -343,8 +343,8 @@ SN_TEST(CommandCodec, decode_multiple_commands_array) {
 }
 
 SN_TEST(CommandCodec, decode_multiple_commands_same) {
-  Arena::Scope arena0 = getScratch(nullptr, 0);
-  Arena::Scope arena1 = getScratch(&arena0.arena, 0);
+  Arena::Scope arena0 = Arena::getScratch();
+  Arena::Scope arena1 = Arena::getScratch(arena0.arena);
 
   Slice<u8> encoded;
   {

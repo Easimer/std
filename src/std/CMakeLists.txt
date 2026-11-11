@@ -75,7 +75,7 @@ endif()
 add_library(std-static STATIC)
 target_sources(std-static
   PRIVATE
-    Arena.c Arena.h
+    Arena.cpp Arena.hpp
     Array.hpp
     Check.cpp Check.h
     Chronometry.c Chronometry.h
@@ -156,7 +156,7 @@ add_library(std-os STATIC)
 target_sources(std-os
   PRIVATE
     os/Thread.cpp os/Thread.hpp
-    os/Sync.c os/Sync.h
+    os/Sync.cpp os/Sync.hpp
 )
 target_link_libraries(std-os PUBLIC std-static)
 target_wall_werror_SN(std-os)
@@ -166,7 +166,7 @@ add_library(std::os ALIAS std-os)
 add_library(std-context SHARED)
 target_sources(std-context
   PRIVATE
-    ArenaTls.c
+    ArenaTls.cpp
     TestRegistry.c
 )
 target_compile_definitions(std-context

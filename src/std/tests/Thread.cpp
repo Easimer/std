@@ -81,14 +81,14 @@ SN_TEST(Thread, hardwareConcurrency) {
 }
 
 SN_TEST(Barrier, createDestroy) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   Barrier *barrier = barrierCreate(temp, 4);
   CHECK(barrier != nullptr);
   barrierDestroy(barrier);
 }
 
 SN_TEST(Barrier, simple) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   struct ThreadArgs {
     Barrier *barrier;
@@ -127,7 +127,7 @@ SN_TEST(Barrier, simple) {
 }
 
 SN_TEST(WorkerPool, one_thread) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   WorkerPool *wp = createWorkerPool(temp, 1);
 
   auto func = [](const Dispatch *D) {
@@ -155,7 +155,7 @@ SN_TEST(WorkerPool, one_thread) {
 }
 
 SN_TEST(WorkerPool, multi_thread) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
   WorkerPool *wp = createWorkerPool(temp, 8);
 
   auto func = [](const Dispatch *D) {
@@ -183,7 +183,7 @@ SN_TEST(WorkerPool, multi_thread) {
 }
 
 SN_TEST(WorkerPool, init) {
-  Arena::Scope temp = getScratch(nullptr, 0);
+  Arena::Scope temp = Arena::getScratch();
 
   auto init = [](const Dispatch *D) {
     u32 &mask = D->parametersAs<u32>();
