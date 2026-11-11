@@ -67,6 +67,8 @@ struct SerializationPrimitive : FalseType {};
   template <>                             \
   struct SerializationPrimitive<T> : TrueType {}
 
+SN_STD_SERIALIZATION_PRIMITIVE(bool);
+
 SN_STD_SERIALIZATION_PRIMITIVE(u8);
 SN_STD_SERIALIZATION_PRIMITIVE(u16);
 SN_STD_SERIALIZATION_PRIMITIVE(u32);
@@ -83,6 +85,8 @@ SN_STD_SERIALIZATION_PRIMITIVE(f64);
 [[nodiscard]] Optional<Error> serializeBytes(Serialization *S,
                                              u8 *value,
                                              size_t count);
+
+[[nodiscard]] Optional<Error> serialize(Serialization *S, bool *value);
 
 [[nodiscard]] Optional<Error> serialize(Serialization *S, u8 *value);
 [[nodiscard]] Optional<Error> serialize(Serialization *S, u16 *value);

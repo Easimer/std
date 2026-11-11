@@ -102,6 +102,19 @@ Optional<Error> serialize(Serialization *S,
   return {};
 }
 
+Optional<Error> serialize(Serialization *S, bool *value) {
+  if (S->isWriting) {
+    u8 v = (*value) ? 0x01 : 0x00;
+    return serializePrimitive<u8>(S, &v);
+  } else {
+    u8 v;
+    SN_TRY_SERIALIZE(serializePrimitive<u8>(S, &v));
+    *value = v != 0x00;
+  }
+
+  return {};
+}
+
 Optional<Error> serialize(Serialization *S, u8 *value) {
   return serializePrimitive<u8>(S, value);
 }
