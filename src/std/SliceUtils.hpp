@@ -23,6 +23,7 @@
 /**
  * \brief Creates a slice initializer from a zero-terminated string constant.
  * Does not include the zero terminator!
+ * \deprecated Prefer the `_slice` user-literal operator from Slice.hpp
  */
 #define sliceFromConstChar(s) {(s), sizeof((s)) - 1}
 /**

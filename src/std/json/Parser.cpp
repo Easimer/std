@@ -9,9 +9,9 @@
 
 #include <cmath> // pow
 
-static constexpr Slice<char> NUL = sliceFromConstChar("null");
-static constexpr Slice<char> FALSE = sliceFromConstChar("false");
-static constexpr Slice<char> TRUE = sliceFromConstChar("true");
+static constexpr Slice<char> NUL = "null"_slice;
+static constexpr Slice<char> FALSE = "false"_slice;
+static constexpr Slice<char> TRUE = "true"_slice;
 
 static void eatWhitespace(Slice<char> &json) {
   while (json.length != 0) {

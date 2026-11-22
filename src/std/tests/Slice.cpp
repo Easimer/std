@@ -863,3 +863,38 @@ SN_TEST(Slice, allocManualAlignment) {
   CHECK(vectors.length == 3 * 8);
   CHECK(((uintptr_t)vectors.data & 31) == 0);
 }
+
+SN_TEST(Slice, stringUserLiteral) {
+  Slice<char> s = "hello"_slice;
+  ASSERT_EQUAL(s.length, 5);
+  ASSERT_EQUAL(s[0], 'h');
+  ASSERT_EQUAL(s[1], 'e');
+  ASSERT_EQUAL(s[2], 'l');
+  ASSERT_EQUAL(s[3], 'l');
+  ASSERT_EQUAL(s[4], 'o');
+
+  Slice<char> e = ""_slice;
+  ASSERT_EQUAL(e.length, 0);
+}
+
+SN_TEST(Slice, wstringUserLiteral) {
+  Slice<wchar_t> s = L"hello"_slice;
+  ASSERT_NOT_EQUAL(s.length, 0);
+
+  Slice<wchar_t> e = L""_slice;
+  ASSERT_EQUAL(e.length, 0);
+}
+
+SN_TEST(Slice, u8stringUserLiteral) {
+  Slice<char8_t> s = u8"héllo"_slice;
+  ASSERT_EQUAL(s.length, 6);
+  ASSERT_EQUAL(s[0], 0x68);
+  ASSERT_EQUAL(s[1], 0xC3);
+  ASSERT_EQUAL(s[2], 0xA9);
+  ASSERT_EQUAL(s[3], 0x6C);
+  ASSERT_EQUAL(s[4], 0x6C);
+  ASSERT_EQUAL(s[5], 0x6F);
+
+  Slice<char8_t> e = u8""_slice;
+  ASSERT_EQUAL(e.length, 0);
+}

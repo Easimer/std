@@ -12,51 +12,51 @@ SN_TEST(Strings, split_empty) {
 SN_TEST(Strings, split_normal) {
   Arena::Scope temp = Arena::getScratch();
 
-  Slice<char> input = sliceFromConstChar("asd,123,wawa");
+  Slice<char> input = "asd,123,wawa"_slice;
   Slice<Slice<char>> res = split(temp, input, ',');
   CHECK(res.length == 3);
-  CHECK(res[0] == Slice<char>(sliceFromConstChar("asd")));
-  CHECK(res[1] == Slice<char>(sliceFromConstChar("123")));
-  CHECK(res[2] == Slice<char>(sliceFromConstChar("wawa")));
+  CHECK(res[0] == "asd"_slice);
+  CHECK(res[1] == "123"_slice);
+  CHECK(res[2] == "wawa"_slice);
 }
 
 SN_TEST(Strings, split_leadingSeparator) {
   Arena::Scope temp = Arena::getScratch();
 
-  Slice<char> input = sliceFromConstChar(",123,wawa");
+  Slice<char> input = ",123,wawa"_slice;
   Slice<Slice<char>> res = split(temp, input, ',');
   CHECK(res.length == 3);
   CHECK(res[0].empty());
-  CHECK(res[1] == Slice<char>(sliceFromConstChar("123")));
-  CHECK(res[2] == Slice<char>(sliceFromConstChar("wawa")));
+  CHECK(res[1] == "123"_slice);
+  CHECK(res[2] == "wawa"_slice);
 }
 
 SN_TEST(Strings, split_trailingSeparator) {
   Arena::Scope temp = Arena::getScratch();
 
-  Slice<char> input = sliceFromConstChar("asd,123,");
+  Slice<char> input = "asd,123,"_slice;
   Slice<Slice<char>> res = split(temp, input, ',');
   CHECK(res.length == 3);
-  CHECK(res[0] == Slice<char>(sliceFromConstChar("asd")));
-  CHECK(res[1] == Slice<char>(sliceFromConstChar("123")));
+  CHECK(res[0] == "asd"_slice);
+  CHECK(res[1] == "123"_slice);
   CHECK(res[2].empty());
 }
 
 SN_TEST(Strings, split_emptyMiddle) {
   Arena::Scope temp = Arena::getScratch();
 
-  Slice<char> input = sliceFromConstChar("asd,,wawa");
+  Slice<char> input = "asd,,wawa"_slice;
   Slice<Slice<char>> res = split(temp, input, ',');
   CHECK(res.length == 3);
-  CHECK(res[0] == Slice<char>(sliceFromConstChar("asd")));
+  CHECK(res[0] == "asd"_slice);
   CHECK(res[1].empty());
-  CHECK(res[2] == Slice<char>(sliceFromConstChar("wawa")));
+  CHECK(res[2] == "wawa"_slice);
 }
 
 SN_TEST(Strings, split_singleSeparator) {
   Arena::Scope temp = Arena::getScratch();
 
-  Slice<char> input = sliceFromConstChar(",");
+  Slice<char> input = ","_slice;
   Slice<Slice<char>> res = split(temp, input, ',');
   CHECK(res.length == 2);
   CHECK(res[0].empty());

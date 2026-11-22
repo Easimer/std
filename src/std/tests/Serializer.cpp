@@ -570,9 +570,9 @@ SN_TEST(Serializer, swissTableStringKey) {
   };
 
   SwissTable<char, u32> table(temp);
-  table.put(sliceFromConstChar("hi"), 13);
-  table.put(sliceFromConstChar("hello"), 50);
-  table.put(sliceFromConstChar("asdasdasdasd"), 65535);
+  table.put("hi"_slice, 13);
+  table.put("hello"_slice, 50);
+  table.put("asdasdasdasd"_slice, 65535);
 
   SN_MUST_SERIALIZE(serialize(&S, &table));
 
@@ -589,9 +589,9 @@ SN_TEST(Serializer, swissTableStringKey) {
   SwissTable<char, u32> table_out(temp);
   SN_MUST_SERIALIZE(serialize(&S2, &table_out));
 
-  ASSERT_EQUAL(*table_out.get(sliceFromConstChar("hi")), 13);
-  ASSERT_EQUAL(*table_out.get(sliceFromConstChar("hello")), 50);
-  ASSERT_EQUAL(*table_out.get(sliceFromConstChar("asdasdasdasd")), 65535);
+  ASSERT_EQUAL(*table_out.get("hi"_slice), 13);
+  ASSERT_EQUAL(*table_out.get("hello"_slice), 50);
+  ASSERT_EQUAL(*table_out.get("asdasdasdasd"_slice), 65535);
 }
 
 enum Option {

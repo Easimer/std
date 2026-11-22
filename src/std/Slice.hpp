@@ -1128,4 +1128,30 @@ Slice<typename C::value_type> sliceFromStd(const C &container) {
   return {container.data(), container.size()};
 }
 
+/**
+ * \brief Produces a Slice<char> from a string literal.
+ */
+static inline constexpr Slice<char> operator""_slice(const char *data,
+                                                     size_t length) noexcept {
+  return {data, length};
+}
+
+/**
+ * \brief Produces a Slice<wchar_t> from a string literal.
+ */
+static inline constexpr Slice<wchar_t> operator""_slice(
+    const wchar_t *data,
+    size_t length) noexcept {
+  return {data, length};
+}
+
+/**
+ * \brief Produces a Slice<char8_t> from a string literal.
+ */
+static inline constexpr Slice<char8_t> operator""_slice(
+    const char8_t *data,
+    size_t length) noexcept {
+  return {data, length};
+}
+
 /**@}*/

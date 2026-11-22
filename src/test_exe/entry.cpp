@@ -334,12 +334,12 @@ int main(int numArgs, char **arrArgs) {
   for (int idxArg = 1; idxArg < numArgs; idxArg++) {
     Slice<char> arg = fromCStr(arrArgs[idxArg]);
 
-    if (arg.startsWith(sliceFromConstChar("--suite="))) {
+    if (arg.startsWith("--suite="_slice)) {
       suiteNameFilter = arg.subarray(arg.indexOf('=').value());
       suiteNameFilter.shift();  // eat '='
 
       printf("Test suite filter: \"%.*s\"\n", FMT_SLICE(suiteNameFilter));
-    } else if (arg.startsWith(sliceFromConstChar("--repeat"))) {
+    } else if (arg.startsWith("--repeat"_slice)) {
       repeat = true;
     }
   }
