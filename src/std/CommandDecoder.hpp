@@ -108,7 +108,7 @@ struct CommandDecoder {
       return false;
     }
 
-    out = _buffer.subarray(0, sizeof(T)).cast<T>()[0];
+    out = _buffer.subarray(0, sizeof(T)).template cast<T>()[0];
 
     _buffer.shrinkFromLeftByCount(sizeof(T));
     return true;
